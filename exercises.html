@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Exercise Library — PhysioCare</title>
+  <meta name="description" content="A searchable library of clear, safe physiotherapy exercises with step-by-step instructions for neck, shoulder, back, hip, knee, ankle and core." />
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+  <!-- ============ Header ============ -->
+  <header class="site-header">
+    <div class="container nav">
+      <a class="brand" href="index.html">
+        <span class="brand__mark">✚</span>
+        PhysioCare
+      </a>
+      <button class="nav__toggle" aria-label="Toggle menu" aria-expanded="false">
+        <span></span><span></span><span></span>
+      </button>
+      <ul class="nav__links">
+        <li><a href="index.html">Home</a></li>
+        <li><a href="exercises.html">Exercises</a></li>
+        <li><a href="about.html">About</a></li>
+        <li><a href="contact.html">Contact</a></li>
+      </ul>
+    </div>
+  </header>
+
+  <main>
+    <section class="section">
+      <div class="container">
+        <div class="section__head">
+          <span class="eyebrow">Exercise library</span>
+          <h2>Find the right exercise for you</h2>
+          <p class="lead">
+            Search or pick a body area, then tap <em>“How to do it”</em> on any
+            card for step-by-step instructions and safety notes.
+          </p>
+        </div>
+
+        <!-- Safety disclaimer -->
+        <div class="notice" style="margin-bottom:2rem;">
+          <span style="font-size:1.4rem;">ℹ️</span>
+          <p style="margin:0;">
+            <strong>Please read first:</strong> These exercises are general
+            educational guidance, not personalised medical advice. Stop if
+            anything causes sharp or worsening pain, and check with a
+            physiotherapist or doctor if you're unsure or recovering from injury.
+          </p>
+        </div>
+
+        <!-- Filters -->
+        <div class="filters">
+          <label class="search">
+            <span aria-hidden="true">🔎</span>
+            <input
+              id="exercise-search"
+              type="search"
+              placeholder="Search exercises (e.g. knee, stretch, plank)…"
+              aria-label="Search exercises"
+            />
+          </label>
+        </div>
+        <div class="chips" id="category-chips" role="group" aria-label="Filter by body area">
+          <!-- Category buttons are added by js/main.js -->
+        </div>
+
+        <!-- Exercise cards get rendered here -->
+        <div class="exercise-grid" id="exercise-grid" style="margin-top:2rem;">
+          <p class="no-results">Loading exercises…</p>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- ============ Footer ============ -->
+  <footer class="site-footer">
+    <div class="container">
+      <div class="footer-grid">
+        <div>
+          <a class="brand" href="index.html"><span class="brand__mark">✚</span> PhysioCare</a>
+          <p style="color:#94a3b8;max-width:32ch;">
+            Helping you move better and recover with confidence, one step at a time.
+          </p>
+        </div>
+        <div>
+          <h4>Explore</h4>
+          <ul>
+            <li><a href="index.html">Home</a></li>
+            <li><a href="exercises.html">Exercises</a></li>
+            <li><a href="about.html">About</a></li>
+            <li><a href="contact.html">Contact</a></li>
+          </ul>
+        </div>
+        <div>
+          <h4>Get in touch</h4>
+          <ul>
+            <li>📍 Your address here</li>
+            <li>📞 Your phone here</li>
+            <li>✉️ hello@yourclinic.com</li>
+          </ul>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <span>© <span id="year">2026</span> PhysioCare. All rights reserved.</span>
+        <span>Built with care for our patients.</span>
+      </div>
+    </div>
+  </footer>
+
+  <script src="js/exercises-data.js"></script>
+  <script src="js/main.js"></script>
+</body>
+</html>
