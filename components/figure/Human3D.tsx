@@ -35,19 +35,28 @@ type BoneRule = {
  * top of it.
  */
 const MAP: Partial<Record<keyof Pose, BoneRule>> = {
-  shoulderNear: { bone: "mixamorig:RightArm", axis: "z", rest: -75, scale: 0.5 },
-  elbowNear: { bone: "mixamorig:RightForeArm", axis: "y", rest: 0, scale: -1 },
-  shoulderFar: { bone: "mixamorig:LeftArm", axis: "z", rest: 75, scale: -0.5 },
-  elbowFar: { bone: "mixamorig:LeftForeArm", axis: "y", rest: 0, scale: 1 },
-  hipNear: { bone: "mixamorig:RightUpLeg", axis: "x", rest: 0, scale: -1 },
-  kneeNear: { bone: "mixamorig:RightLeg", axis: "x", rest: 0, scale: 1 },
-  hipFar: { bone: "mixamorig:LeftUpLeg", axis: "x", rest: 0, scale: -1 },
-  kneeFar: { bone: "mixamorig:LeftLeg", axis: "x", rest: 0, scale: 1 },
-  lumbar: { bone: "mixamorig:Spine", axis: "x", rest: 0, scale: 0.5 },
-  thorax: { bone: "mixamorig:Spine1", axis: "x", rest: 0, scale: 0.5 },
-  neck: { bone: "mixamorig:Neck", axis: "x", rest: 0, scale: 0.6 },
-  head: { bone: "mixamorig:Head", axis: "x", rest: 0, scale: 0.6 },
+  shoulderNear: { bone: "RightArm", axis: "z", rest: 78, scale: -0.42 },
+  elbowNear: { bone: "RightForeArm", axis: "y", rest: 0, scale: 0.9 },
+  shoulderFar: { bone: "LeftArm", axis: "z", rest: -78, scale: 0.42 },
+  elbowFar: { bone: "LeftForeArm", axis: "y", rest: 0, scale: -0.9 },
+  hipNear: { bone: "RightUpLeg", axis: "x", rest: 0, scale: -0.9 },
+  kneeNear: { bone: "RightLeg", axis: "x", rest: 0, scale: 0.9 },
+  hipFar: { bone: "LeftUpLeg", axis: "x", rest: 0, scale: -0.9 },
+  kneeFar: { bone: "LeftLeg", axis: "x", rest: 0, scale: 0.9 },
+  lumbar: { bone: "Spine", axis: "x", rest: 0, scale: 0.4 },
+  thorax: { bone: "Spine1", axis: "x", rest: 0, scale: 0.4 },
+  neck: { bone: "Neck", axis: "x", rest: 0, scale: 0.5 },
+  head: { bone: "Head", axis: "x", rest: 0, scale: 0.5 },
 };
+
+/**
+ * Mixamo prefixes bones inconsistently — "mixamorig:Hips" on some exports,
+ * "mixamorig7Hips" on others. Match on the part after the prefix so any
+ * character loads without editing this file.
+ */
+function boneKey(name: string): string {
+  return name.replace(/^mixamorig\d*[:_]?/i, "");
+}
 
 export default function Human3D({
   pose,
@@ -76,8 +85,8 @@ export default function Human3D({
     // The camera is what solves the plane problem: abduction needs a front
     // view, flexion a side view, and here that is one number rather than a
     // second hand-drawn figure.
-    if (view === "front") camera.position.set(0, 1.0, 4.4);
-    else camera.position.set(4.4, 1.0, 0);
+    if (view === "front") camera.position.set(0, 1.05, 4.6);
+    else camera.position.set(4.6, 1.05, 0);
     camera.lookAt(0, 0.95, 0);
 
     scene.add(new THREE.HemisphereLight(0xffffff, 0x555560, 2.2));
@@ -94,11 +103,15 @@ export default function Human3D({
     let raf = 0;
     let disposed = false;
 
-    new GLTFLoader().load("/models/test-human.glb", (gltf) => {
+    new GLTFLoader().load("/models/adam.glb", (gltf) => {
       if (disposed) return;
       gltf.scene.traverse((o) => {
-        if ((o as THREE.Bone).isBone) bones.set(o.name, o as THREE.Bone);
+        if ((o as THREE.Bone).isBone) bones.set(boneKey(o.name), o as THREE.Bone);
       });
+
+      // Drop the model so its feet sit on the origin, and face the camera.
+      const box = new THREE.Box3().setFromObject(gltf.scene);
+      gltf.scene.position.y -= box.min.y;
       scene.add(gltf.scene);
 
       const tick = () => {
