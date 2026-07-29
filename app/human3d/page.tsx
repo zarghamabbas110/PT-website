@@ -1,52 +1,55 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import Human3D from "@/components/figure/Human3D";
+import Human3D, { type View3D } from "@/components/figure/Human3D";
 import { EXERCISES } from "@/data/exercises";
 import { sampleSequence } from "@/lib/figure";
 
 /**
- * Proof of concept: the same exercise data driving a rigged 3D human instead
- * of the flat SVG figure. The character here is a placeholder from the
- * three.js sample set — the point is the pipeline, not the model.
+ * Calibration and review page for the 3D character. Pick an exercise, watch it
+ * from any angle, freeze it, and toggle the hoodie.
  */
 export default function Human3DPage() {
-  const withSideFrames = EXERCISES.filter((e) => e.figure.frames);
-  const [slug, setSlug] = useState(withSideFrames[0].slug);
+  const list = EXERCISES.filter((e) => e.figure.frames);
+  const [slug, setSlug] = useState("active-shoulder-flexion");
+  const [view, setView] = useState<View3D>("side");
+  const [playing, setPlaying] = useState(true);
   const [ms, setMs] = useState(0);
 
   useEffect(() => {
+    if (!playing) return;
     let raf = 0;
-    const t0 = performance.now();
+    const t0 = performance.now() - ms;
     const tick = (now: number) => {
       setMs(now - t0);
       raf = requestAnimationFrame(tick);
     };
     raf = requestAnimationFrame(tick);
     return () => cancelAnimationFrame(raf);
-  }, []);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [playing]);
 
-  const ex = withSideFrames.find((e) => e.slug === slug)!;
-  const { pose } = sampleSequence(ex.figure.frames!, ms);
+  const ex = list.find((e) => e.slug === slug) ?? list[0];
+  const frames = ex.figure.frames!;
+  // Freezing "somewhere in the loop" usually lands on the start position,
+  // which is the least informative frame. This lands on the working end.
+  const total = frames.reduce((s2, f) => s2 + f.travel + f.hold, 0);
+  const endAt = total - frames[frames.length - 1].hold / 2;
+  const { pose, index } = sampleSequence(frames, playing ? ms : endAt);
+  const label = ex.figure.frames![index]?.label;
 
   return (
     <main className="min-h-screen bg-cream-100 px-5 pb-24 pt-28 sm:px-8">
       <div className="mx-auto max-w-6xl">
         <p className="mb-3 text-xs font-bold uppercase tracking-[0.2em] text-crimson-600">
-          Proof of concept
+          3D character — calibration
         </p>
         <h1 className="display text-4xl text-espresso-900 sm:text-5xl">
-          The same exercise data, driving a real 3D human
+          Adam, driven by the exercise library
         </h1>
-        <p className="mt-4 max-w-2xl text-[1.02rem] leading-relaxed text-espresso-700/75">
-          Nothing in the exercise library changed. The joint angles that draw
-          the flat figure are being applied to the bones of a rigged character.
-          Swap the model file and this becomes a photoreal person — the
-          exercises, the movements and the camera all carry over.
-        </p>
 
-        <div className="mt-8 flex flex-wrap gap-2">
-          {withSideFrames.map((e) => (
+        <div className="mt-7 flex flex-wrap gap-2">
+          {list.map((e) => (
             <button
               key={e.slug}
               onClick={() => setSlug(e.slug)}
@@ -61,40 +64,40 @@ export default function Human3DPage() {
           ))}
         </div>
 
-        <div className="mt-8 grid gap-6 sm:grid-cols-2">
-          <Figure title="Front view">
-            <Human3D pose={pose} view="front" className="h-[460px] w-full" />
-          </Figure>
-          <Figure title="Side view — same pose, camera moved">
-            <Human3D pose={pose} view="side" className="h-[460px] w-full" />
-          </Figure>
+        <div className="mt-4 flex flex-wrap items-center gap-2">
+          {(["front", "side", "threeQuarter"] as View3D[]).map((v) => (
+            <button
+              key={v}
+              onClick={() => setView(v)}
+              className={`rounded-full px-4 py-2 text-[0.82rem] font-bold transition-all ${
+                v === view
+                  ? "bg-espresso-900 text-cream-50"
+                  : "bg-cream-50 text-espresso-700/70 ring-1 ring-crimson-100"
+              }`}
+            >
+              {v === "threeQuarter" ? "3/4 view" : `${v} view`}
+            </button>
+          ))}
+          <span className="mx-2 h-6 w-px bg-crimson-200" />
+          <button
+            onClick={() => setPlaying((v) => !v)}
+            className="rounded-full bg-cream-50 px-4 py-2 text-[0.82rem] font-bold text-espresso-700/70 ring-1 ring-crimson-100"
+          >
+            {playing ? "Hold end pose" : "Play"}
+          </button>
         </div>
 
-        <p className="mt-8 rounded-2xl border border-amber-accent/40 bg-amber-accent/10 p-5 text-[0.9rem] leading-relaxed text-espresso-800">
-          <strong>The character is a placeholder</strong> from the three.js
-          sample models, used only to prove the rig mapping works. It shares
-          Mixamo&apos;s standard skeleton, which means a realistic male and
-          female downloaded from Mixamo will load with no code changes.
-          The joint mapping is still rough — arms and spine need calibrating.
-        </p>
+        <div className="mt-6 overflow-hidden rounded-[26px] border border-crimson-100 bg-gradient-to-b from-crimson-50 to-cream-50">
+          <Human3D
+            pose={pose}
+            view={view}
+            className="h-[560px] w-full"
+          />
+          <p className="border-t border-crimson-100 bg-cream-50 py-3.5 text-center text-[0.95rem] font-semibold text-espresso-800">
+            {label ?? ex.name.en}
+          </p>
+        </div>
       </div>
     </main>
-  );
-}
-
-function Figure({
-  title,
-  children,
-}: {
-  title: string;
-  children: React.ReactNode;
-}) {
-  return (
-    <div className="overflow-hidden rounded-[26px] border border-crimson-100 bg-gradient-to-b from-crimson-50 to-cream-50">
-      {children}
-      <p className="border-t border-crimson-100 bg-cream-50 py-3 text-center text-[0.85rem] font-semibold text-espresso-800">
-        {title}
-      </p>
-    </div>
   );
 }
