@@ -1,0 +1,96 @@
+@import "tailwindcss";
+
+/* ==========================================================================
+   PhysioFlow — design tokens
+   The palette is drawn from the red "paper-cut" reference: a warm crimson
+   against soft cream, with deep espresso text and an amber accent. Red alone
+   reads as "alarm" in a health context, so it is balanced with warm neutrals
+   and a calm clinical teal for supporting UI.
+   ========================================================================== */
+
+@theme {
+  --color-crimson-50: #fef4f2;
+  --color-crimson-100: #fde5e1;
+  --color-crimson-200: #fbccc4;
+  --color-crimson-300: #f7a89b;
+  --color-crimson-400: #f07a65;
+  --color-crimson-500: #e2503b;
+  --color-crimson-600: #cf3a26;
+  --color-crimson-700: #ad2d1d;
+  --color-crimson-800: #8f281c;
+  --color-crimson-900: #77261d;
+
+  --color-cream-50: #fdfbf9;
+  --color-cream-100: #fbf6f1;
+  --color-cream-200: #f5ebe2;
+  --color-cream-300: #ecdccd;
+
+  --color-espresso-700: #4a2f28;
+  --color-espresso-800: #33201b;
+  --color-espresso-900: #241512;
+
+  --color-amber-accent: #f2a03d;
+  --color-clinical-500: #14676b;
+  --color-clinical-600: #0f5155;
+
+  --font-display: "Georgia", "Times New Roman", serif;
+  --font-sans: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+
+  --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* ------------------------------------------------------------------ base */
+html {
+  scroll-behavior: smooth;
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  background: var(--color-cream-100);
+  color: var(--color-espresso-900);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  overflow-x: clip;
+}
+
+/* Never let a wide element push the page sideways */
+main, section { overflow-x: clip; }
+
+::selection {
+  background: var(--color-crimson-500);
+  color: #fff;
+}
+
+/* ------------------------------------------------- paper-cut layer shadow
+   The reference art gets its depth from a soft shadow cast by each torn
+   paper edge onto the layer beneath it. */
+.paper-edge {
+  filter: drop-shadow(0 -8px 14px rgba(90, 30, 20, 0.13));
+}
+.paper-edge-soft {
+  filter: drop-shadow(0 -5px 10px rgba(90, 30, 20, 0.09));
+}
+
+/* --------------------------------------------------------- display type */
+.display {
+  font-family: var(--font-display);
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  line-height: 0.95;
+}
+
+/* --------------------------------------------------------- scrollbars */
+.no-scrollbar::-webkit-scrollbar { display: none; }
+.no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+/* ------------------------------------------------------ reduced motion
+   Some patients — especially with vestibular or neurological conditions —
+   get symptoms from heavy motion. Honour their system setting. */
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  *, *::before, *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
+}
