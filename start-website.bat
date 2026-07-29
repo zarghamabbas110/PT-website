@@ -21,17 +21,18 @@ if errorlevel 1 (
   exit /b 1
 )
 
-if not exist "node_modules" (
-  echo   First run - downloading the pieces the site needs.
-  echo   This takes a few minutes. Warnings are normal.
+REM Always check the pieces are up to date. Running this every time is quick
+REM once they are installed, and it stops "Module not found" errors after an
+REM update adds something new.
+echo   Checking the site has everything it needs...
+echo   (the first time this takes a few minutes - warnings are normal)
+echo.
+call npm.cmd install
+if errorlevel 1 (
   echo.
-  call npm.cmd install
-  if errorlevel 1 (
-    echo.
-    echo   Install failed. Copy the red text above and send it to Claude.
-    pause
-    exit /b 1
-  )
+  echo   Install failed. Copy the red text above and send it to Claude.
+  pause
+  exit /b 1
 )
 
 echo.
