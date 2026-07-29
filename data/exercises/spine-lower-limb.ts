@@ -88,9 +88,9 @@ export const SPINE_LOWER_LIMB: Exercise[] = [
         "Hold 5 seconds, then release forward slowly.",
       ],
       ur: [
-        "سیدھے بیٹھیں، نظریں سامنے اور برابر رکھیں۔",
-        "ٹھوڑی کو سیدھا پیچھے کھسکائیں تاکہ ہلکی سی ڈبل چن بنے۔",
-        "5 سیکنڈ رکیں، پھر آہستہ آگے چھوڑ دیں۔",
+        "سیدھے بیٹھیں اور نظریں بالکل سامنے رکھیں۔",
+        "ٹھوڑی کو سیدھا پیچھے کھینچیں، جیسے ہلکی سی ڈبل چن بن رہی ہو۔",
+        "سر نیچے نہ جھکائیں۔ پانچ سیکنڈ رکیں، پھر چھوڑ دیں۔",
       ],
     },
     steps: {
@@ -173,22 +173,33 @@ export const SPINE_LOWER_LIMB: Exercise[] = [
     },
     figure: {
       view: "side",
+      // Zoomed to the head, neck and upper trunk. A chin tuck is only a few
+      // centimetres of real travel; at full-body scale it is invisible, and
+      // exaggerating it turns it into the wrong movement.
+      scale: 1.7,
+      offsetX: -86,
+      offsetY: -38,
       frames: [
         {
-          pose: pose({ headSlide: 17, neck: 9, head: -4 }, SEATED),
+          // Poking-chin posture: head translated forward, upper neck extended
+          // so the chin lifts. This is the fault the exercise corrects.
+          pose: pose({ headSlide: 12, neck: 5, head: -6 }, SEATED),
           travel: 900,
           hold: 600,
-          label: "Start — head carried forward",
+          label: "Start — chin poking forward",
         },
         {
-          pose: pose({ headSlide: -6, neck: -3, head: 2 }, SEATED),
+          // A true chin tuck is retraction PLUS upper cervical flexion: the
+          // skull glides back and the chin drops slightly. Retraction alone,
+          // with the chin left level, is a different movement.
+          pose: pose({ headSlide: -4, neck: -1, head: 5 }, SEATED),
           travel: 900,
           hold: 1500,
-          label: "Chin glides straight back — hold 5s",
+          label: "Chin glides back and slightly down",
         },
       ],
       props: [{ kind: "chair" }],
-      arrows: [{ at: "head", dir: 270, len: 30, label: "back" }],
+      arrows: [{ at: "head", dir: 262, len: 26, label: "back" }],
     },
   },
 
@@ -229,9 +240,9 @@ export const SPINE_LOWER_LIMB: Exercise[] = [
         "Hold 5 seconds, then relax completely.",
       ],
       ur: [
-        "گھٹنے موڑ کر سیدھے لیٹ جائیں، پاؤں زمین پر۔",
-        "سانس چھوڑیں، پیٹ کا نچلا حصہ سخت کریں اور کمر کو زمین سے دبائیں۔",
-        "5 سیکنڈ رکیں، پھر مکمل ڈھیلا چھوڑ دیں۔",
+        "گھٹنے موڑ کر سیدھے لیٹ جائیں، پاؤں زمین پر رکھیں۔",
+        "سانس چھوڑتے ہوئے پیٹ کو اندر کھینچیں اور کمر کو زمین سے لگائیں۔",
+        "پانچ سیکنڈ رکیں، پھر بالکل ڈھیلا چھوڑ دیں۔",
       ],
     },
     steps: {
@@ -375,9 +386,9 @@ export const SPINE_LOWER_LIMB: Exercise[] = [
         "Hold 3 seconds, then lower slowly.",
       ],
       ur: [
-        "سیدھے لیٹ جائیں، گھٹنے مڑے ہوں، نرم گیند گھٹنوں کے درمیان دبی ہو۔",
-        "ایڑیوں سے زور دے کر صرف کولہے اٹھائیں — کندھے زمین پر رہیں۔",
-        "3 سیکنڈ رکیں، پھر آہستہ نیچے لائیں۔",
+        "سیدھے لیٹ جائیں، گھٹنے مڑے ہوں اور نرم گیند گھٹنوں کے بیچ دبی ہو۔",
+        "ایڑیوں سے زور لگا کر صرف کولہے اوپر اٹھائیں — کندھے زمین پر ہی رہیں۔",
+        "تین سیکنڈ رکیں، پھر آرام سے نیچے لے آئیں۔",
       ],
     },
     steps: {
@@ -535,9 +546,9 @@ export const SPINE_LOWER_LIMB: Exercise[] = [
         "Stop before the hip rolls back. Lower slowly.",
       ],
       ur: [
-        "پہلو کے بل لیٹیں، گھٹنے مڑے، کولہے ایک دوسرے کے اوپر، بینڈ گھٹنوں سے اوپر۔",
-        "پاؤں جوڑے رکھتے ہوئے اوپر والا گھٹنا سیپ کی طرح کھولیں۔",
-        "کولہا پیچھے گھومنے سے پہلے رک جائیں۔ آہستہ نیچے لائیں۔",
+        "پہلو کے بل لیٹ جائیں، گھٹنے مڑے ہوں اور بینڈ گھٹنوں سے اوپر ہو۔",
+        "پاؤں آپس میں جوڑے رکھیں اور اوپر والا گھٹنا سیپ کی طرح کھولیں۔",
+        "جیسے ہی کولہا پیچھے گھومنے لگے رک جائیں، پھر آرام سے نیچے لائیں۔",
       ],
     },
     steps: {
@@ -682,9 +693,9 @@ export const SPINE_LOWER_LIMB: Exercise[] = [
         "Hold 2 seconds, then lower slowly.",
       ],
       ur: [
-        "سیدھے لیٹ جائیں، ایک گھٹنا مڑا ہو، ورزش والی ٹانگ سیدھی۔",
-        "ران سخت کریں، پھر سیدھی ٹانگ کو دوسرے گھٹنے کی بلندی تک اٹھائیں۔",
-        "2 سیکنڈ رکیں، پھر آہستہ نیچے لائیں۔",
+        "سیدھے لیٹ جائیں، ایک گھٹنا مڑا ہوا اور دوسری ٹانگ بالکل سیدھی۔",
+        "پہلے ران سخت کریں، پھر سیدھی ٹانگ کو دوسرے گھٹنے کی اونچائی تک اٹھائیں۔",
+        "دو سیکنڈ رکیں، پھر آرام سے نیچے لے آئیں۔",
       ],
     },
     steps: {
@@ -819,9 +830,9 @@ export const SPINE_LOWER_LIMB: Exercise[] = [
         "Hold, breathing steadily, then push up through your heels.",
       ],
       ur: [
-        "کمر دیوار سے لگا کر کھڑے ہوں، پاؤں دو قدم آگے۔",
-        "نیچے کھسکیں یہاں تک کہ گھٹنے تقریباً 90 درجے پر مڑ جائیں، گھٹنے پنجوں سے پیچھے رہیں۔",
-        "سانس لیتے ہوئے رکیں، پھر ایڑیوں سے زور دے کر اوپر آئیں۔",
+        "کمر دیوار سے لگا کر کھڑے ہوں اور پاؤں دو قدم آگے کر لیں۔",
+        "نیچے کھسکتے جائیں یہاں تک کہ گھٹنے تقریباً نوے ڈگری پر مڑ جائیں۔",
+        "سانس چلتی رہے۔ رکیں، پھر ایڑیوں سے زور لگا کر اوپر آ جائیں۔",
       ],
     },
     steps: {

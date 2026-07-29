@@ -20,6 +20,13 @@ import {
 
 export type Lang = "en" | "ur";
 
+/**
+ * Who is reading. This drives two things at once: the colour theme, and how
+ * much detail the page shows. A patient wants two lines and a picture; a
+ * physiotherapist wants the whole record.
+ */
+export type Audience = "client" | "clinician";
+
 /** A string that exists in both languages. */
 export type Bi = { en: string; ur: string };
 export type BiList = { en: string[]; ur: string[] };
@@ -27,6 +34,8 @@ export type BiList = { en: string[]; ur: string[] };
 type Ctx = {
   lang: Lang;
   setLang: (l: Lang) => void;
+  audience: Audience;
+  setAudience: (a: Audience) => void;
   /** Pick the active language out of a bilingual field. */
   t: (v: Bi) => string;
   tl: (v: BiList) => string[];
@@ -35,35 +44,52 @@ type Ctx = {
 
 const LanguageContext = createContext<Ctx | null>(null);
 
-const STORAGE_KEY = "physioflow.lang";
+const LANG_KEY = "physioflow.lang";
+const AUDIENCE_KEY = "physioflow.audience";
 
 export function LanguageProvider({ children }: { children: ReactNode }) {
   const [lang, setLangState] = useState<Lang>("en");
+  const [audience, setAudienceState] = useState<Audience>("client");
 
-  // Restore the visitor's previous choice.
+  // Restore the visitor's previous choices.
   useEffect(() => {
-    const saved = window.localStorage.getItem(STORAGE_KEY);
-    if (saved === "ur" || saved === "en") setLangState(saved);
+    const savedLang = window.localStorage.getItem(LANG_KEY);
+    if (savedLang === "ur" || savedLang === "en") setLangState(savedLang);
+    const savedAudience = window.localStorage.getItem(AUDIENCE_KEY);
+    if (savedAudience === "client" || savedAudience === "clinician") {
+      setAudienceState(savedAudience);
+    }
   }, []);
 
   const setLang = (l: Lang) => {
     setLangState(l);
-    window.localStorage.setItem(STORAGE_KEY, l);
+    window.localStorage.setItem(LANG_KEY, l);
+  };
+
+  const setAudience = (a: Audience) => {
+    setAudienceState(a);
+    window.localStorage.setItem(AUDIENCE_KEY, a);
   };
 
   const value = useMemo<Ctx>(
     () => ({
       lang,
       setLang,
+      audience,
+      setAudience,
       t: (v) => (lang === "ur" ? v.ur : v.en),
       tl: (v) => (lang === "ur" ? v.ur : v.en),
       dir: lang === "ur" ? "rtl" : "ltr",
     }),
-    [lang]
+    [lang, audience]
   );
 
   return (
-    <LanguageContext.Provider value={value}>{children}</LanguageContext.Provider>
+    <LanguageContext.Provider value={value}>
+      <div className={audience === "clinician" ? "theme-clinician" : "theme-client"}>
+        {children}
+      </div>
+    </LanguageContext.Provider>
   );
 }
 
@@ -106,6 +132,8 @@ const UI = {
     ur: "طبی جائزہ زیرِ التوا",
   },
   none: { en: "None", ur: "کوئی نہیں" },
+  patientView: { en: "Patient", ur: "مریض" },
+  clinicianView: { en: "Clinician", ur: "فزیوتھراپسٹ" },
 } as const;
 
 export type UiKey = keyof typeof UI;

@@ -5,6 +5,7 @@ import PhysioFigure from "@/components/figure/PhysioFigure";
 import PinnedNotes from "./PinnedNotes";
 import Collapsible from "./Collapsible";
 import LanguageToggle from "@/components/LanguageToggle";
+import AudienceToggle from "@/components/AudienceToggle";
 import Reveal from "@/components/Reveal";
 import { useLang, useUi } from "@/lib/i18n";
 import type { Exercise } from "@/data/schema";
@@ -27,7 +28,8 @@ export default function ExerciseDetail({
   exercise: Exercise;
   related: Exercise[];
 }) {
-  const { t, tl, lang, dir } = useLang();
+  const { t, tl, lang, dir, audience } = useLang();
+  const isClinician = audience === "clinician";
   const ui = useUi();
   const rtl = dir === "rtl";
 
@@ -41,7 +43,10 @@ export default function ExerciseDetail({
           >
             ← {ui("backToLibrary")}
           </Link>
-          <LanguageToggle />
+          <div className="flex flex-wrap items-center gap-3">
+            <AudienceToggle />
+            <LanguageToggle />
+          </div>
         </div>
 
         {/* ------------------------------------------- name, before anything */}
@@ -131,8 +136,10 @@ export default function ExerciseDetail({
               </div>
             )}
 
-            {/* everything else, closed until wanted */}
+            {/* Patients get the quick guide and nothing else; the full record
+                is for the clinician view. */}
             <div className="mt-4 space-y-3">
+              {isClinician && (
               <Collapsible title={ui("fullSteps")} count={tl(ex.steps).length}>
                 <ol className="space-y-3" dir={dir}>
                   {tl(ex.steps).map((s, i) => (
@@ -154,6 +161,7 @@ export default function ExerciseDetail({
                   ))}
                 </ol>
               </Collapsible>
+              )}
 
               <Collapsible
                 title={ui("commonMistakes")}
@@ -170,6 +178,7 @@ export default function ExerciseDetail({
                 <Bullets items={tl(ex.safetyPrecautions)} marker="!" rtl={rtl} tone="amber" />
               </Collapsible>
 
+              {isClinician && (
               <Collapsible
                 title={ui("contraindications")}
                 count={tl(ex.contraindications).length}
@@ -177,7 +186,9 @@ export default function ExerciseDetail({
               >
                 <Bullets items={tl(ex.contraindications)} marker="⊘" rtl={rtl} tone="crimson" />
               </Collapsible>
+              )}
 
+              {isClinician && (
               <Collapsible title={ui("clinicalDetail")}>
                 <div className="grid gap-4 sm:grid-cols-2">
                   <Tags label={ui("joint")} items={ex.joint} />
@@ -191,6 +202,7 @@ export default function ExerciseDetail({
                   />
                 </div>
               </Collapsible>
+              )}
             </div>
           </div>
         </div>

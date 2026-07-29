@@ -84,9 +84,19 @@ type Props = {
   showLabel?: boolean;
 };
 
-const SKIN = "#f8dccd";
-const SHADE = "#efc3ad";
-const LINE = "#8f281c";
+/* --------------------------------------------------------------- palette
+   A fair-to-wheatish complexion, dark hair, and fitted clothing in neutral
+   tones that sit comfortably on both the patient and clinician themes.
+   Clothing is deliberately close-fitting: a baggy shirt would hide exactly
+   the trunk and shoulder movement the illustration exists to show. */
+const SKIN = "#f2d2b3";
+const SHADE = "#dcb08a";
+const HAIR = "#241a14";
+const SHIRT = "#38506b";
+const SHIRT_DK = "#22334a";
+const TROUSER = "#5b6472";
+const TROUSER_DK = "#3d4552";
+const LINE = "#5c3a25";
 const EDGE = 3.2;
 
 export default function PhysioFigure({
@@ -212,26 +222,42 @@ function SideBody({
   const neck = [sk.t1, sk.neckTop];
   const neckW = [13, 11];
 
-  const farArm = [sk.far.shoulder, sk.far.elbow, sk.far.hand];
-  const nearArm = [sk.near.shoulder, sk.near.elbow, sk.near.hand];
   const armW = [9, 7.4, 6];
-
-  const farLeg = [sk.far.hip, sk.far.knee, sk.far.ankle];
-  const nearLeg = [sk.near.hip, sk.near.knee, sk.near.ankle];
   const legW = [14, 9.6, 6];
-
-  const farFoot = [sk.far.ankle, sk.far.toe];
-  const nearFoot = [sk.near.ankle, sk.near.toe];
   const footW = [6, 4.4];
+
+  const limb = (l: Skeleton["near"], faded: boolean) => (
+    <g opacity={faded ? 0.45 : 1}>
+      {/* leg, then the trouser over it */}
+      <Part pts={[l.hip, l.knee, l.ankle]} w={legW} />
+      <Part pts={[l.ankle, l.toe]} w={footW} />
+      <Part
+        pts={[l.hip, l.knee, at(l.knee, l.ankle, 0.94)]}
+        w={[16.5, 11.5, 8]}
+        fill={TROUSER}
+        edge={TROUSER_DK}
+      />
+    </g>
+  );
+
+  const arm = (l: Skeleton["near"], faded: boolean) => (
+    <g opacity={faded ? 0.45 : 1}>
+      <Part pts={[l.shoulder, l.elbow, l.hand]} w={armW} />
+      {/* short sleeve, ending about halfway down the upper arm */}
+      <Part
+        pts={[l.shoulder, at(l.shoulder, l.elbow, 0.52)]}
+        w={[12.5, 9.5]}
+        fill={SHIRT}
+        edge={SHIRT_DK}
+      />
+    </g>
+  );
 
   return (
     <g>
       {/* far side, faded, behind the trunk */}
-      <g opacity={0.45}>
-        <Part pts={farLeg} w={legW} />
-        <Part pts={farFoot} w={footW} />
-        <Part pts={farArm} w={armW} />
-      </g>
+      {limb(sk.far, true)}
+      {arm(sk.far, true)}
 
       {/* Equipment held between the limbs is drawn after the far side and
           before the near side, so the near knee overlaps it. That occlusion
@@ -241,11 +267,20 @@ function SideBody({
 
       <Part pts={torso} w={torsoW} />
       <Part pts={neck} w={neckW} />
+      {/* t-shirt over the trunk, hem just below the hip */}
+      <Part
+        pts={[at(sk.pelvis, sk.l5, -0.35), sk.l5, sk.t12, sk.t1]}
+        w={[21, 20.5, 21.5, 23]}
+        fill={SHIRT}
+        edge={SHIRT_DK}
+      />
+      {/* collar */}
+      <Part pts={[at(sk.t1, sk.neckTop, 0.1), at(sk.t1, sk.neckTop, 0.34)]} w={[15, 13.5]} fill={SHIRT_DK} edge={SHIRT_DK} />
+
       <HeadProfile at={sk.headCentre} angle={sk.headAngle} />
 
-      <Part pts={nearLeg} w={legW} />
-      <Part pts={nearFoot} w={footW} />
-      <Part pts={nearArm} w={armW} />
+      {limb(sk.near, false)}
+      {arm(sk.near, false)}
       <Hand at={sk.near.hand} />
     </g>
   );
@@ -274,10 +309,23 @@ function FrontBody({ fk }: { fk: FrontalSkeleton }) {
 
   return (
     <g>
+      {/* legs, then trousers over them */}
       <Part pts={[fk.hipR, fk.kneeR, fk.ankleR]} w={legW} />
       <Part pts={[fk.hipL, fk.kneeL, fk.ankleL]} w={legW} />
       <Foot at={fk.ankleR} dir={-1} />
       <Foot at={fk.ankleL} dir={1} />
+      <Part
+        pts={[fk.hipR, fk.kneeR, at(fk.kneeR, fk.ankleR, 0.94)]}
+        w={[17.5, 12, 8.5]}
+        fill={TROUSER}
+        edge={TROUSER_DK}
+      />
+      <Part
+        pts={[fk.hipL, fk.kneeL, at(fk.kneeL, fk.ankleL, 0.94)]}
+        w={[17.5, 12, 8.5]}
+        fill={TROUSER}
+        edge={TROUSER_DK}
+      />
 
       <Part pts={pelvisBand} w={pelvisW} />
       <Part pts={trunk} w={trunkW} />
@@ -286,6 +334,36 @@ function FrontBody({ fk }: { fk: FrontalSkeleton }) {
 
       <Part pts={[fk.shoulderR, fk.elbowR, fk.handR]} w={armW} />
       <Part pts={[fk.shoulderL, fk.elbowL, fk.handL]} w={armW} />
+
+      {/* t-shirt: body, then the two short sleeves */}
+      <Part
+        pts={[{ x: fk.pelvis.x, y: fk.pelvis.y + 6 }, fk.chest, fk.neckBase]}
+        w={[22, 29, 25.5]}
+        fill={SHIRT}
+        edge={SHIRT_DK}
+      />
+      <Part pts={shoulders} w={[15, 15]} fill={SHIRT} edge={SHIRT_DK} />
+      <Part
+        pts={[fk.shoulderR, at(fk.shoulderR, fk.elbowR, 0.52)]}
+        w={[13.5, 10.5]}
+        fill={SHIRT}
+        edge={SHIRT_DK}
+      />
+      <Part
+        pts={[fk.shoulderL, at(fk.shoulderL, fk.elbowL, 0.52)]}
+        w={[13.5, 10.5]}
+        fill={SHIRT}
+        edge={SHIRT_DK}
+      />
+      {/* neckline */}
+      <ellipse
+        cx={fk.neckBase.x}
+        cy={fk.neckBase.y + 4}
+        rx={15}
+        ry={7}
+        fill={SHIRT_DK}
+      />
+
       <Hand at={fk.handR} />
       <Hand at={fk.handL} />
 
@@ -304,7 +382,17 @@ function FrontBody({ fk }: { fk: FrontalSkeleton }) {
  * leaves a zero-winding region that renders as a hole; the discs make joints
  * and caps solid regardless.
  */
-function Part({ pts, w }: { pts: Point[]; w: number[] }) {
+function Part({
+  pts,
+  w,
+  fill = SKIN,
+  edge = LINE,
+}: {
+  pts: Point[];
+  w: number[];
+  fill?: string;
+  edge?: string;
+}) {
   const outer = taperedPath(
     pts,
     w.map((n) => n + EDGE)
@@ -312,16 +400,21 @@ function Part({ pts, w }: { pts: Point[]; w: number[] }) {
   const inner = taperedPath(pts, w);
   return (
     <g>
-      <path d={outer} fill={LINE} />
+      <path d={outer} fill={edge} />
       {pts.map((p, i) => (
-        <circle key={`o${i}`} cx={p.x} cy={p.y} r={w[i] + EDGE} fill={LINE} />
+        <circle key={`o${i}`} cx={p.x} cy={p.y} r={w[i] + EDGE} fill={edge} />
       ))}
-      <path d={inner} fill={SKIN} />
+      <path d={inner} fill={fill} />
       {pts.map((p, i) => (
-        <circle key={`i${i}`} cx={p.x} cy={p.y} r={w[i]} fill={SKIN} />
+        <circle key={`i${i}`} cx={p.x} cy={p.y} r={w[i]} fill={fill} />
       ))}
     </g>
   );
+}
+
+/** Point a fraction of the way from a to b — used to end a sleeve or hem. */
+function at(a: Point, b: Point, t: number): Point {
+  return { x: a.x + (b.x - a.x) * t, y: a.y + (b.y - a.y) * t };
 }
 
 function Hand({ at }: { at: Point }) {
@@ -339,11 +432,12 @@ function Foot({ at, dir }: { at: Point; dir: number }) {
 }
 
 /**
- * Head in profile. Deliberately a soft, rounded face — brow, a gentle nose
- * curve and a real chin — rather than the wedge-shaped nose of the first pass.
+ * Head in profile — a man in his thirties: short dark hair, defined brow,
+ * straight nose and close-trimmed beard. Kept simple enough to stay legible
+ * at thumbnail size, and the jaw line is what makes a chin tuck readable.
  */
-function HeadProfile({ at, angle }: { at: Point; angle: number }) {
-  const d = `M -3 -21
+function HeadProfile({ at: c, angle }: { at: Point; angle: number }) {
+  const face = `M -3 -21
     C 8 -21.5 16 -15 16.5 -6.5
     C 16.7 -4 18.2 -3.2 18.6 -1.6
     C 19.2 0.6 18.6 2.4 16.8 3.4
@@ -355,10 +449,35 @@ function HeadProfile({ at, angle }: { at: Point; angle: number }) {
     C -20 -13 -13 -20.6 -3 -21 Z`;
 
   return (
-    <g transform={`translate(${at.x} ${at.y}) rotate(${angle})`}>
-      <path d={d} fill={LINE} stroke={LINE} strokeWidth={EDGE * 2} strokeLinejoin="round" />
-      <path d={d} fill={SKIN} />
-      {/* ear and eye give the profile its read */}
+    <g transform={`translate(${c.x} ${c.y}) rotate(${angle})`}>
+      <path d={face} fill={LINE} stroke={LINE} strokeWidth={EDGE * 2} strokeLinejoin="round" />
+      <path d={face} fill={SKIN} />
+
+      {/* close-trimmed beard along the jaw */}
+      <path
+        d="M -14 8 C -12 15 -6 19 -2.4 19.2 C 4 19.2 9 17.4 11.6 15
+           C 13.4 13.4 14 11.4 13.2 9.6 C 11 12 6 13.6 0 13.4
+           C -6 13.2 -11 11.4 -14 8 Z"
+        fill={HAIR}
+        opacity={0.72}
+      />
+
+      {/* hair: covers the crown and back of the skull */}
+      <path
+        d="M -3 -21.6 C 8.4 -22 16.8 -15 17 -6.8
+           C 14.6 -10.6 9 -13.2 1 -13 C -7 -12.8 -14 -10 -18.6 -5.4
+           C -19.6 -14.4 -12.6 -21.2 -3 -21.6 Z"
+        fill={HAIR}
+      />
+      <path
+        d="M -18.8 -5.6 C -20.4 2 -20 8.2 -17.4 12.4
+           C -20.6 6 -21 -1.4 -19.6 -7.4 Z"
+        fill={HAIR}
+      />
+
+      {/* brow, eye and ear */}
+      <path d="M 6.5 -8.6 L 13.6 -7.2" stroke={HAIR} strokeWidth={2.6} strokeLinecap="round" />
+      <circle cx={10.4} cy={-3.4} r={2} fill={LINE} />
       <path
         d="M -7 -1 C -4 -3 -1.5 -1 -2 2 C -2.5 4.6 -5 5 -7 3.4"
         fill="none"
@@ -366,14 +485,13 @@ function HeadProfile({ at, angle }: { at: Point; angle: number }) {
         strokeWidth={2.2}
         strokeLinecap="round"
       />
-      <circle cx={8.5} cy={-6} r={2.1} fill={LINE} />
     </g>
   );
 }
 
-/** Head seen from the front: an oval with a jaw, eyes and a soft nose line. */
-function HeadFront({ at, angle }: { at: Point; angle: number }) {
-  const d = `M 0 -22
+/** Head seen from the front: same person, facing the viewer. */
+function HeadFront({ at: c, angle }: { at: Point; angle: number }) {
+  const face = `M 0 -22
     C 12 -22 18.5 -14 18.5 -3
     C 18.5 6 14 15 7 19.6
     C 4.4 21.4 -4.4 21.4 -7 19.6
@@ -381,17 +499,34 @@ function HeadFront({ at, angle }: { at: Point; angle: number }) {
     C -18.5 -14 -12 -22 0 -22 Z`;
 
   return (
-    <g transform={`translate(${at.x} ${at.y}) rotate(${angle})`}>
-      <path d={d} fill={LINE} stroke={LINE} strokeWidth={EDGE * 2} strokeLinejoin="round" />
-      <path d={d} fill={SKIN} />
-      <circle cx={-6.6} cy={-4} r={2.1} fill={LINE} />
-      <circle cx={6.6} cy={-4} r={2.1} fill={LINE} />
+    <g transform={`translate(${c.x} ${c.y}) rotate(${angle})`}>
+      <path d={face} fill={LINE} stroke={LINE} strokeWidth={EDGE * 2} strokeLinejoin="round" />
+      <path d={face} fill={SKIN} />
+
+      {/* beard framing the jaw */}
       <path
-        d="M 0 -1 L 0 5"
-        stroke={SHADE}
-        strokeWidth={2.2}
-        strokeLinecap="round"
+        d="M -16.5 4 C -15.5 12 -10 18.4 -7 19.6 C -4.4 21.4 4.4 21.4 7 19.6
+           C 10 18.4 15.5 12 16.5 4 C 13.5 11 8 14.6 0 14.6
+           C -8 14.6 -13.5 11 -16.5 4 Z"
+        fill={HAIR}
+        opacity={0.68}
       />
+
+      {/* hair with a short fringe */}
+      <path
+        d="M 0 -22.6 C 12.4 -22.6 19 -14 19 -3.4
+           C 17.2 -8.4 14.4 -11.6 11 -12.2 C 7 -9.6 -7 -9.6 -11 -12.2
+           C -14.4 -11.6 -17.2 -8.4 -19 -3.4 C -19 -14 -12.4 -22.6 0 -22.6 Z"
+        fill={HAIR}
+      />
+
+      {/* brows, eyes, nose, mouth */}
+      <path d="M -11 -7 L -3.4 -8" stroke={HAIR} strokeWidth={2.5} strokeLinecap="round" />
+      <path d="M 11 -7 L 3.4 -8" stroke={HAIR} strokeWidth={2.5} strokeLinecap="round" />
+      <circle cx={-6.8} cy={-2.6} r={2} fill={LINE} />
+      <circle cx={6.8} cy={-2.6} r={2} fill={LINE} />
+      <path d="M 0 -1 L 0 4.6" stroke={SHADE} strokeWidth={2.2} strokeLinecap="round" />
+      <path d="M -4 9 Q 0 11 4 9" fill="none" stroke={SHADE} strokeWidth={2.2} strokeLinecap="round" />
     </g>
   );
 }
