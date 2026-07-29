@@ -24,6 +24,9 @@ const SUPINE = pose({
 
 const SIDE_LYING = pose({
   rootRot: -90,
+  // Rolled onto the near side. The flat drawing cannot show this, but in 3D a
+  // clamshell performed on the back would be plain hip abduction instead.
+  roll: -90,
   rootX: 245,
   rootY: 300,
   hipNear: 45,

@@ -243,6 +243,16 @@ export type Pose = {
   /** Whole-body rotation — 0 upright, 90 lying on the back, -90 face down. */
   rootRot: number;
 
+  /**
+   * Rotation about the body's own head-to-toe axis, in degrees.
+   *
+   * The flat side-on drawing cannot tell supine from side-lying — both show a
+   * horizontal body — so the 2D solver ignores this. In 3D the difference is
+   * the whole exercise: a clamshell rolled onto its back is a hip abduction.
+   * 0 leaves the chest facing the camera-side; 90 rolls onto the near side.
+   */
+  roll: number;
+
   /** Positive = anterior pelvic tilt (pubic bone drops, lower back arches). */
   pelvisTilt: number;
   /** Positive = lumbar flexion (flattening/rounding the lower back). */
@@ -284,6 +294,7 @@ export const NEUTRAL: Pose = {
   rootX: 200,
   rootY: 240,
   rootRot: 0,
+  roll: 0,
   pelvisTilt: 0,
   lumbar: 0,
   thorax: 0,
