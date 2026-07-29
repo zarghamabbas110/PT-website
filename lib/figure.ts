@@ -39,9 +39,165 @@ function unit(a: Point, b: Point): Point {
   return { x: dx / len, y: dy / len };
 }
 
+/* --------------------------------------------------------------------------
+   Anatomical outlines
+   --------------------------------------------------------------------------
+   A bone chain of three points offset by three widths and joined with straight
+   lines reads as a tube, and a stack of tubes reads as a mannequin. Real limbs
+   swell and narrow continuously — deltoid, elbow, forearm belly, wrist — so
+   the chain is resampled into many points, given a width *profile*, and the
+   outline drawn as one smooth closed curve.
+   -------------------------------------------------------------------------- */
+
+/** Resample a polyline into `n` points spaced evenly along its length. */
+export function resample(pts: Point[], n: number): Point[] {
+  const segLen: number[] = [];
+  let total = 0;
+  for (let i = 0; i < pts.length - 1; i++) {
+    const d = Math.hypot(pts[i + 1].x - pts[i].x, pts[i + 1].y - pts[i].y);
+    segLen.push(d);
+    total += d;
+  }
+  if (total === 0) return new Array(n).fill(pts[0]);
+
+  const out: Point[] = [];
+  for (let k = 0; k < n; k++) {
+    let target = (k / (n - 1)) * total;
+    let i = 0;
+    while (i < segLen.length - 1 && target > segLen[i]) {
+      target -= segLen[i];
+      i++;
+    }
+    const t = segLen[i] === 0 ? 0 : target / segLen[i];
+    out.push({
+      x: pts[i].x + (pts[i + 1].x - pts[i].x) * t,
+      y: pts[i].y + (pts[i + 1].y - pts[i].y) * t,
+    });
+  }
+  return out;
+}
+
+/**
+ * A width profile: pairs of [position along the limb 0–1, half-width].
+ * Interpolated linearly, so a handful of landmarks describes a whole limb.
+ */
+export type Profile = [number, number][];
+
+export function widthAt(profile: Profile, t: number): number {
+  if (t <= profile[0][0]) return profile[0][1];
+  const last = profile[profile.length - 1];
+  if (t >= last[0]) return last[1];
+  for (let i = 0; i < profile.length - 1; i++) {
+    const [t0, w0] = profile[i];
+    const [t1, w1] = profile[i + 1];
+    if (t >= t0 && t <= t1) {
+      const f = (t - t0) / (t1 - t0 || 1);
+      return w0 + (w1 - w0) * f;
+    }
+  }
+  return last[1];
+}
+
+/** A closed Catmull-Rom curve through the points, emitted as cubic beziers. */
+export function smoothClosedPath(pts: Point[]): string {
+  const n = pts.length;
+  if (n < 3) return "";
+  const at = (i: number) => pts[(i + n) % n];
+
+  let d = `M ${at(0).x.toFixed(2)} ${at(0).y.toFixed(2)}`;
+  for (let i = 0; i < n; i++) {
+    const p0 = at(i - 1);
+    const p1 = at(i);
+    const p2 = at(i + 1);
+    const p3 = at(i + 2);
+    const c1 = { x: p1.x + (p2.x - p0.x) / 6, y: p1.y + (p2.y - p0.y) / 6 };
+    const c2 = { x: p2.x - (p3.x - p1.x) / 6, y: p2.y - (p3.y - p1.y) / 6 };
+    d += ` C ${c1.x.toFixed(2)} ${c1.y.toFixed(2)}, ${c2.x.toFixed(2)} ${c2.y.toFixed(2)}, ${p2.x.toFixed(2)} ${p2.y.toFixed(2)}`;
+  }
+  return d + " Z";
+}
+
+/**
+ * The outline of one limb or the trunk: resample the bone chain, offset each
+ * sample by its profile width, and close the loop with rounded ends.
+ */
+export function limbOutline(
+  chain: Point[],
+  profile: Profile,
+  samples = 26
+): string {
+  const spine = resample(chain, samples);
+
+  const normals: Point[] = spine.map((_, i) => {
+    const a = spine[Math.max(0, i - 1)];
+    const b = spine[Math.min(spine.length - 1, i + 1)];
+    const dx = b.x - a.x;
+    const dy = b.y - a.y;
+    const len = Math.hypot(dx, dy) || 1;
+    return { x: -dy / len, y: dx / len };
+  });
+
+  const w = spine.map((_, i) => widthAt(profile, i / (spine.length - 1)));
+
+  const left: Point[] = [];
+  const right: Point[] = [];
+  for (let i = 0; i < spine.length; i++) {
+    left.push({
+      x: spine[i].x + normals[i].x * w[i],
+      y: spine[i].y + normals[i].y * w[i],
+    });
+    right.push({
+      x: spine[i].x - normals[i].x * w[i],
+      y: spine[i].y - normals[i].y * w[i],
+    });
+  }
+
+  const last = spine.length - 1;
+
+  /**
+   * Round the ends by sweeping the offset vector a half turn through the
+   * tangent. Interpolating between two angles instead leaves the sweep
+   * direction ambiguous, and picking the wrong one reverses the winding of
+   * that part of the ring — which the non-zero fill rule renders as a hole
+   * sitting exactly on the joint.
+   */
+  const cap = (centre: Point, n: Point, t: Point, radius: number, outward: boolean) => {
+    const steps = 8;
+    const arc: Point[] = [];
+    const sign = outward ? 1 : -1;
+    for (let s = 1; s < steps; s++) {
+      const a = (Math.PI * s) / steps;
+      arc.push({
+        x: centre.x + sign * (n.x * Math.cos(a) + t.x * Math.sin(a)) * radius,
+        y: centre.y + sign * (n.y * Math.cos(a) + t.y * Math.sin(a)) * radius,
+      });
+    }
+    return arc;
+  };
+
+  const tangent = (a: Point, b: Point): Point => {
+    const dx = b.x - a.x;
+    const dy = b.y - a.y;
+    const len = Math.hypot(dx, dy) || 1;
+    return { x: dx / len, y: dy / len };
+  };
+
+  const tEnd = tangent(spine[last - 1], spine[last]);
+  const tStart = tangent(spine[1], spine[0]);
+
+  const ring = [
+    ...left,
+    ...cap(spine[last], normals[last], tEnd, w[last], true),
+    ...right.slice().reverse(),
+    ...cap(spine[0], normals[0], tStart, w[0], false),
+  ];
+
+  return smoothClosedPath(ring);
+}
+
 /**
  * Closed outline around a bone chain, `halfWidths[i]` wide at `pts[i]`.
- * Ends are capped with semicircles.
+ * Ends are capped with semicircles. Retained for props and simple shapes.
  */
 export function taperedPath(pts: Point[], halfWidths: number[]): string {
   if (pts.length < 2) return "";

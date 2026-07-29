@@ -14,7 +14,9 @@ import {
   sampleSequence,
   solve,
   solveFrontal,
+  limbOutline,
   taperedPath,
+  type Profile,
 } from "@/lib/figure";
 
 /* ==========================================================================
@@ -96,8 +98,82 @@ const SHIRT = "#38506b";
 const SHIRT_DK = "#22334a";
 const TROUSER = "#5b6472";
 const TROUSER_DK = "#3d4552";
+const SHOE = "#2a2f38";
+const SHOE_DK = "#171b21";
 const LINE = "#5c3a25";
-const EDGE = 3.2;
+const EDGE = 3.0;
+
+/* ------------------------------------------------------- width profiles
+   Each entry is [distance along the limb 0-1, half-width]. These are what
+   turn a bone chain into a body: the deltoid swells at the top of the arm,
+   the forearm has a belly, the thigh narrows into the knee and the calf
+   swells below it. A limb drawn at constant width is a tube. */
+
+const ARM: Profile = [
+  [0.0, 11.5],   // deltoid
+  [0.1, 11.0],
+  [0.3, 9.0],
+  [0.46, 7.6],   // above the elbow
+  [0.54, 7.8],   // elbow
+  [0.66, 8.2],   // forearm belly
+  [0.85, 6.0],
+  [1.0, 4.6],    // wrist
+];
+
+const LEG: Profile = [
+  [0.0, 16.5],   // hip
+  [0.14, 15.2],
+  [0.34, 12.2],
+  [0.47, 9.6],   // above the knee
+  [0.53, 9.4],   // knee
+  [0.63, 10.6],  // calf belly
+  [0.82, 6.6],
+  [1.0, 5.0],    // ankle
+];
+
+const TROUSER_LEG: Profile = [
+  [0.0, 18.5],
+  [0.14, 17.2],
+  [0.34, 14.0],
+  [0.5, 11.4],
+  [0.63, 12.4],
+  [0.85, 9.0],
+  [1.0, 8.2],
+];
+
+/** Side-on trunk: buttock, waist, ribcage, chest. */
+const TRUNK_SIDE: Profile = [
+  [0.0, 18.5],
+  [0.2, 16.6],
+  [0.42, 15.4],  // waist
+  [0.66, 17.8],
+  [0.86, 20.0],  // chest
+  [1.0, 19.0],
+];
+
+/** Front-on trunk: hips, waist, ribcage, chest. */
+const TRUNK_FRONT: Profile = [
+  [0.0, 21.0],
+  [0.18, 18.6],
+  [0.36, 17.2],  // waist
+  [0.62, 22.5],
+  [0.86, 25.5],  // chest
+  [1.0, 23.0],
+];
+
+const SHIRT_SIDE: Profile = TRUNK_SIDE.map(([t, w]) => [t, w + 2.4]) as Profile;
+const SHIRT_FRONT: Profile = TRUNK_FRONT.map(([t, w]) => [t, w + 2.6]) as Profile;
+
+const NECK: Profile = [
+  [0.0, 13.5],
+  [0.5, 11.0],
+  [1.0, 10.4],
+];
+
+const FOOT: Profile = [
+  [0.0, 6.0],
+  [1.0, 4.0],
+];
 
 export default function PhysioFigure({
   spec,
@@ -217,71 +293,69 @@ function SideBody({
   sk: Skeleton;
   between?: React.ReactNode;
 }) {
-  const torso = [sk.pelvis, sk.l5, sk.t12, sk.t1];
-  const torsoW = [19, 18, 19, 21];
-  const neck = [sk.t1, sk.neckTop];
-  const neckW = [13, 11];
+  // The trunk runs pelvis → L5 → T12 → T1 and carries the waist/chest profile,
+  // so the silhouette narrows at the waist the way a body does.
+  const trunk = [sk.pelvis, sk.l5, sk.t12, sk.t1];
 
-  const armW = [9, 7.4, 6];
-  const legW = [14, 9.6, 6];
-  const footW = [6, 4.4];
+  const leg = (l: Skeleton["near"]) => [l.hip, l.knee, l.ankle];
+  const arm = (l: Skeleton["near"]) => [l.shoulder, l.elbow, l.hand];
 
-  const limb = (l: Skeleton["near"], faded: boolean) => (
-    <g opacity={faded ? 0.45 : 1}>
-      {/* leg, then the trouser over it */}
-      <Part pts={[l.hip, l.knee, l.ankle]} w={legW} />
-      <Part pts={[l.ankle, l.toe]} w={footW} />
-      <Part
-        pts={[l.hip, l.knee, at(l.knee, l.ankle, 0.94)]}
-        w={[16.5, 11.5, 8]}
+  const side = (l: Skeleton["near"], faded: boolean) => (
+    <g opacity={faded ? 0.42 : 1}>
+      <Shape chain={leg(l)} profile={LEG} />
+      <Shape chain={[l.ankle, l.toe]} profile={FOOT} fill={SHOE} edge={SHOE_DK} samples={10} />
+      <Shape
+        chain={[at(l.hip, l.knee, -0.12), l.knee, l.ankle]}
+        profile={TROUSER_LEG}
         fill={TROUSER}
         edge={TROUSER_DK}
       />
     </g>
   );
 
-  const arm = (l: Skeleton["near"], faded: boolean) => (
-    <g opacity={faded ? 0.45 : 1}>
-      <Part pts={[l.shoulder, l.elbow, l.hand]} w={armW} />
-      {/* short sleeve, ending about halfway down the upper arm */}
-      <Part
-        pts={[l.shoulder, at(l.shoulder, l.elbow, 0.52)]}
-        w={[12.5, 9.5]}
+  const sleeve = (l: Skeleton["near"], faded: boolean) => (
+    <g opacity={faded ? 0.42 : 1}>
+      <Shape chain={arm(l)} profile={ARM} />
+      <Shape
+        chain={[l.shoulder, at(l.shoulder, l.elbow, 0.5)]}
+        profile={[
+          [0, 13.5],
+          [0.6, 11.4],
+          [1, 10.2],
+        ]}
         fill={SHIRT}
         edge={SHIRT_DK}
+        samples={14}
       />
     </g>
   );
 
   return (
     <g>
-      {/* far side, faded, behind the trunk */}
-      {limb(sk.far, true)}
-      {arm(sk.far, true)}
+      {side(sk.far, true)}
+      {sleeve(sk.far, true)}
 
       {/* Equipment held between the limbs is drawn after the far side and
           before the near side, so the near knee overlaps it. That occlusion
-          is what makes a ball read as being *between* the knees rather than
-          floating around them. */}
+          is what makes a ball read as being *between* the knees. */}
       {between}
 
-      <Part pts={torso} w={torsoW} />
-      <Part pts={neck} w={neckW} />
-      {/* t-shirt over the trunk, hem just below the hip */}
-      <Part
-        pts={[at(sk.pelvis, sk.l5, -0.35), sk.l5, sk.t12, sk.t1]}
-        w={[21, 20.5, 21.5, 23]}
+      <Shape chain={trunk} profile={TRUNK_SIDE} />
+      <Shape chain={[sk.t1, sk.neckTop]} profile={NECK} samples={10} />
+      <HeadProfile at={sk.headCentre} angle={sk.headAngle} />
+
+      {/* the shirt sits over the trunk, hem carried below the waistband so no
+          strip of skin or trouser edge shows at the hip */}
+      <Shape
+        chain={[at(sk.pelvis, sk.l5, -0.5), sk.l5, sk.t12, sk.t1]}
+        profile={SHIRT_SIDE}
         fill={SHIRT}
         edge={SHIRT_DK}
       />
-      {/* collar */}
-      <Part pts={[at(sk.t1, sk.neckTop, 0.1), at(sk.t1, sk.neckTop, 0.34)]} w={[15, 13.5]} fill={SHIRT_DK} edge={SHIRT_DK} />
 
-      <HeadProfile at={sk.headCentre} angle={sk.headAngle} />
-
-      {limb(sk.near, false)}
-      {arm(sk.near, false)}
-      <Hand at={sk.near.hand} />
+      {side(sk.near, false)}
+      {sleeve(sk.near, false)}
+      <Hand at={sk.near.hand} from={sk.near.elbow} />
     </g>
   );
 }
@@ -289,84 +363,85 @@ function SideBody({
 /* ========================================================= front (coronal) */
 
 function FrontBody({ fk }: { fk: FrontalSkeleton }) {
-  // The trunk tapers from a narrow waist to a broad chest. Its lower end is
-  // deliberately kept above the hip line: a wide rounded cap down there reads
-  // as a pale blob between the legs. A separate pelvis band bridges the hips.
-  const trunk = [{ x: fk.pelvis.x, y: fk.pelvis.y - 6 }, fk.chest, fk.neckBase];
-  const trunkW = [20, 27, 24];
-  const pelvisBand = [fk.hipR, fk.hipL];
-  const pelvisW = [16, 16];
+  const trunk = [{ x: fk.pelvis.x, y: fk.pelvis.y + 14 }, fk.chest, fk.neckBase];
+  const legR = [fk.hipR, fk.kneeR, fk.ankleR];
+  const legL = [fk.hipL, fk.kneeL, fk.ankleL];
+  const armR = [fk.shoulderR, fk.elbowR, fk.handR];
+  const armL = [fk.shoulderL, fk.elbowL, fk.handL];
 
-  // Narrow enough that the arms cover its ends, otherwise the caps show as
-  // bumps sitting on top of the shoulders.
-  const shoulders = [fk.shoulderR, fk.shoulderL];
-  const shoulderW = [12.5, 12.5];
-  const neck = [fk.neckBase, { x: fk.headCentre.x, y: fk.headCentre.y + 14 }];
-  const neckW = [13, 12];
-
-  const armW = [10, 7.6, 6];
-  const legW = [15, 10, 6.5];
+  // Trapezius: the slope from neck to shoulder. Without it the shoulders read
+  // as a bar bolted across the top of a rectangle.
+  const trapR = [fk.neckBase, fk.shoulderR];
+  const trapL = [fk.neckBase, fk.shoulderL];
+  const trap: Profile = [
+    [0, 15],
+    [0.5, 13],
+    [1, 12],
+  ];
 
   return (
     <g>
-      {/* legs, then trousers over them */}
-      <Part pts={[fk.hipR, fk.kneeR, fk.ankleR]} w={legW} />
-      <Part pts={[fk.hipL, fk.kneeL, fk.ankleL]} w={legW} />
       <Foot at={fk.ankleR} dir={-1} />
       <Foot at={fk.ankleL} dir={1} />
-      <Part
-        pts={[fk.hipR, fk.kneeR, at(fk.kneeR, fk.ankleR, 0.94)]}
-        w={[17.5, 12, 8.5]}
-        fill={TROUSER}
-        edge={TROUSER_DK}
+      <Shape chain={legR} profile={LEG} />
+      <Shape chain={legL} profile={LEG} />
+
+      <Shape chain={trunk} profile={TRUNK_FRONT} />
+      <Shape chain={trapR} profile={trap} samples={10} />
+      <Shape chain={trapL} profile={trap} samples={10} />
+      <Shape
+        chain={[fk.neckBase, { x: fk.headCentre.x, y: fk.headCentre.y + 13 }]}
+        profile={NECK}
+        samples={10}
       />
-      <Part
-        pts={[fk.hipL, fk.kneeL, at(fk.kneeL, fk.ankleL, 0.94)]}
-        w={[17.5, 12, 8.5]}
-        fill={TROUSER}
-        edge={TROUSER_DK}
-      />
 
-      <Part pts={pelvisBand} w={pelvisW} />
-      <Part pts={trunk} w={trunkW} />
-      <Part pts={shoulders} w={shoulderW} />
-      <Part pts={neck} w={neckW} />
+      <Shape chain={armR} profile={ARM} />
+      <Shape chain={armL} profile={ARM} />
 
-      <Part pts={[fk.shoulderR, fk.elbowR, fk.handR]} w={armW} />
-      <Part pts={[fk.shoulderL, fk.elbowL, fk.handL]} w={armW} />
+      {/* trousers: a waistband spanning the hips first, otherwise the gap
+          between the two legs shows through as a pale notch at the crotch */}
+      {/* Shorts drawn as one explicit shape. Two overlapping bars left a pale
+          wedge at the crotch, because the gap between the leg cylinders is
+          real geometry — it has to be closed deliberately, not covered over. */}
+      <Shorts fk={fk} />
+      <Shape chain={legR} profile={TROUSER_LEG} fill={TROUSER} edge={TROUSER_DK} />
+      <Shape chain={legL} profile={TROUSER_LEG} fill={TROUSER} edge={TROUSER_DK} />
 
-      {/* t-shirt: body, then the two short sleeves */}
-      <Part
-        pts={[{ x: fk.pelvis.x, y: fk.pelvis.y + 6 }, fk.chest, fk.neckBase]}
-        w={[22, 29, 25.5]}
+      {/* shirt: body, then the two short sleeves */}
+      <Shape
+        chain={[{ x: fk.pelvis.x, y: fk.pelvis.y + 4 }, fk.chest, fk.neckBase]}
+        profile={SHIRT_FRONT}
         fill={SHIRT}
         edge={SHIRT_DK}
       />
-      <Part pts={shoulders} w={[15, 15]} fill={SHIRT} edge={SHIRT_DK} />
-      <Part
-        pts={[fk.shoulderR, at(fk.shoulderR, fk.elbowR, 0.52)]}
-        w={[13.5, 10.5]}
+      <Shape chain={trapR} profile={[[0, 16], [1, 13.5]]} fill={SHIRT} edge={SHIRT_DK} samples={10} />
+      <Shape chain={trapL} profile={[[0, 16], [1, 13.5]]} fill={SHIRT} edge={SHIRT_DK} samples={10} />
+      <Shape
+        chain={[fk.shoulderR, at(fk.shoulderR, fk.elbowR, 0.5)]}
+        profile={[[0, 14.5], [0.6, 12.4], [1, 11.2]]}
         fill={SHIRT}
         edge={SHIRT_DK}
+        samples={14}
       />
-      <Part
-        pts={[fk.shoulderL, at(fk.shoulderL, fk.elbowL, 0.52)]}
-        w={[13.5, 10.5]}
+      <Shape
+        chain={[fk.shoulderL, at(fk.shoulderL, fk.elbowL, 0.5)]}
+        profile={[[0, 14.5], [0.6, 12.4], [1, 11.2]]}
         fill={SHIRT}
         edge={SHIRT_DK}
+        samples={14}
       />
-      {/* neckline */}
-      <ellipse
-        cx={fk.neckBase.x}
-        cy={fk.neckBase.y + 4}
-        rx={15}
-        ry={7}
-        fill={SHIRT_DK}
+      {/* a shallow neckline, not a filled ellipse sitting on the throat */}
+      <path
+        d={`M ${fk.neckBase.x - 12} ${fk.neckBase.y - 1}
+            Q ${fk.neckBase.x} ${fk.neckBase.y + 10} ${fk.neckBase.x + 12} ${fk.neckBase.y - 1}`}
+        fill="none"
+        stroke={SHIRT_DK}
+        strokeWidth={3.4}
+        strokeLinecap="round"
       />
 
-      <Hand at={fk.handR} />
-      <Hand at={fk.handL} />
-
+      <Hand at={fk.handR} from={fk.elbowR} />
+      <Hand at={fk.handL} from={fk.elbowL} />
       <HeadFront at={fk.headCentre} angle={fk.headAngle} />
     </g>
   );
@@ -382,32 +457,31 @@ function FrontBody({ fk }: { fk: FrontalSkeleton }) {
  * leaves a zero-winding region that renders as a hole; the discs make joints
  * and caps solid regardless.
  */
-function Part({
-  pts,
-  w,
+/**
+ * One body part, drawn as a single smooth anatomical outline.
+ *
+ * Every shape is stroked wide in the outline colour and then filled narrower
+ * in its own colour. The dark layer is completely covered except at the edge,
+ * so parts that overlap — an arm across a chest — never show a seam.
+ */
+function Shape({
+  chain,
+  profile,
   fill = SKIN,
   edge = LINE,
+  samples = 26,
 }: {
-  pts: Point[];
-  w: number[];
+  chain: Point[];
+  profile: Profile;
   fill?: string;
   edge?: string;
+  samples?: number;
 }) {
-  const outer = taperedPath(
-    pts,
-    w.map((n) => n + EDGE)
-  );
-  const inner = taperedPath(pts, w);
+  const d = limbOutline(chain, profile, samples);
   return (
     <g>
-      <path d={outer} fill={edge} />
-      {pts.map((p, i) => (
-        <circle key={`o${i}`} cx={p.x} cy={p.y} r={w[i] + EDGE} fill={edge} />
-      ))}
-      <path d={inner} fill={fill} />
-      {pts.map((p, i) => (
-        <circle key={`i${i}`} cx={p.x} cy={p.y} r={w[i]} fill={fill} />
-      ))}
+      <path d={d} fill={edge} stroke={edge} strokeWidth={EDGE * 2} strokeLinejoin="round" />
+      <path d={d} fill={fill} />
     </g>
   );
 }
@@ -417,116 +491,198 @@ function at(a: Point, b: Point, t: number): Point {
   return { x: a.x + (b.x - a.x) * t, y: a.y + (b.y - a.y) * t };
 }
 
-function Hand({ at }: { at: Point }) {
+/**
+ * The seat of the trousers: across both hips, down the outside of each thigh,
+ * and up into a short crotch notch. One shape, so nothing can show through.
+ */
+function Shorts({ fk }: { fk: FrontalSkeleton }) {
+  const yTop = fk.hipR.y - 12;
+  const yHem = fk.hipR.y + 40;
+  const xR = fk.hipR.x - 18.5;
+  const xL = fk.hipL.x + 18.5;
+  const inR = fk.pelvis.x - 3;
+  const inL = fk.pelvis.x + 3;
+  const yCrotch = fk.pelvis.y + 24;
+
+  const d = `M ${xR} ${yTop}
+    Q ${fk.pelvis.x} ${yTop - 9} ${xL} ${yTop}
+    L ${xL} ${yHem}
+    L ${inL + 12} ${yHem}
+    Q ${inL} ${yCrotch + 6} ${inL} ${yCrotch}
+    L ${inR} ${yCrotch}
+    Q ${inR} ${yCrotch + 6} ${inR - 12} ${yHem}
+    L ${xR} ${yHem} Z`;
+
   return (
     <g>
-      <circle cx={at.x} cy={at.y} r={8.4} fill={LINE} />
-      <circle cx={at.x} cy={at.y} r={8.4 - EDGE} fill={SKIN} />
+      <path d={d} fill={TROUSER_DK} stroke={TROUSER_DK} strokeWidth={EDGE * 2} strokeLinejoin="round" />
+      <path d={d} fill={TROUSER} />
     </g>
   );
 }
 
+/** A hand: a short tapered mitt carrying on from the wrist, not a disc. */
+function Hand({ at: wrist, from }: { at: Point; from: Point }) {
+  const dx = wrist.x - from.x;
+  const dy = wrist.y - from.y;
+  const len = Math.hypot(dx, dy) || 1;
+  const tip = { x: wrist.x + (dx / len) * 15, y: wrist.y + (dy / len) * 15 };
+  return (
+    <Shape
+      chain={[wrist, tip]}
+      profile={[
+        [0, 5.4],
+        [0.45, 6.2],
+        [1, 4.4],
+      ]}
+      samples={10}
+    />
+  );
+}
+
 function Foot({ at, dir }: { at: Point; dir: number }) {
-  const toe = { x: at.x + dir * 4, y: at.y + 13 };
-  return <Part pts={[at, toe]} w={[7, 9]} />;
+  const toe = { x: at.x + dir * 7, y: at.y + 15 };
+  return (
+    <Shape
+      chain={[at, toe]}
+      profile={[
+        [0, 7],
+        [0.6, 8],
+        [1, 6.5],
+      ]}
+      fill={SHOE}
+      edge={SHOE_DK}
+      samples={10}
+    />
+  );
 }
 
 /**
- * Head in profile — a man in his thirties: short dark hair, defined brow,
- * straight nose and close-trimmed beard. Kept simple enough to stay legible
- * at thumbnail size, and the jaw line is what makes a chin tuck readable.
+ * Head in profile. Built from the landmarks that actually make a face read as
+ * human: forehead, brow ridge, nose bridge and tip, philtrum, lips, chin, and
+ * the angle of the jaw running back to the ear. A circle with a dot on it
+ * never reads as a person however well the body is drawn.
  */
 function HeadProfile({ at: c, angle }: { at: Point; angle: number }) {
-  const face = `M -3 -21
-    C 8 -21.5 16 -15 16.5 -6.5
-    C 16.7 -4 18.2 -3.2 18.6 -1.6
-    C 19.2 0.6 18.6 2.4 16.8 3.4
-    C 15.8 4 15.4 4.6 15.4 6
-    C 15.4 8 14.6 9 13.2 9.6
-    C 14 11.4 13.4 13.6 11.4 15.2
-    C 8.6 17.6 3.8 19.2 -2.4 19.2
-    C -13 19.2 -20 12 -20 -1
-    C -20 -13 -13 -20.6 -3 -21 Z`;
+  const K = 1.18;
+  const face = `M -2.5 -22
+    C 6.5 -22.4 13.5 -18 16 -11.5
+    C 17.2 -8.4 17.4 -5.6 17.2 -3.4
+    C 17.1 -2.2 17.6 -1.6 18.4 -0.6
+    C 20.2 1.6 21.2 3.4 20.4 4.6
+    C 19.8 5.5 18.4 5.6 17.2 5.4
+    C 16.6 5.3 16.3 5.8 16.3 6.6
+    C 16.3 8.2 15.6 9.4 14.2 10
+    C 13.6 10.3 13.5 10.8 13.8 11.6
+    C 14.5 13.4 13.9 15.6 12.2 17.2
+    C 10 19.2 6.6 20.4 2.6 20.6
+    C -1.6 20.8 -5.4 19.8 -8.6 17.6
+    C -13.8 14 -17.6 8 -18.4 1
+    C -19.2 -6 -16.6 -13.4 -11.6 -17.8
+    C -9 -20.1 -5.9 -21.8 -2.5 -22 Z`;
 
   return (
-    <g transform={`translate(${c.x} ${c.y}) rotate(${angle})`}>
+    <g transform={`translate(${c.x} ${c.y}) rotate(${angle}) scale(${K})`}>
       <path d={face} fill={LINE} stroke={LINE} strokeWidth={EDGE * 2} strokeLinejoin="round" />
       <path d={face} fill={SKIN} />
 
-      {/* close-trimmed beard along the jaw */}
+      {/* close-trimmed beard following the jaw */}
       <path
-        d="M -14 8 C -12 15 -6 19 -2.4 19.2 C 4 19.2 9 17.4 11.6 15
-           C 13.4 13.4 14 11.4 13.2 9.6 C 11 12 6 13.6 0 13.4
-           C -6 13.2 -11 11.4 -14 8 Z"
+        d="M -15.5 6 C -13.6 12 -9.4 16.4 -5 18.8
+           C -1.4 20.6 3.4 20.8 7 19.4 C 10 18.2 12.4 16 13.4 13.6
+           C 13.9 12.4 13.9 11.6 13.6 11
+           C 11.6 13.6 7.4 15.2 2.4 15.2
+           C -4.6 15.2 -11.4 12 -15.5 6 Z"
         fill={HAIR}
-        opacity={0.72}
+        opacity={0.4}
       />
 
-      {/* hair: covers the crown and back of the skull */}
+      {/* hair: crown, temple and a short taper at the nape */}
       <path
-        d="M -3 -21.6 C 8.4 -22 16.8 -15 17 -6.8
-           C 14.6 -10.6 9 -13.2 1 -13 C -7 -12.8 -14 -10 -18.6 -5.4
-           C -19.6 -14.4 -12.6 -21.2 -3 -21.6 Z"
+        d="M -2.5 -22.6 C 7 -23 14.2 -18.2 16.5 -11.2
+           C 14 -14.6 9.4 -16.6 3.4 -16.6
+           C -4.6 -16.6 -12.4 -13.4 -17.4 -7.2
+           C -17.8 -13.4 -14.6 -19 -9 -21.2
+           C -6.9 -22 -4.7 -22.5 -2.5 -22.6 Z"
         fill={HAIR}
       />
       <path
-        d="M -18.8 -5.6 C -20.4 2 -20 8.2 -17.4 12.4
-           C -20.6 6 -21 -1.4 -19.6 -7.4 Z"
+        d="M -17.5 -7.4 C -18.8 -2.6 -18.8 2.6 -17.4 7
+           C -19.4 2 -19.6 -3.4 -18.6 -7.8 Z"
         fill={HAIR}
       />
 
-      {/* brow, eye and ear */}
-      <path d="M 6.5 -8.6 L 13.6 -7.2" stroke={HAIR} strokeWidth={2.6} strokeLinecap="round" />
-      <circle cx={10.4} cy={-3.4} r={2} fill={LINE} />
+      {/* brow, eye, ear */}
+      <path d="M 7.4 -10.4 L 14.4 -8.4" stroke={HAIR} strokeWidth={2.6} strokeLinecap="round" />
+      <path d="M 9.4 -5.4 C 11.4 -6.8 13.6 -6.4 14.6 -4.8" fill="none" stroke={LINE} strokeWidth={1.6} strokeLinecap="round" />
+      <circle cx={11.8} cy={-4.6} r={1.9} fill={LINE} />
+      <path d="M 13.6 8.2 C 12 9 10.2 9 8.8 8.4" fill="none" stroke={SHADE} strokeWidth={1.8} strokeLinecap="round" />
       <path
-        d="M -7 -1 C -4 -3 -1.5 -1 -2 2 C -2.5 4.6 -5 5 -7 3.4"
+        d="M -7.4 -2.2 C -4 -4.4 -1 -2 -1.6 1.4 C -2.2 4.4 -5 5 -7.4 3.2"
         fill="none"
         stroke={SHADE}
-        strokeWidth={2.2}
+        strokeWidth={2}
         strokeLinecap="round"
       />
     </g>
   );
 }
 
-/** Head seen from the front: same person, facing the viewer. */
+/**
+ * Head from the front: wide cranium, cheekbones, a jaw that tapers to a chin.
+ * The taper is what stops it reading as a ball.
+ */
 function HeadFront({ at: c, angle }: { at: Point; angle: number }) {
-  const face = `M 0 -22
-    C 12 -22 18.5 -14 18.5 -3
-    C 18.5 6 14 15 7 19.6
-    C 4.4 21.4 -4.4 21.4 -7 19.6
-    C -14 15 -18.5 6 -18.5 -3
-    C -18.5 -14 -12 -22 0 -22 Z`;
+  const K = 1.18; // head scale — it was reading too small against the torso
+  const face = `M 0 -23
+    C 10 -23 16.6 -17.4 17.4 -8
+    C 17.8 -3.6 17.4 0.4 16.4 4.4
+    C 15.4 8.4 13.2 12.6 10.2 15.8
+    C 7.6 18.6 4 20.8 0 21.2
+    C -4 20.8 -7.6 18.6 -10.2 15.8
+    C -13.2 12.6 -15.4 8.4 -16.4 4.4
+    C -17.4 0.4 -17.8 -3.6 -17.4 -8
+    C -16.6 -17.4 -10 -23 0 -23 Z`;
 
   return (
-    <g transform={`translate(${c.x} ${c.y}) rotate(${angle})`}>
+    <g transform={`translate(${c.x} ${c.y}) rotate(${angle}) scale(${K})`}>
       <path d={face} fill={LINE} stroke={LINE} strokeWidth={EDGE * 2} strokeLinejoin="round" />
       <path d={face} fill={SKIN} />
 
-      {/* beard framing the jaw */}
+      {/* ears */}
+      <ellipse cx={-17} cy={-1} rx={2.6} ry={4.4} fill={SKIN} stroke={LINE} strokeWidth={2} />
+      <ellipse cx={17} cy={-1} rx={2.6} ry={4.4} fill={SKIN} stroke={LINE} strokeWidth={2} />
+
+      {/* beard along the jaw */}
       <path
-        d="M -16.5 4 C -15.5 12 -10 18.4 -7 19.6 C -4.4 21.4 4.4 21.4 7 19.6
-           C 10 18.4 15.5 12 16.5 4 C 13.5 11 8 14.6 0 14.6
-           C -8 14.6 -13.5 11 -16.5 4 Z"
+        d="M -15.6 4.6 C -14.6 9 -12.6 13 -10.2 15.8
+           C -7.6 18.6 -4 20.8 0 21.2 C 4 20.8 7.6 18.6 10.2 15.8
+           C 12.6 13 14.6 9 15.6 4.6
+           C 13.4 10.4 7.6 13.8 0 13.8
+           C -7.6 13.8 -13.4 10.4 -15.6 4.6 Z"
         fill={HAIR}
-        opacity={0.68}
+        opacity={0.38}
       />
 
       {/* hair with a short fringe */}
       <path
-        d="M 0 -22.6 C 12.4 -22.6 19 -14 19 -3.4
-           C 17.2 -8.4 14.4 -11.6 11 -12.2 C 7 -9.6 -7 -9.6 -11 -12.2
-           C -14.4 -11.6 -17.2 -8.4 -19 -3.4 C -19 -14 -12.4 -22.6 0 -22.6 Z"
+        d="M 0 -23.6 C 10.4 -23.6 17.2 -17.6 17.8 -7.6
+           C 16.6 -12.4 14.4 -15 11.4 -15.8
+           C 8 -12.8 -8 -12.8 -11.4 -15.8
+           C -14.4 -15 -16.6 -12.4 -17.8 -7.6
+           C -17.2 -17.6 -10.4 -23.6 0 -23.6 Z"
         fill={HAIR}
       />
 
       {/* brows, eyes, nose, mouth */}
-      <path d="M -11 -7 L -3.4 -8" stroke={HAIR} strokeWidth={2.5} strokeLinecap="round" />
-      <path d="M 11 -7 L 3.4 -8" stroke={HAIR} strokeWidth={2.5} strokeLinecap="round" />
-      <circle cx={-6.8} cy={-2.6} r={2} fill={LINE} />
-      <circle cx={6.8} cy={-2.6} r={2} fill={LINE} />
-      <path d="M 0 -1 L 0 4.6" stroke={SHADE} strokeWidth={2.2} strokeLinecap="round" />
-      <path d="M -4 9 Q 0 11 4 9" fill="none" stroke={SHADE} strokeWidth={2.2} strokeLinecap="round" />
+      <path d="M -12 -8.4 L -4 -9.4" stroke={HAIR} strokeWidth={2.5} strokeLinecap="round" />
+      <path d="M 12 -8.4 L 4 -9.4" stroke={HAIR} strokeWidth={2.5} strokeLinecap="round" />
+      <path d="M -10.6 -4 C -9 -5.6 -6 -5.6 -4.4 -4" fill="none" stroke={LINE} strokeWidth={1.5} strokeLinecap="round" />
+      <path d="M 10.6 -4 C 9 -5.6 6 -5.6 4.4 -4" fill="none" stroke={LINE} strokeWidth={1.5} strokeLinecap="round" />
+      <circle cx={-7.4} cy={-3.2} r={1.9} fill={LINE} />
+      <circle cx={7.4} cy={-3.2} r={1.9} fill={LINE} />
+      <path d="M -1.6 -0.4 C -2.2 3 -1.4 4.4 0 4.6 C 1.4 4.4 2.2 3 1.6 -0.4" fill="none" stroke={SHADE} strokeWidth={1.8} strokeLinecap="round" />
+      <path d="M -4.4 9.4 C -2 11 2 11 4.4 9.4" fill="none" stroke={SHADE} strokeWidth={2} strokeLinecap="round" />
     </g>
   );
 }
