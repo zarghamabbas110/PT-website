@@ -113,6 +113,14 @@ export type Pose = {
   hipFar: number;
   kneeFar: number;
   ankleFar: number;
+
+  /**
+   * Offsets the far-side limbs, turning a flat side-on view into a slight
+   * three-quarter one. Without this the two knees sit exactly on top of one
+   * another, so a ball "between the knees" has nothing to sit between.
+   */
+  farDX: number;
+  farDY: number;
 };
 
 /** A comfortable upright standing pose, used as the base for every exercise. */
@@ -136,6 +144,8 @@ export const NEUTRAL: Pose = {
   hipFar: 0,
   kneeFar: 2,
   ankleFar: 0,
+  farDX: 0,
+  farDY: 0,
 };
 
 /** Segment lengths, roughly proportional to adult anatomy. */
@@ -241,6 +251,19 @@ export function solve(pose: Pose): Skeleton {
     return { shoulder, elbow, hand, hip, knee, ankle, toe };
   };
 
+  const shift = (p: Point): Point => ({
+    x: p.x + pose.farDX,
+    y: p.y + pose.farDY,
+  });
+
+  const far = limb(
+    pose.shoulderFar,
+    pose.elbowFar,
+    pose.hipFar,
+    pose.kneeFar,
+    pose.ankleFar
+  );
+
   return {
     pelvis: root,
     hip,
@@ -258,13 +281,62 @@ export function solve(pose: Pose): Skeleton {
       pose.kneeNear,
       pose.ankleNear
     ),
-    far: limb(
-      pose.shoulderFar,
-      pose.elbowFar,
-      pose.hipFar,
-      pose.kneeFar,
-      pose.ankleFar
-    ),
+    far: {
+      shoulder: shift(far.shoulder),
+      elbow: shift(far.elbow),
+      hand: shift(far.hand),
+      hip: shift(far.hip),
+      knee: shift(far.knee),
+      ankle: shift(far.ankle),
+      toe: shift(far.toe),
+    },
+  };
+}
+
+/**
+ * Anchoring.
+ *
+ * The kinematic chain is built outward from the pelvis, so raising the pelvis
+ * raises the entire trunk with it. That is wrong for a bridge: the upper back
+ * and shoulders stay on the mat while only the pelvis and lower back lift.
+ *
+ * Anchoring fixes this. Solve normally, then translate the whole skeleton so
+ * that a chosen landmark lands back on a fixed point. Anchor the upper trunk
+ * and the shoulders stay put while the hips travel.
+ */
+export type Anchor = { joint: "t1" | "pelvis" | "headCentre"; x: number; y: number };
+
+export function applyAnchor(sk: Skeleton, anchor?: Anchor): Skeleton {
+  if (!anchor) return sk;
+
+  const current = sk[anchor.joint];
+  const dx = anchor.x - current.x;
+  const dy = anchor.y - current.y;
+  if (dx === 0 && dy === 0) return sk;
+
+  const m = (p: Point): Point => ({ x: p.x + dx, y: p.y + dy });
+  const mLimb = (l: Skeleton["near"]): Skeleton["near"] => ({
+    shoulder: m(l.shoulder),
+    elbow: m(l.elbow),
+    hand: m(l.hand),
+    hip: m(l.hip),
+    knee: m(l.knee),
+    ankle: m(l.ankle),
+    toe: m(l.toe),
+  });
+
+  return {
+    ...sk,
+    pelvis: m(sk.pelvis),
+    hip: m(sk.hip),
+    l5: m(sk.l5),
+    t12: m(sk.t12),
+    t1: m(sk.t1),
+    shoulder: m(sk.shoulder),
+    neckTop: m(sk.neckTop),
+    headCentre: m(sk.headCentre),
+    near: mLimb(sk.near),
+    far: mLimb(sk.far),
   };
 }
 

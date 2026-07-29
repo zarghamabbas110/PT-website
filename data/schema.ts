@@ -77,6 +77,12 @@ export type Exercise = {
   position: Position;
   equipment: string[];
   startingPosition: Bi;
+  /**
+   * Two or three lines: everything a patient needs to actually do the
+   * exercise. Shown beside the animation. The full `steps`, mistakes and
+   * precautions stay available but collapsed, so the reader is not buried.
+   */
+  quickSteps: BiList;
   steps: BiList;
   /** The pinned notes shown alongside the animation. */
   specialInstructions: BiList;

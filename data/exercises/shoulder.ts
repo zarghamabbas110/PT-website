@@ -74,6 +74,18 @@ export const SHOULDER: Exercise[] = [
       en: "Stand beside a table. Lean forward and support yourself with your good hand on the table. Let the affected arm hang straight down, completely relaxed.",
       ur: "میز کے پاس کھڑے ہوں۔ آگے کی طرف جھکیں اور اپنے صحت مند ہاتھ سے میز کا سہارا لیں۔ متاثرہ بازو کو بالکل ڈھیلا چھوڑ کر سیدھا نیچے لٹکنے دیں۔",
     },
+    quickSteps: {
+      en: [
+        "Lean on a table and let the sore arm hang completely loose.",
+        "Sway your body so the arm swings by itself — forwards and back, side to side, then small circles.",
+        "Never use the shoulder muscles to move it.",
+      ],
+      ur: [
+        "میز پر ٹیک لگائیں اور متاثرہ بازو کو بالکل ڈھیلا لٹکنے دیں۔",
+        "جسم کو ہلائیں تاکہ بازو خود جھولے — آگے پیچھے، دائیں بائیں، پھر چھوٹے دائرے۔",
+        "کندھے کے پٹھوں سے بازو کو ہرگز نہ ہلائیں۔",
+      ],
+    },
     steps: {
       en: [
         "Let the affected arm hang loose — do not hold it up with your muscles.",
@@ -210,6 +222,18 @@ export const SHOULDER: Exercise[] = [
       en: "Lie on your back with knees bent. Hold the stick with both hands, palms facing down, hands about shoulder-width apart, resting on your thighs.",
       ur: "گھٹنے موڑ کر سیدھے لیٹ جائیں۔ ڈنڈے کو دونوں ہاتھوں سے پکڑیں، ہتھیلیاں نیچے کی طرف، ہاتھ کندھوں کے برابر فاصلے پر، ڈنڈا رانوں پر رکھا ہو۔",
     },
+    quickSteps: {
+      en: [
+        "Lie on your back holding a stick with both hands, elbows straight.",
+        "Push the stick up and over towards your head with your good arm.",
+        "Hold 5 seconds, then lower slowly.",
+      ],
+      ur: [
+        "سیدھے لیٹ کر ڈنڈا دونوں ہاتھوں سے پکڑیں، کہنیاں سیدھی رکھیں۔",
+        "صحت مند بازو سے ڈنڈے کو اوپر اور سر کی طرف دھکیلیں۔",
+        "5 سیکنڈ رکیں، پھر آہستہ نیچے لائیں۔",
+      ],
+    },
     steps: {
       en: [
         "Keep both elbows straight.",
@@ -344,6 +368,18 @@ export const SHOULDER: Exercise[] = [
       en: "Stand tall. Hold the stick horizontally in front of you with both hands, palms facing forward, arms relaxed down.",
       ur: "سیدھے کھڑے ہوں۔ ڈنڈے کو دونوں ہاتھوں سے سامنے افقی پکڑیں، ہتھیلیاں آگے کی طرف، بازو نیچے ڈھیلے۔",
     },
+    quickSteps: {
+      en: [
+        "Stand holding the stick in front of you with both hands.",
+        "Push sideways with the good hand so the affected arm lifts out to the side.",
+        "Hold 5 seconds, then lower slowly.",
+      ],
+      ur: [
+        "ڈنڈا دونوں ہاتھوں سے سامنے پکڑ کر کھڑے ہوں۔",
+        "صحت مند ہاتھ سے ایک طرف دھکیلیں تاکہ متاثرہ بازو بغل کی طرف اٹھے۔",
+        "5 سیکنڈ رکیں، پھر آہستہ نیچے لائیں۔",
+      ],
+    },
     steps: {
       en: [
         "Keep both elbows straight and your body upright.",
@@ -422,6 +458,9 @@ export const SHOULDER: Exercise[] = [
     },
     figure: {
       view: "front",
+      // Both arms cannot abduct on one stick. To push the affected right arm
+      // out to the side, the assisting left hand has to travel the same way,
+      // which means the left arm ADDUCTS across the front of the body.
       frontFrames: [
         {
           pose: frontPose({ abductR: 6, abductL: 6, elbowR: 0, elbowL: 0 }, STAND),
@@ -431,16 +470,19 @@ export const SHOULDER: Exercise[] = [
         },
         {
           pose: frontPose(
-            { abductR: 92, abductL: 92, elbowR: 0, elbowL: 0 },
+            { abductR: 94, abductL: -34, elbowR: 0, elbowL: 0 },
             STAND
           ),
           travel: 1100,
           hold: 900,
-          label: "Guide out to the side — hold 5s",
+          label: "Left hand pushes; right arm lifts out",
         },
       ],
       props: [{ kind: "stick" }],
-      arrows: [{ at: "handR", dir: 315, len: 34, label: "out" }],
+      arrows: [
+        { at: "handR", dir: 300, len: 32, label: "affected" },
+        { at: "handL", dir: 300, len: 26, label: "pushes" },
+      ],
     },
   },
 
@@ -474,6 +516,18 @@ export const SHOULDER: Exercise[] = [
     startingPosition: {
       en: "Stand tall with a rolled towel tucked between your elbow and your side. Bend both elbows to 90 degrees and hold the stick horizontally, palms facing up.",
       ur: "سیدھے کھڑے ہوں اور ایک لپٹا ہوا تولیہ کہنی اور پہلو کے درمیان دبا لیں۔ دونوں کہنیاں 90 درجے پر موڑیں اور ڈنڈا افقی پکڑیں، ہتھیلیاں اوپر کی طرف۔",
+    },
+    quickSteps: {
+      en: [
+        "Tuck a rolled towel between your elbow and your side, elbow bent to 90°.",
+        "Use the good hand to push the stick so the affected forearm turns outward.",
+        "Keep the elbow glued to your side. Hold 10 seconds.",
+      ],
+      ur: [
+        "لپٹا ہوا تولیہ کہنی اور پہلو کے درمیان دبائیں، کہنی 90 درجے پر مڑی ہو۔",
+        "صحت مند ہاتھ سے ڈنڈا دھکیلیں تاکہ متاثرہ بازو باہر کی طرف گھومے۔",
+        "کہنی پہلو سے چپکی رہے۔ 10 سیکنڈ رکیں۔",
+      ],
     },
     steps: {
       en: [
@@ -558,7 +612,7 @@ export const SHOULDER: Exercise[] = [
       frontFrames: [
         {
           pose: frontPose(
-            { abductR: 8, abductL: 8, elbowR: -20, elbowL: 90 },
+            { abductR: 8, abductL: 8, elbowR: -20, elbowL: 46 },
             STAND
           ),
           travel: 800,
@@ -566,13 +620,16 @@ export const SHOULDER: Exercise[] = [
           label: "Start — elbows at the sides, bent to 90°",
         },
         {
+          // Both hands travel the same way across the screen: that is external
+          // rotation for the affected side and internal rotation for the
+          // assisting side. They cannot both rotate outward on one stick.
           pose: frontPose(
-            { abductR: 8, abductL: 8, elbowR: 78, elbowL: 90 },
+            { abductR: 8, abductL: 8, elbowR: 76, elbowL: -52 },
             STAND
           ),
           travel: 1000,
           hold: 1200,
-          label: "Turn the forearm outward — hold 10s",
+          label: "Left hand pushes it across — hold 10s",
         },
       ],
       props: [{ kind: "stick" }],
@@ -609,6 +666,18 @@ export const SHOULDER: Exercise[] = [
     startingPosition: {
       en: "Stand facing a wall, about an arm's length away. Place the fingertips of the affected hand on the wall at about waist height.",
       ur: "دیوار کی طرف رخ کر کے تقریباً ایک بازو کے فاصلے پر کھڑے ہوں۔ متاثرہ ہاتھ کی انگلیوں کے پوروں کو کمر کی بلندی پر دیوار پر رکھیں۔",
+    },
+    quickSteps: {
+      en: [
+        "Stand facing a wall with your fingertips on it at waist height.",
+        "Walk your fingers slowly up the wall, stepping closer as you go.",
+        "Hold at your highest comfortable point, then walk them back down.",
+      ],
+      ur: [
+        "دیوار کی طرف رخ کر کے کھڑے ہوں، انگلیاں کمر کی بلندی پر دیوار پر رکھیں۔",
+        "انگلیوں کو آہستہ دیوار پر اوپر چلائیں اور ساتھ ساتھ قریب ہوتے جائیں۔",
+        "جہاں تک آرام سے جا سکیں وہاں رکیں، پھر انگلیوں کو واپس نیچے چلائیں۔",
+      ],
     },
     steps: {
       en: [
@@ -689,23 +758,32 @@ export const SHOULDER: Exercise[] = [
         "Finger-ladder wall walking is a widely used assisted elevation exercise with the advantage of a visible progress marker. Citations to be attached at clinical review.",
     },
     figure: {
-      view: "front",
-      frontFrames: [
+      // Drawn side-on with the wall in front of the figure. From the front the
+      // arm rising could be flexion or abduction; side-on, facing a solid
+      // wall, it can only be flexion.
+      view: "side",
+      frames: [
         {
-          pose: frontPose({ abductR: 40, elbowR: 40, abductL: 6 }, STAND),
+          pose: pose(
+            { rootX: 176, rootY: 205, shoulderNear: 108, elbowNear: 34 },
+            NEUTRAL
+          ),
           travel: 800,
           hold: 300,
           label: "Fingertips start at waist height",
         },
         {
-          pose: frontPose({ abductR: 138, elbowR: 12, abductL: 6 }, STAND),
+          pose: pose(
+            { rootX: 176, rootY: 205, shoulderNear: 26, elbowNear: 6 },
+            NEUTRAL
+          ),
           travel: 1200,
           hold: 900,
-          label: "Walk the fingers up — hold 10s",
+          label: "Walk the fingers up the wall — hold 10s",
         },
       ],
-      props: [{ kind: "doorway" }],
-      arrows: [{ at: "handR", dir: 0, len: 30, label: "climb" }],
+      props: [{ kind: "wallRight" }],
+      arrows: [{ at: "hand", dir: 0, len: 28, label: "climb" }],
     },
   },
 
@@ -744,6 +822,18 @@ export const SHOULDER: Exercise[] = [
     startingPosition: {
       en: "Sit or stand tall with your arms relaxed by your sides and your shoulders dropped away from your ears.",
       ur: "سیدھے بیٹھیں یا کھڑے ہوں، بازو پہلوؤں پر ڈھیلے اور کندھے کانوں سے دور نیچے۔",
+    },
+    quickSteps: {
+      en: [
+        "Sit or stand tall with your arms relaxed.",
+        "Gently draw your shoulder blades together and slightly down.",
+        "Hold 5 seconds without shrugging, then release.",
+      ],
+      ur: [
+        "سیدھے بیٹھیں یا کھڑے ہوں، بازو ڈھیلے رکھیں۔",
+        "شانے کی ہڈیوں کو نرمی سے آپس میں ملائیں اور ہلکا نیچے کھینچیں۔",
+        "کندھے اچکائے بغیر 5 سیکنڈ رکیں، پھر چھوڑ دیں۔",
+      ],
     },
     steps: {
       en: [
@@ -879,6 +969,18 @@ export const SHOULDER: Exercise[] = [
       en: "Stand tall with your arms relaxed by your sides, thumb pointing forward.",
       ur: "سیدھے کھڑے ہوں، بازو پہلوؤں پر ڈھیلے اور انگوٹھا آگے کی طرف۔",
     },
+    quickSteps: {
+      en: [
+        "Stand tall with the arm at your side, thumb forward.",
+        "Raise the arm forward and up with the elbow straight — no shrugging.",
+        "Pause at the top, then lower slowly.",
+      ],
+      ur: [
+        "سیدھے کھڑے ہوں، بازو پہلو پر اور انگوٹھا آگے کی طرف۔",
+        "کہنی سیدھی رکھتے ہوئے بازو آگے اور اوپر اٹھائیں — کندھا نہ اچکائیں۔",
+        "اوپر رکیں، پھر آہستہ نیچے لائیں۔",
+      ],
+    },
     steps: {
       en: [
         "Set your shoulder blade gently before you begin.",
@@ -1006,6 +1108,18 @@ export const SHOULDER: Exercise[] = [
     startingPosition: {
       en: "Stand tall with your arms by your sides and palms facing your thighs.",
       ur: "سیدھے کھڑے ہوں، بازو پہلوؤں پر اور ہتھیلیاں رانوں کی طرف۔",
+    },
+    quickSteps: {
+      en: [
+        "Stand tall with arms at your sides.",
+        "Lift the arm out to the side with the thumb pointing up, elbow straight.",
+        "Stop at shoulder height, then lower slowly.",
+      ],
+      ur: [
+        "سیدھے کھڑے ہوں، بازو پہلوؤں پر۔",
+        "انگوٹھا اوپر رکھتے ہوئے بازو ایک طرف اٹھائیں، کہنی سیدھی۔",
+        "کندھے کی بلندی پر رکیں، پھر آہستہ نیچے لائیں۔",
+      ],
     },
     steps: {
       en: [
@@ -1140,6 +1254,18 @@ export const SHOULDER: Exercise[] = [
       en: "Stand tall. Let your arms hang, then bring them forward about 30 degrees from your sides, thumbs pointing up.",
       ur: "سیدھے کھڑے ہوں۔ بازو لٹکنے دیں، پھر انہیں پہلوؤں سے تقریباً 30 درجے آگے لائیں، انگوٹھے اوپر کی طرف۔",
     },
+    quickSteps: {
+      en: [
+        "Bring your arms about 30° forward of your sides, thumbs up.",
+        "Raise both arms along that forward diagonal to shoulder height.",
+        "Lower slowly along the same line.",
+      ],
+      ur: [
+        "بازوؤں کو پہلوؤں سے تقریباً 30 درجے آگے لائیں، انگوٹھے اوپر۔",
+        "دونوں بازو اسی مائل لکیر پر کندھے کی بلندی تک اٹھائیں۔",
+        "اسی لکیر پر آہستہ نیچے لائیں۔",
+      ],
+    },
     steps: {
       en: [
         "Keep the thumbs pointing upward throughout.",
@@ -1231,7 +1357,7 @@ export const SHOULDER: Exercise[] = [
           pose: frontPose({ abductR: 84, abductL: 84, elbowR: 2, elbowL: 2 }, STAND),
           travel: 1100,
           hold: 800,
-          label: "Raise in the scapular plane, thumbs up",
+          label: "Raise on the diagonal, thumbs up",
         },
       ],
       props: [{ kind: "dumbbells" }],
@@ -1269,6 +1395,18 @@ export const SHOULDER: Exercise[] = [
     startingPosition: {
       en: "Stand side-on to where the band is anchored, at about elbow height. Tuck a rolled towel between your elbow and your side. Bend the elbow to 90 degrees and hold the band across your body.",
       ur: "جہاں بینڈ بندھا ہے اس کی طرف پہلو کر کے کھڑے ہوں، تقریباً کہنی کی بلندی پر۔ ایک لپٹا ہوا تولیہ کہنی اور پہلو کے درمیان دبا لیں۔ کہنی 90 درجے پر موڑیں اور بینڈ کو جسم کے سامنے سے پکڑیں۔",
+    },
+    quickSteps: {
+      en: [
+        "Stand side-on to the band with a towel tucked at your elbow, elbow bent 90°.",
+        "Rotate the forearm outward, away from your stomach.",
+        "Return slowly against the band — the slow return matters most.",
+      ],
+      ur: [
+        "بینڈ کی طرف پہلو کر کے کھڑے ہوں، تولیہ کہنی پر دبا ہو، کہنی 90 درجے پر مڑی ہو۔",
+        "بازو کو باہر کی طرف، پیٹ سے دور گھمائیں۔",
+        "بینڈ کے خلاف آہستہ واپس آئیں — آہستہ واپسی سب سے اہم ہے۔",
+      ],
     },
     steps: {
       en: [
@@ -1414,6 +1552,18 @@ export const SHOULDER: Exercise[] = [
       en: "Stand facing the anchor point, holding one end of the band in each hand with your arms extended forward at chest height.",
       ur: "بینڈ جہاں بندھا ہے اس کی طرف رخ کر کے کھڑے ہوں، ہر ہاتھ میں بینڈ کا ایک سرا پکڑیں اور بازو سینے کی بلندی پر آگے پھیلے ہوں۔",
     },
+    quickSteps: {
+      en: [
+        "Face the band with both arms stretched forward at chest height.",
+        "Draw the shoulder blades back first, then pull the elbows past your ribs.",
+        "Return forward slowly under control.",
+      ],
+      ur: [
+        "بینڈ کی طرف رخ کریں، دونوں بازو سینے کی بلندی پر آگے پھیلے ہوں۔",
+        "پہلے شانے کی ہڈیاں پیچھے کھینچیں، پھر کہنیاں پسلیوں سے پیچھے لے جائیں۔",
+        "قابو کے ساتھ آہستہ آگے واپس آئیں۔",
+      ],
+    },
     steps: {
       en: [
         "Draw your shoulder blades back and down first, before the arms move.",
@@ -1550,6 +1700,18 @@ export const SHOULDER: Exercise[] = [
     startingPosition: {
       en: "Stand or sit tall. Bring the affected arm across the front of your chest at about shoulder height.",
       ur: "سیدھے کھڑے ہوں یا بیٹھیں۔ متاثرہ بازو کو سینے کے سامنے سے تقریباً کندھے کی بلندی پر لے آئیں۔",
+    },
+    quickSteps: {
+      en: [
+        "Bring the sore arm across your chest at shoulder height.",
+        "Hold just above the elbow with the other hand and draw it further across.",
+        "Hold 30 seconds without shrugging.",
+      ],
+      ur: [
+        "متاثرہ بازو کو سینے کے سامنے کندھے کی بلندی پر لائیں۔",
+        "دوسرے ہاتھ سے کہنی کے ذرا اوپر پکڑ کر مزید آر پار کھینچیں۔",
+        "کندھا اچکائے بغیر 30 سیکنڈ رکیں۔",
+      ],
     },
     steps: {
       en: [
@@ -1689,6 +1851,18 @@ export const SHOULDER: Exercise[] = [
     startingPosition: {
       en: "Stand in a doorway. Place your forearms on the door frame with your elbows at about shoulder height, bent to 90 degrees.",
       ur: "دروازے میں کھڑے ہوں۔ اپنے بازو دروازے کی چوکھٹ پر رکھیں، کہنیاں تقریباً کندھے کی بلندی پر اور 90 درجے پر مڑی ہوئی۔",
+    },
+    quickSteps: {
+      en: [
+        "Put your forearms on a door frame, elbows at about shoulder height.",
+        "Step forward slowly until you feel a stretch across your chest.",
+        "Keep your ribs down. Hold 30 seconds.",
+      ],
+      ur: [
+        "اپنے بازو دروازے کی چوکھٹ پر رکھیں، کہنیاں تقریباً کندھے کی بلندی پر۔",
+        "آہستہ آگے قدم بڑھائیں جب تک سینے میں کھنچاؤ محسوس نہ ہو۔",
+        "پسلیاں نیچے رکھیں۔ 30 سیکنڈ رکیں۔",
+      ],
     },
     steps: {
       en: [

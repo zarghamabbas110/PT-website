@@ -2,6 +2,8 @@
 
 import { useEffect, useId, useRef, useState } from "react";
 import {
+  Anchor,
+  applyAnchor,
   FrontalKeyframe,
   FrontalSkeleton,
   Keyframe,
@@ -30,6 +32,7 @@ import {
 export type Prop =
   | { kind: "mat" }
   | { kind: "wall" }
+  | { kind: "wallRight" }
   | { kind: "chair" }
   | { kind: "ballBetweenKnees"; radius?: number }
   | { kind: "gymBall"; radius?: number }
@@ -63,6 +66,8 @@ export type Arrow = {
 
 export type FigureSpec = {
   view?: "side" | "front";
+  /** Hold a landmark still while the rest of the body moves — see lib/figure.ts */
+  anchor?: Anchor;
   frames?: Keyframe[];
   frontFrames?: FrontalKeyframe[];
   props?: Prop[];
@@ -134,7 +139,7 @@ export default function PhysioFigure({
     ? spec.frontFrames![frontSample!.index]?.label
     : spec.frames![sideSample!.index]?.label;
 
-  const sk = sideSample ? solve(sideSample.pose) : null;
+  const sk = sideSample ? applyAnchor(solve(sideSample.pose), spec.anchor) : null;
   const fk = frontSample ? solveFrontal(frontSample.pose) : null;
 
   return (
@@ -153,7 +158,16 @@ export default function PhysioFigure({
           <PropBehind key={i} prop={p} sk={sk} fk={fk} />
         ))}
 
-        {sk && <SideBody sk={sk} />}
+        {sk && (
+          <SideBody
+            sk={sk}
+            between={(spec.props ?? [])
+              .filter((p) => p.kind === "ballBetweenKnees")
+              .map((p, i) => (
+                <PropBetween key={i} prop={p} sk={sk} />
+              ))}
+          />
+        )}
         {fk && <FrontBody fk={fk} />}
 
         {(spec.props ?? []).map((p, i) => (
@@ -186,7 +200,13 @@ export default function PhysioFigure({
 
 /* ======================================================== side (sagittal) */
 
-function SideBody({ sk }: { sk: Skeleton }) {
+function SideBody({
+  sk,
+  between,
+}: {
+  sk: Skeleton;
+  between?: React.ReactNode;
+}) {
   const torso = [sk.pelvis, sk.l5, sk.t12, sk.t1];
   const torsoW = [19, 18, 19, 21];
   const neck = [sk.t1, sk.neckTop];
@@ -207,11 +227,17 @@ function SideBody({ sk }: { sk: Skeleton }) {
   return (
     <g>
       {/* far side, faded, behind the trunk */}
-      <g opacity={0.4}>
+      <g opacity={0.45}>
         <Part pts={farLeg} w={legW} />
         <Part pts={farFoot} w={footW} />
         <Part pts={farArm} w={armW} />
       </g>
+
+      {/* Equipment held between the limbs is drawn after the far side and
+          before the near side, so the near knee overlaps it. That occlusion
+          is what makes a ball read as being *between* the knees rather than
+          floating around them. */}
+      {between}
 
       <Part pts={torso} w={torsoW} />
       <Part pts={neck} w={neckW} />
@@ -372,6 +398,30 @@ function HeadFront({ at, angle }: { at: Point; angle: number }) {
 
 /* -------------------------------------------------------------- equipment */
 
+/** A hatched masonry band, so a wall reads as a surface rather than a line. */
+function WallBand({ x, facing }: { x: number; facing: "left" | "right" }) {
+  const inner = facing === "left" ? x + 52 : x;
+  return (
+    <g>
+      <rect x={x} y={18} width={52} height={344} fill="#14676b" opacity={0.13} />
+      {Array.from({ length: 9 }).map((_, i) => (
+        <line
+          key={i}
+          x1={x}
+          y1={30 + i * 38}
+          x2={x + 52}
+          y2={30 + i * 38}
+          stroke="#14676b"
+          strokeWidth={2}
+          opacity={0.28}
+        />
+      ))}
+      <line x1={inner} y1={18} x2={inner} y2={362} stroke="#14676b" strokeWidth={5} opacity={0.55} />
+      <line x1={30} y1={362} x2={372} y2={362} stroke="#14676b" strokeWidth={4} opacity={0.32} />
+    </g>
+  );
+}
+
 function PropBehind({
   prop,
   sk,
@@ -390,13 +440,12 @@ function PropBehind({
         </g>
       );
     case "wall":
-      return (
-        <g>
-          <rect x={92} y={24} width={14} height={334} rx={5} fill="#14676b" opacity={0.18} />
-          <line x1={106} y1={24} x2={106} y2={358} stroke="#14676b" strokeWidth={3.5} opacity={0.42} />
-          <line x1={40} y1={358} x2={372} y2={358} stroke="#14676b" strokeWidth={3.5} opacity={0.28} />
-        </g>
-      );
+      return <WallBand x={54} facing="left" />;
+
+    // The mirrored wall matters: which side the wall is on is what tells the
+    // reader whether the figure is facing it (flexion) or side-on (abduction).
+    case "wallRight":
+      return <WallBand x={294} facing="right" />;
     case "doorway":
       return (
         <g stroke="#14676b" strokeWidth={7} fill="none" opacity={0.3} strokeLinecap="round">
@@ -438,6 +487,40 @@ function PropBehind({
   }
 }
 
+/**
+ * Equipment that physically sits between the two legs. Drawn after the far
+ * limb and before the near one so the near knee overlaps it — that occlusion
+ * is what communicates "between" rather than "near".
+ */
+function PropBetween({ prop, sk }: { prop: Prop; sk: Skeleton }) {
+  if (prop.kind !== "ballBetweenKnees") return null;
+
+  const cx = (sk.near.knee.x + sk.far.knee.x) / 2;
+  const cy = (sk.near.knee.y + sk.far.knee.y) / 2;
+  const r = prop.radius ?? 23;
+
+  return (
+    <g>
+      <circle cx={cx} cy={cy} r={r} fill="#f2a03d" stroke={LINE} strokeWidth={3} />
+      {/* squash lines: the ball is being compressed by the knees */}
+      <path
+        d={`M ${cx - r * 0.5} ${cy - r * 0.42} Q ${cx} ${cy - r * 0.86} ${cx + r * 0.5} ${cy - r * 0.42}`}
+        fill="none"
+        stroke="#fff"
+        strokeWidth={2.6}
+        opacity={0.75}
+      />
+      <path
+        d={`M ${cx - r * 0.5} ${cy + r * 0.42} Q ${cx} ${cy + r * 0.86} ${cx + r * 0.5} ${cy + r * 0.42}`}
+        fill="none"
+        stroke="#fff"
+        strokeWidth={2.6}
+        opacity={0.4}
+      />
+    </g>
+  );
+}
+
 function PropFront({
   prop,
   sk,
@@ -448,26 +531,6 @@ function PropFront({
   fk: FrontalSkeleton | null;
 }) {
   switch (prop.kind) {
-    case "ballBetweenKnees": {
-      if (!sk) return null;
-      const cx = (sk.near.knee.x + sk.far.knee.x) / 2;
-      const cy = (sk.near.knee.y + sk.far.knee.y) / 2;
-      const r = prop.radius ?? 21;
-      return (
-        <g>
-          <circle cx={cx} cy={cy} r={r} fill="#f2a03d" stroke={LINE} strokeWidth={3} />
-          <path
-            d={`M ${cx - r * 0.55} ${cy - r * 0.35} Q ${cx} ${cy - r * 0.9} ${
-              cx + r * 0.55
-            } ${cy - r * 0.35}`}
-            fill="none"
-            stroke="#fff"
-            strokeWidth={2.5}
-            opacity={0.8}
-          />
-        </g>
-      );
-    }
     case "band": {
       // Between the hands in the front view, between the knees side-on.
       const a = fk ? fk.handR : sk!.near.knee;

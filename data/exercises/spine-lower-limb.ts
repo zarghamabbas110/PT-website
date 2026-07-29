@@ -81,6 +81,18 @@ export const SPINE_LOWER_LIMB: Exercise[] = [
       en: "Sit tall on a firm chair with your feet flat, shoulders relaxed and eyes level with the horizon.",
       ur: "مضبوط کرسی پر سیدھے بیٹھیں، پاؤں زمین پر، کندھے ڈھیلے اور نظریں سامنے۔",
     },
+    quickSteps: {
+      en: [
+        "Sit tall, eyes level, looking straight ahead.",
+        "Glide your chin straight backwards to make a gentle double chin.",
+        "Hold 5 seconds, then release forward slowly.",
+      ],
+      ur: [
+        "سیدھے بیٹھیں، نظریں سامنے اور برابر رکھیں۔",
+        "ٹھوڑی کو سیدھا پیچھے کھسکائیں تاکہ ہلکی سی ڈبل چن بنے۔",
+        "5 سیکنڈ رکیں، پھر آہستہ آگے چھوڑ دیں۔",
+      ],
+    },
     steps: {
       en: [
         "Keep your eyes looking straight ahead — the head must not nod down.",
@@ -209,6 +221,18 @@ export const SPINE_LOWER_LIMB: Exercise[] = [
     startingPosition: {
       en: "Lie on your back with knees bent and feet flat, hip-width apart. Notice the small natural gap under your lower back.",
       ur: "گھٹنے موڑ کر سیدھے لیٹ جائیں، پاؤں زمین پر اور کولہوں کے برابر فاصلے پر۔ کمر کے نیچے قدرتی خالی جگہ محسوس کریں۔",
+    },
+    quickSteps: {
+      en: [
+        "Lie on your back with knees bent and feet flat.",
+        "Breathe out, tighten your lower tummy and press your lower back into the floor.",
+        "Hold 5 seconds, then relax completely.",
+      ],
+      ur: [
+        "گھٹنے موڑ کر سیدھے لیٹ جائیں، پاؤں زمین پر۔",
+        "سانس چھوڑیں، پیٹ کا نچلا حصہ سخت کریں اور کمر کو زمین سے دبائیں۔",
+        "5 سیکنڈ رکیں، پھر مکمل ڈھیلا چھوڑ دیں۔",
+      ],
     },
     steps: {
       en: [
@@ -344,6 +368,18 @@ export const SPINE_LOWER_LIMB: Exercise[] = [
       en: "Lie on your back with knees bent and feet flat, hip-width apart. Place the soft ball between your knees.",
       ur: "گھٹنے موڑ کر سیدھے لیٹ جائیں، پاؤں زمین پر اور کولہوں کے برابر فاصلے پر۔ نرم گیند گھٹنوں کے درمیان رکھیں۔",
     },
+    quickSteps: {
+      en: [
+        "Lie on your back, knees bent, soft ball squeezed between your knees.",
+        "Press through your heels and lift only your hips — shoulders stay on the floor.",
+        "Hold 3 seconds, then lower slowly.",
+      ],
+      ur: [
+        "سیدھے لیٹ جائیں، گھٹنے مڑے ہوں، نرم گیند گھٹنوں کے درمیان دبی ہو۔",
+        "ایڑیوں سے زور دے کر صرف کولہے اٹھائیں — کندھے زمین پر رہیں۔",
+        "3 سیکنڈ رکیں، پھر آہستہ نیچے لائیں۔",
+      ],
+    },
     steps: {
       en: [
         "Squeeze the ball gently and keep that pressure throughout.",
@@ -424,25 +460,41 @@ export const SPINE_LOWER_LIMB: Exercise[] = [
     },
     figure: {
       view: "side",
+      // The upper back and shoulders never leave the mat in a bridge. Anchoring
+      // T1 keeps them planted while the pelvis and lumbar spine travel upward,
+      // which is the movement the patient actually has to produce.
+      anchor: { joint: "t1", x: 101, y: 300 },
       frames: [
         {
-          pose: pose({}, SUPINE),
+          pose: pose({ farDX: 9, farDY: 7 }, SUPINE),
           travel: 800,
           hold: 400,
-          label: "Start — hips down, ball held",
+          label: "Start — hips down, ball squeezed",
         },
         {
           pose: pose(
-            { rootY: 268, hipNear: 22, kneeNear: 78, hipFar: 20, kneeFar: 76 },
+            {
+              pelvisTilt: -16,
+              lumbar: -6,
+              thorax: 22,
+              hipNear: 16,
+              kneeNear: 86,
+              ankleNear: 60,
+              hipFar: 14,
+              kneeFar: 84,
+              ankleFar: 60,
+              farDX: 9,
+              farDY: 7,
+            },
             SUPINE
           ),
           travel: 900,
           hold: 1000,
-          label: "Lift to a straight line — hold 3s",
+          label: "Hips lift — shoulders stay down — hold 3s",
         },
       ],
       props: [{ kind: "mat" }, { kind: "ballBetweenKnees" }],
-      arrows: [{ at: "hip", dir: 0, len: 40, label: "lift" }],
+      arrows: [{ at: "hip", dir: 0, len: 38, label: "hips only" }],
     },
   },
 
@@ -475,6 +527,18 @@ export const SPINE_LOWER_LIMB: Exercise[] = [
     startingPosition: {
       en: "Lie on your side with hips and knees bent, hips stacked directly on top of one another. Place the band just above your knees.",
       ur: "پہلو کے بل لیٹیں، کولہے اور گھٹنے مڑے ہوئے اور کولہے بالکل ایک دوسرے کے اوپر۔ بینڈ گھٹنوں سے ذرا اوپر رکھیں۔",
+    },
+    quickSteps: {
+      en: [
+        "Lie on your side, knees bent, hips stacked, band above the knees.",
+        "Keeping your feet together, rotate the top knee open like a clam.",
+        "Stop before the hip rolls back. Lower slowly.",
+      ],
+      ur: [
+        "پہلو کے بل لیٹیں، گھٹنے مڑے، کولہے ایک دوسرے کے اوپر، بینڈ گھٹنوں سے اوپر۔",
+        "پاؤں جوڑے رکھتے ہوئے اوپر والا گھٹنا سیپ کی طرح کھولیں۔",
+        "کولہا پیچھے گھومنے سے پہلے رک جائیں۔ آہستہ نیچے لائیں۔",
+      ],
     },
     steps: {
       en: [
@@ -558,16 +622,22 @@ export const SPINE_LOWER_LIMB: Exercise[] = [
       view: "side",
       frames: [
         {
-          pose: pose({}, SIDE_LYING),
+          pose: pose({ farDX: 12, farDY: 10 }, SIDE_LYING),
           travel: 800,
           hold: 400,
           label: "Start — knees together, hips stacked",
         },
         {
-          pose: pose({ hipNear: 20, kneeNear: 78 }, SIDE_LYING),
+          // Knee flexion is held constant and the ankle compensates, so the
+          // top leg rotates about the hip instead of straightening — which is
+          // what a clamshell actually is.
+          pose: pose(
+            { hipNear: 74, kneeNear: 90, ankleNear: 8, farDX: 12, farDY: 10 },
+            SIDE_LYING
+          ),
           travel: 900,
           hold: 900,
-          label: "Top knee opens against the band",
+          label: "Top knee rotates open — feet stay together",
         },
       ],
       props: [{ kind: "mat" }, { kind: "band" }],
@@ -604,6 +674,18 @@ export const SPINE_LOWER_LIMB: Exercise[] = [
     startingPosition: {
       en: "Lie on your back. Bend the other knee with the foot flat. Keep the exercising leg straight along the mat.",
       ur: "سیدھے لیٹ جائیں۔ دوسری ٹانگ کا گھٹنا موڑ کر پاؤں زمین پر رکھیں۔ ورزش والی ٹانگ زمین پر سیدھی رکھیں۔",
+    },
+    quickSteps: {
+      en: [
+        "Lie on your back, one knee bent, the exercising leg straight.",
+        "Tighten the thigh, then lift the straight leg to the height of the other knee.",
+        "Hold 2 seconds, then lower slowly.",
+      ],
+      ur: [
+        "سیدھے لیٹ جائیں، ایک گھٹنا مڑا ہو، ورزش والی ٹانگ سیدھی۔",
+        "ران سخت کریں، پھر سیدھی ٹانگ کو دوسرے گھٹنے کی بلندی تک اٹھائیں۔",
+        "2 سیکنڈ رکیں، پھر آہستہ نیچے لائیں۔",
+      ],
     },
     steps: {
       en: [
@@ -729,6 +811,18 @@ export const SPINE_LOWER_LIMB: Exercise[] = [
     startingPosition: {
       en: "Stand with your back flat against a wall and walk your feet forward about two steps, hip-width apart.",
       ur: "کمر دیوار سے لگا کر کھڑے ہوں اور پاؤں تقریباً دو قدم آگے لے جائیں، کولہوں کے برابر فاصلے پر۔",
+    },
+    quickSteps: {
+      en: [
+        "Stand with your back flat on a wall, feet two steps forward.",
+        "Slide down until your knees bend towards 90°, keeping knees behind your toes.",
+        "Hold, breathing steadily, then push up through your heels.",
+      ],
+      ur: [
+        "کمر دیوار سے لگا کر کھڑے ہوں، پاؤں دو قدم آگے۔",
+        "نیچے کھسکیں یہاں تک کہ گھٹنے تقریباً 90 درجے پر مڑ جائیں، گھٹنے پنجوں سے پیچھے رہیں۔",
+        "سانس لیتے ہوئے رکیں، پھر ایڑیوں سے زور دے کر اوپر آئیں۔",
+      ],
     },
     steps: {
       en: [
