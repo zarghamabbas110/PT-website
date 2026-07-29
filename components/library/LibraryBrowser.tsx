@@ -9,8 +9,11 @@ import {
   DIFFICULTIES,
   EXERCISES,
   LOAD_TYPES,
+  MOVEMENT_MODES,
   POSITIONS,
 } from "@/data/exercises";
+import { useLang } from "@/lib/i18n";
+import LanguageToggle from "@/components/LanguageToggle";
 
 /* ==========================================================================
    LibraryBrowser — the filtering model you described: several independent
@@ -29,6 +32,7 @@ type Axis = {
 
 const AXES: Axis[] = [
   { key: "bodyRegion", label: "Body region", options: BODY_REGIONS },
+  { key: "mode", label: "Movement type", options: MOVEMENT_MODES },
   { key: "contraction", label: "Contraction", options: CONTRACTION_TYPES },
   { key: "load", label: "Load", options: LOAD_TYPES },
   { key: "position", label: "Position", options: POSITIONS },
@@ -39,6 +43,7 @@ export default function LibraryBrowser() {
   const [query, setQuery] = useState("");
   const [active, setActive] = useState<Record<string, string[]>>({});
   const [openAxis, setOpenAxis] = useState<string | null>("bodyRegion");
+  const { lang } = useLang();
 
   const toggle = (axis: string, value: string) => {
     setActive((prev) => {
@@ -59,8 +64,10 @@ export default function LibraryBrowser() {
       // Free-text search across the fields a clinician would actually type.
       if (q) {
         const haystack = [
-          ex.name,
-          ex.purpose,
+          ex.name.en,
+          ex.name.ur,
+          ex.purpose.en,
+          ex.purpose.ur,
           ex.bodyRegion,
           ...ex.musclesTargeted,
           ...ex.conditions,
@@ -90,17 +97,22 @@ export default function LibraryBrowser() {
   return (
     <div className="mx-auto max-w-7xl">
       {/* ------------------------------------------------------ heading */}
-      <div className="mb-10">
-        <p className="mb-3 text-xs font-bold uppercase tracking-[0.2em] text-crimson-600">
-          Exercise library
-        </p>
-        <h1 className="display max-w-2xl text-5xl text-espresso-900 sm:text-6xl">
-          Narrow it down the way you think.
-        </h1>
-        <p className="mt-4 max-w-xl text-[1.02rem] leading-relaxed text-espresso-700/70">
-          Combine any of the axes below. Within an axis the filters widen your
-          results; across axes they narrow them.
-        </p>
+      <div className="mb-10 flex flex-wrap items-end justify-between gap-6">
+        <div>
+          <p className="mb-3 text-xs font-bold uppercase tracking-[0.2em] text-crimson-600">
+            Exercise library
+          </p>
+          <h1 className="display max-w-2xl text-5xl text-espresso-900 sm:text-6xl">
+            {lang === "ur"
+              ? "اپنی سوچ کے مطابق تلاش کریں۔"
+              : "Narrow it down the way you think."}
+          </h1>
+          <p className="mt-4 max-w-xl text-[1.02rem] leading-relaxed text-espresso-700/70">
+            Combine any of the axes below. Within an axis the filters widen your
+            results; across axes they narrow them.
+          </p>
+        </div>
+        <LanguageToggle />
       </div>
 
       {/* ------------------------------------------------------- search */}

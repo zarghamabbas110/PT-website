@@ -19,6 +19,66 @@
 
 export type Point = { x: number; y: number };
 
+/* ==========================================================================
+   Tapered outlines
+   --------------------------------------------------------------------------
+   A constant-width stroke reads as a stick figure. Real limbs taper — thick at
+   the hip, narrow at the knee — so each bone chain is turned into a closed
+   polygon whose half-width varies along its length, with rounded caps.
+
+   Drawing order matters: every part is drawn once in the outline colour and
+   then again, slightly narrower, in the skin colour. The dark layer is fully
+   covered except at the edges, which yields a clean outline with no seams
+   where parts overlap.
+   ========================================================================== */
+
+function unit(a: Point, b: Point): Point {
+  const dx = b.x - a.x;
+  const dy = b.y - a.y;
+  const len = Math.hypot(dx, dy) || 1;
+  return { x: dx / len, y: dy / len };
+}
+
+/**
+ * Closed outline around a bone chain, `halfWidths[i]` wide at `pts[i]`.
+ * Ends are capped with semicircles.
+ */
+export function taperedPath(pts: Point[], halfWidths: number[]): string {
+  if (pts.length < 2) return "";
+
+  // Per-vertex normal: average the normals of the segments meeting there, so
+  // the outline turns smoothly through a joint instead of pinching.
+  const normals: Point[] = pts.map((_, i) => {
+    const prev = i > 0 ? unit(pts[i - 1], pts[i]) : unit(pts[0], pts[1]);
+    const next =
+      i < pts.length - 1
+        ? unit(pts[i], pts[i + 1])
+        : unit(pts[pts.length - 2], pts[pts.length - 1]);
+    const mx = prev.x + next.x;
+    const my = prev.y + next.y;
+    const len = Math.hypot(mx, my) || 1;
+    // Rotate the averaged tangent by 90°.
+    return { x: -(my / len), y: mx / len };
+  });
+
+  const left = pts.map((p, i) => ({
+    x: p.x + normals[i].x * halfWidths[i],
+    y: p.y + normals[i].y * halfWidths[i],
+  }));
+  const right = pts.map((p, i) => ({
+    x: p.x - normals[i].x * halfWidths[i],
+    y: p.y - normals[i].y * halfWidths[i],
+  }));
+
+  const last = pts.length - 1;
+  let d = `M ${left[0].x} ${left[0].y}`;
+  for (let i = 1; i <= last; i++) d += ` L ${left[i].x} ${left[i].y}`;
+  d += ` A ${halfWidths[last]} ${halfWidths[last]} 0 0 1 ${right[last].x} ${right[last].y}`;
+  for (let i = last - 1; i >= 0; i--) d += ` L ${right[i].x} ${right[i].y}`;
+  d += ` A ${halfWidths[0]} ${halfWidths[0]} 0 0 1 ${left[0].x} ${left[0].y} Z`;
+  return d;
+}
+
 /** Joint angles describing a single instant of a movement. */
 export type Pose = {
   /** Position of the pelvis in SVG units. */
@@ -210,6 +270,208 @@ export function solve(pose: Pose): Skeleton {
 
 /* ------------------------------------------------------------ animation */
 
+/* ==========================================================================
+   FRONTAL (front-on) VIEW
+   --------------------------------------------------------------------------
+   The sagittal skeleton above cannot show movements that happen across the
+   body: shoulder abduction, internal/external rotation, scaption, scapular
+   retraction. Those are most of a shoulder library, so the engine carries a
+   second, front-facing solver.
+
+   Frontal angle convention, per arm: 0 = hanging at the side, 90 = out
+   horizontally, 180 = straight overhead. Angles are mirrored automatically
+   for the left arm so the same number means the same movement on both sides.
+   ========================================================================== */
+
+export type FrontalPose = {
+  rootX: number;
+  rootY: number;
+
+  /** Trunk lean towards the viewer's right, in degrees. */
+  trunkLean: number;
+  /** Positive = trunk side-bends to the figure's right. */
+  trunkSideBend: number;
+  /** Positive tips the head to the figure's right. */
+  headTilt: number;
+
+  /** Shoulder elevation (shrug) in SVG units, per side. */
+  shrugR: number;
+  shrugL: number;
+  /** Scapular protraction/retraction: negative narrows the shoulders. */
+  scapulaR: number;
+  scapulaL: number;
+
+  /** Arm elevation: 0 at side, 90 horizontal, 180 overhead. */
+  abductR: number;
+  abductL: number;
+  /** Elbow flexion in degrees. */
+  elbowR: number;
+  elbowL: number;
+  /**
+   * Rotation of the forearm about the upper arm's axis, used for internal and
+   * external rotation. Drawn as foreshortening plus a rotation cue.
+   */
+  rotateR: number;
+  rotateL: number;
+
+  /** Leg stance width and knee bend. */
+  stance: number;
+  kneeBend: number;
+};
+
+export const FRONT_NEUTRAL: FrontalPose = {
+  rootX: 200,
+  rootY: 214,
+  trunkLean: 0,
+  trunkSideBend: 0,
+  headTilt: 0,
+  shrugR: 0,
+  shrugL: 0,
+  scapulaR: 0,
+  scapulaL: 0,
+  abductR: 6,
+  abductL: 6,
+  elbowR: 4,
+  elbowL: 4,
+  rotateR: 0,
+  rotateL: 0,
+  stance: 20,
+  kneeBend: 3,
+};
+
+export const FSEG = {
+  pelvisToChest: 82,
+  chestToShoulder: 26,
+  shoulderHalf: 40,
+  hipHalf: 21,
+  neck: 20,
+  headR: 22,
+  upperArm: 60,
+  foreArm: 54,
+  thigh: 82,
+  shin: 78,
+};
+
+export type FrontalSkeleton = {
+  pelvis: Point;
+  chest: Point;
+  neckBase: Point;
+  headCentre: Point;
+  headAngle: number;
+  hipR: Point;
+  hipL: Point;
+  shoulderR: Point;
+  shoulderL: Point;
+  elbowR: Point;
+  elbowL: Point;
+  handR: Point;
+  handL: Point;
+  kneeR: Point;
+  kneeL: Point;
+  ankleR: Point;
+  ankleL: Point;
+};
+
+export function solveFrontal(p: FrontalPose): FrontalSkeleton {
+  const lean = p.trunkLean + p.trunkSideBend;
+  const pelvis: Point = { x: p.rootX, y: p.rootY };
+
+  const chest = step(pelvis, lean, FSEG.pelvisToChest);
+  const neckBase = step(chest, lean + p.trunkSideBend * 0.3, FSEG.chestToShoulder);
+  const headCentre = step(
+    neckBase,
+    lean + p.headTilt,
+    FSEG.neck + FSEG.headR * 0.55
+  );
+
+  // "R" is the figure's right, drawn on the viewer's left (negative x).
+  const shoulderR: Point = {
+    x: neckBase.x - (FSEG.shoulderHalf + p.scapulaR),
+    y: neckBase.y + 6 - p.shrugR,
+  };
+  const shoulderL: Point = {
+    x: neckBase.x + (FSEG.shoulderHalf + p.scapulaL),
+    y: neckBase.y + 6 - p.shrugL,
+  };
+
+  const hipR: Point = { x: pelvis.x - FSEG.hipHalf, y: pelvis.y + 4 };
+  const hipL: Point = { x: pelvis.x + FSEG.hipHalf, y: pelvis.y + 4 };
+
+  // Rotation foreshortens the forearm: a fully internally rotated forearm
+  // points at the viewer and so appears shorter.
+  const foreLen = (rot: number) =>
+    FSEG.foreArm * (0.62 + 0.38 * Math.cos(rot * RAD));
+
+  const arm = (
+    shoulder: Point,
+    abduct: number,
+    elbow: number,
+    rot: number,
+    sign: number
+  ) => {
+    // 0 = straight down, 180 = straight overhead, swinging away from midline.
+    const upperAngle = sign * (180 - abduct);
+    const elbowPt = step(shoulder, upperAngle, FSEG.upperArm);
+    const foreAngle = upperAngle - sign * elbow;
+    const handPt = step(elbowPt, foreAngle, foreLen(rot));
+    return { elbowPt, handPt };
+  };
+
+  const right = arm(shoulderR, p.abductR, p.elbowR, p.rotateR, -1);
+  const left = arm(shoulderL, p.abductL, p.elbowL, p.rotateL, 1);
+
+  const leg = (hip: Point, sign: number) => {
+    const thighAngle = sign * (180 - p.stance * 0.25);
+    const knee = step(hip, thighAngle, FSEG.thigh);
+    const shinAngle = thighAngle + sign * -p.kneeBend;
+    const ankle = step(knee, shinAngle, FSEG.shin);
+    return { knee, ankle };
+  };
+
+  const legR = leg(hipR, -1);
+  const legL = leg(hipL, 1);
+
+  return {
+    pelvis,
+    chest,
+    neckBase,
+    headCentre,
+    headAngle: lean + p.headTilt,
+    hipR,
+    hipL,
+    shoulderR,
+    shoulderL,
+    elbowR: right.elbowPt,
+    elbowL: left.elbowPt,
+    handR: right.handPt,
+    handL: left.handPt,
+    kneeR: legR.knee,
+    kneeL: legL.knee,
+    ankleR: legR.ankle,
+    ankleL: legL.ankle,
+  };
+}
+
+export function lerpFrontal(
+  a: FrontalPose,
+  b: FrontalPose,
+  tRaw: number
+): FrontalPose {
+  const t = easeInOut(Math.min(1, Math.max(0, tRaw)));
+  const out = {} as FrontalPose;
+  (Object.keys(a) as (keyof FrontalPose)[]).forEach((k) => {
+    out[k] = a[k] + (b[k] - a[k]) * t;
+  });
+  return out;
+}
+
+export function frontPose(
+  overrides: Partial<FrontalPose>,
+  base: FrontalPose = FRONT_NEUTRAL
+): FrontalPose {
+  return { ...base, ...overrides };
+}
+
 /** Smooth in-and-out easing so movements start and stop gently. */
 function easeInOut(t: number): number {
   return t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2;
@@ -272,4 +534,39 @@ export function sampleSequence(
 /** Build a pose by overriding only the joints that change. */
 export function pose(overrides: Partial<Pose>, base: Pose = NEUTRAL): Pose {
   return { ...base, ...overrides };
+}
+
+/* ------------------------------------------- frontal keyframes & sampling */
+
+export type FrontalKeyframe = {
+  pose: FrontalPose;
+  travel: number;
+  hold: number;
+  label?: string;
+};
+
+export function sampleFrontal(
+  frames: FrontalKeyframe[],
+  ms: number
+): { pose: FrontalPose; index: number } {
+  const total = frames.reduce((sum, f) => sum + f.travel + f.hold, 0);
+  if (total <= 0) return { pose: frames[0].pose, index: 0 };
+
+  let t = ((ms % total) + total) % total;
+
+  for (let i = 0; i < frames.length; i++) {
+    const frame = frames[i];
+    const prev = frames[(i - 1 + frames.length) % frames.length];
+
+    if (t < frame.travel) {
+      return {
+        pose: lerpFrontal(prev.pose, frame.pose, t / frame.travel),
+        index: i,
+      };
+    }
+    t -= frame.travel;
+    if (t < frame.hold) return { pose: frame.pose, index: i };
+    t -= frame.hold;
+  }
+  return { pose: frames[frames.length - 1].pose, index: frames.length - 1 };
 }

@@ -58,8 +58,10 @@ export default function Hero() {
         style={{ opacity: fade }}
         className="relative mx-auto grid min-h-[92vh] max-w-7xl items-center gap-8 px-5 pb-24 pt-32 sm:px-8 lg:grid-cols-[1.05fr_0.95fr]"
       >
-        {/* ------------------------------------------------------- copy */}
-        <div>
+        {/* ------------------------------------------------------- copy
+            Held inside its own crimson panel so no line of type is ever cut
+            by a paper edge. Images may break out of the layout; words do not. */}
+        <div className="rounded-[32px] bg-crimson-500/55 p-7 ring-1 ring-cream-50/15 backdrop-blur-[3px] sm:p-9">
           <motion.p
             initial={{ opacity: 0, y: 18 }}
             animate={{ opacity: 1, y: 0 }}
@@ -90,7 +92,7 @@ export default function Hero() {
               initial={{ opacity: 0, y: 44 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.9, delay: 0.32, ease: [0.16, 1, 0.3, 1] }}
-              className="block text-espresso-900"
+              className="block text-amber-accent"
             >
               understandable.
             </motion.span>

@@ -2,20 +2,29 @@
 
 import { useEffect, useId, useRef, useState } from "react";
 import {
+  FrontalKeyframe,
+  FrontalSkeleton,
   Keyframe,
   Point,
-  Skeleton,
   SEG,
+  Skeleton,
+  sampleFrontal,
   sampleSequence,
   solve,
+  solveFrontal,
+  taperedPath,
 } from "@/lib/figure";
 
 /* ==========================================================================
-   PhysioFigure — draws the skeleton produced by lib/figure.ts as clean
-   medical line-art, and animates it through an exercise's keyframes.
+   PhysioFigure — draws the skeletons from lib/figure.ts as a human silhouette.
 
-   Equipment ("props") and movement arrows are positioned from real
-   anatomical landmarks, so they follow the body as it moves.
+   Two views:
+     "side"  — sagittal. Flexion/extension, spinal curves, lying positions.
+     "front" — coronal. Abduction, rotation, scapular work; most of the
+               shoulder library needs this.
+
+   Every part is drawn twice: once wide in the outline colour, then again
+   narrower in the skin colour. Overlapping parts therefore never show a seam.
    ========================================================================== */
 
 export type Prop =
@@ -25,25 +34,39 @@ export type Prop =
   | { kind: "ballBetweenKnees"; radius?: number }
   | { kind: "gymBall"; radius?: number }
   | { kind: "band" }
-  | { kind: "towelUnderKnee" };
+  | { kind: "towelUnderKnee" }
+  | { kind: "stick" }
+  | { kind: "dumbbells" }
+  | { kind: "doorway" }
+  | { kind: "tableSupport" };
 
 export type Arrow = {
-  /** Landmark the arrow points at. */
-  at: "head" | "pelvis" | "knee" | "hip" | "hand" | "ankle" | "t12";
-  /** Direction in degrees: 0 = up, 90 = right. */
+  at:
+    | "head"
+    | "pelvis"
+    | "knee"
+    | "hip"
+    | "hand"
+    | "ankle"
+    | "t12"
+    | "handR"
+    | "handL"
+    | "elbowR"
+    | "elbowL"
+    | "shoulderR"
+    | "shoulderL";
   dir: number;
-  /** Length in SVG units. */
   len?: number;
-  /** Draw as a curved rotation arrow instead of a straight one. */
   curved?: boolean;
   label?: string;
 };
 
 export type FigureSpec = {
-  frames: Keyframe[];
+  view?: "side" | "front";
+  frames?: Keyframe[];
+  frontFrames?: FrontalKeyframe[];
   props?: Prop[];
   arrows?: Arrow[];
-  /** Nudges the whole drawing inside the viewBox. */
   offsetX?: number;
   offsetY?: number;
   scale?: number;
@@ -51,15 +74,15 @@ export type FigureSpec = {
 
 type Props = {
   spec: FigureSpec;
-  /** Pause the loop (used for the static thumbnail on library cards). */
   paused?: boolean;
   className?: string;
   showLabel?: boolean;
 };
 
-const SKIN = "#f7d9c9";
-const SKIN_LINE = "#8f281c";
-const LIMB_W = 17;
+const SKIN = "#f8dccd";
+const SHADE = "#efc3ad";
+const LINE = "#8f281c";
+const EDGE = 3.2;
 
 export default function PhysioFigure({
   spec,
@@ -67,15 +90,12 @@ export default function PhysioFigure({
   className,
   showLabel = true,
 }: Props) {
-  // Marker ids must be unique per instance — several figures share a page.
   const uid = useId().replace(/:/g, "");
   const [ms, setMs] = useState(0);
   const raf = useRef<number | null>(null);
   const start = useRef<number | null>(null);
   const [reduced, setReduced] = useState(false);
 
-  // Respect the visitor's reduced-motion setting: hold the mid pose instead
-  // of looping. Some patients get symptoms from repetitive motion.
   useEffect(() => {
     const mq = window.matchMedia("(prefers-reduced-motion: reduce)");
     const sync = () => setReduced(mq.matches);
@@ -86,35 +106,36 @@ export default function PhysioFigure({
 
   useEffect(() => {
     if (paused || reduced) return;
-
     const tick = (now: number) => {
       if (start.current === null) start.current = now;
       setMs(now - start.current);
       raf.current = requestAnimationFrame(tick);
     };
     raf.current = requestAnimationFrame(tick);
-
     return () => {
       if (raf.current !== null) cancelAnimationFrame(raf.current);
       start.current = null;
     };
   }, [paused, reduced]);
 
-  // When paused or reduced-motion, show the working *end* of the movement
-  // rather than the resting start — it is far more informative on a card.
-  const total = spec.frames.reduce((s, f) => s + f.travel + f.hold, 0);
-  const last = spec.frames[spec.frames.length - 1];
-  const frozenAt = total - last.hold * 0.5;
-  const { pose, index } = sampleSequence(
-    spec.frames,
-    paused || reduced ? frozenAt : ms
-  );
-  const sk = solve(pose);
-  const label = spec.frames[index]?.label;
+  const isFront = spec.view === "front";
+  const frames = isFront ? spec.frontFrames! : spec.frames!;
 
-  const tx = spec.offsetX ?? 0;
-  const ty = spec.offsetY ?? 0;
-  const sc = spec.scale ?? 1;
+  // Frozen thumbnails show the working end of the movement, not the rest
+  // position — far more informative on a card.
+  const total = frames.reduce((s, f) => s + f.travel + f.hold, 0);
+  const lastHold = frames[frames.length - 1].hold;
+  const at = paused || reduced ? total - lastHold * 0.5 : ms;
+
+  const sideSample = !isFront ? sampleSequence(spec.frames!, at) : null;
+  const frontSample = isFront ? sampleFrontal(spec.frontFrames!, at) : null;
+
+  const label = isFront
+    ? spec.frontFrames![frontSample!.index]?.label
+    : spec.frames![sideSample!.index]?.label;
+
+  const sk = sideSample ? solve(sideSample.pose) : null;
+  const fk = frontSample ? solveFrontal(frontSample.pose) : null;
 
   return (
     <svg
@@ -123,57 +144,37 @@ export default function PhysioFigure({
       role="img"
       aria-label={label ? `Illustration: ${label}` : "Exercise illustration"}
     >
-      <g transform={`translate(${tx} ${ty}) scale(${sc})`}>
+      <g
+        transform={`translate(${spec.offsetX ?? 0} ${spec.offsetY ?? 0}) scale(${
+          spec.scale ?? 1
+        })`}
+      >
         {(spec.props ?? []).map((p, i) => (
-          <PropBehind key={i} prop={p} sk={sk} />
+          <PropBehind key={i} prop={p} sk={sk} fk={fk} />
         ))}
 
-        {/* Far-side limbs sit behind the torso and are faded for depth. */}
-        <g opacity={0.42}>
-          <Limb a={sk.far.shoulder} b={sk.far.elbow} c={sk.far.hand} />
-          <Leg
-            hip={sk.far.hip}
-            knee={sk.far.knee}
-            ankle={sk.far.ankle}
-            toe={sk.far.toe}
-          />
-        </g>
-
-        <Torso sk={sk} />
-
-        <g>
-          <Leg
-            hip={sk.near.hip}
-            knee={sk.near.knee}
-            ankle={sk.near.ankle}
-            toe={sk.near.toe}
-          />
-          <Limb a={sk.near.shoulder} b={sk.near.elbow} c={sk.near.hand} />
-        </g>
-
-        <Head sk={sk} />
+        {sk && <SideBody sk={sk} />}
+        {fk && <FrontBody fk={fk} />}
 
         {(spec.props ?? []).map((p, i) => (
-          <PropFront key={i} prop={p} sk={sk} />
+          <PropFront key={i} prop={p} sk={sk} fk={fk} />
         ))}
 
         {(spec.arrows ?? []).map((a, i) => (
-          <MovementArrow key={i} arrow={a} sk={sk} uid={`${uid}-${i}`} />
+          <MovementArrow key={i} arrow={a} sk={sk} fk={fk} uid={`${uid}-${i}`} />
         ))}
       </g>
 
-      {/* The caption gets its own band beneath the drawing so it can never
-          collide with the figure, whatever the pose. */}
       {showLabel && label && (
         <>
-          <rect x={0} y={384} width={400} height={40} fill="#fdfbf9" opacity={0.92} />
+          <rect x={0} y={384} width={400} height={40} fill="#fdfbf9" opacity={0.94} />
           <text
             x={200}
             y={409}
             textAnchor="middle"
             fontSize={15}
             fontWeight={600}
-            fill="#8f281c"
+            fill={LINE}
           >
             {label}
           </text>
@@ -183,132 +184,187 @@ export default function PhysioFigure({
   );
 }
 
-/* ------------------------------------------------------------- body parts */
+/* ======================================================== side (sagittal) */
 
-function Torso({ sk }: { sk: Skeleton }) {
-  // The spine is drawn as a smooth curve through pelvis → L5 → T12 → T1,
-  // so lumbar flattening and arching are genuinely visible.
-  const d = `M ${sk.pelvis.x} ${sk.pelvis.y}
-             Q ${sk.l5.x} ${sk.l5.y} ${sk.t12.x} ${sk.t12.y}
-             T ${sk.t1.x} ${sk.t1.y}`;
+function SideBody({ sk }: { sk: Skeleton }) {
+  const torso = [sk.pelvis, sk.l5, sk.t12, sk.t1];
+  const torsoW = [19, 18, 19, 21];
+  const neck = [sk.t1, sk.neckTop];
+  const neckW = [13, 11];
+
+  const farArm = [sk.far.shoulder, sk.far.elbow, sk.far.hand];
+  const nearArm = [sk.near.shoulder, sk.near.elbow, sk.near.hand];
+  const armW = [9, 7.4, 6];
+
+  const farLeg = [sk.far.hip, sk.far.knee, sk.far.ankle];
+  const nearLeg = [sk.near.hip, sk.near.knee, sk.near.ankle];
+  const legW = [14, 9.6, 6];
+
+  const farFoot = [sk.far.ankle, sk.far.toe];
+  const nearFoot = [sk.near.ankle, sk.near.toe];
+  const footW = [6, 4.4];
+
   return (
     <g>
-      {/* Pelvis block — the landmark for tilt exercises */}
-      <g
-        transform={`translate(${sk.pelvis.x} ${sk.pelvis.y}) rotate(${angleOf(
-          sk.pelvis,
-          sk.l5
-        )})`}
-      >
-        <rect
-          x={-17}
-          y={-14}
-          width={34}
-          height={30}
-          rx={11}
-          fill={SKIN}
-          stroke={SKIN_LINE}
-          strokeWidth={3}
-        />
+      {/* far side, faded, behind the trunk */}
+      <g opacity={0.4}>
+        <Part pts={farLeg} w={legW} />
+        <Part pts={farFoot} w={footW} />
+        <Part pts={farArm} w={armW} />
       </g>
 
-      <path
-        d={d}
-        fill="none"
-        stroke={SKIN}
-        strokeWidth={36}
-        strokeLinecap="round"
-      />
-      <path
-        d={d}
-        fill="none"
-        stroke={SKIN_LINE}
-        strokeWidth={3}
-        strokeLinecap="round"
-        opacity={0.55}
-      />
-      <circle cx={sk.t1.x} cy={sk.t1.y} r={11} fill={SKIN} stroke={SKIN_LINE} strokeWidth={3} />
+      <Part pts={torso} w={torsoW} />
+      <Part pts={neck} w={neckW} />
+      <HeadProfile at={sk.headCentre} angle={sk.headAngle} />
+
+      <Part pts={nearLeg} w={legW} />
+      <Part pts={nearFoot} w={footW} />
+      <Part pts={nearArm} w={armW} />
+      <Hand at={sk.near.hand} />
     </g>
   );
 }
 
-function Head({ sk }: { sk: Skeleton }) {
-  return (
-    <g
-      transform={`translate(${sk.headCentre.x} ${sk.headCentre.y}) rotate(${sk.headAngle})`}
-    >
-      {/* A soft profile rather than a plain circle: the brow, nose and chin
-          make the direction of gaze — and so a chin tuck — legible. */}
-      <path
-        fill={SKIN}
-        stroke={SKIN_LINE}
-        strokeWidth={3}
-        strokeLinejoin="round"
-        d={`M -4 -21
-            C 12 -22, 22 -13, 21 -2
-            C 20.5 2, 24 4, 23 6.5
-            C 22.3 8.3, 19 8, 18 9
-            C 17.6 13, 14 17, 8 19
-            C -4 23, -21 15, -21 -1
-            C -21 -13, -14 -20, -4 -21 Z`}
-      />
-      <circle cx={11} cy={-4} r={2.3} fill={SKIN_LINE} />
-    </g>
-  );
-}
+/* ========================================================= front (coronal) */
 
-function Limb({ a, b, c }: { a: Point; b: Point; c: Point }) {
+function FrontBody({ fk }: { fk: FrontalSkeleton }) {
+  // The trunk tapers from a narrow waist to a broad chest. Its lower end is
+  // deliberately kept above the hip line: a wide rounded cap down there reads
+  // as a pale blob between the legs. A separate pelvis band bridges the hips.
+  const trunk = [{ x: fk.pelvis.x, y: fk.pelvis.y - 6 }, fk.chest, fk.neckBase];
+  const trunkW = [20, 27, 24];
+  const pelvisBand = [fk.hipR, fk.hipL];
+  const pelvisW = [16, 16];
+
+  // Narrow enough that the arms cover its ends, otherwise the caps show as
+  // bumps sitting on top of the shoulders.
+  const shoulders = [fk.shoulderR, fk.shoulderL];
+  const shoulderW = [12.5, 12.5];
+  const neck = [fk.neckBase, { x: fk.headCentre.x, y: fk.headCentre.y + 14 }];
+  const neckW = [13, 12];
+
+  const armW = [10, 7.6, 6];
+  const legW = [15, 10, 6.5];
+
   return (
     <g>
-      <polyline
-        points={`${a.x},${a.y} ${b.x},${b.y} ${c.x},${c.y}`}
-        fill="none"
-        stroke={SKIN_LINE}
-        strokeWidth={LIMB_W + 4}
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-      <polyline
-        points={`${a.x},${a.y} ${b.x},${b.y} ${c.x},${c.y}`}
-        fill="none"
-        stroke={SKIN}
-        strokeWidth={LIMB_W}
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
+      <Part pts={[fk.hipR, fk.kneeR, fk.ankleR]} w={legW} />
+      <Part pts={[fk.hipL, fk.kneeL, fk.ankleL]} w={legW} />
+      <Foot at={fk.ankleR} dir={-1} />
+      <Foot at={fk.ankleL} dir={1} />
+
+      <Part pts={pelvisBand} w={pelvisW} />
+      <Part pts={trunk} w={trunkW} />
+      <Part pts={shoulders} w={shoulderW} />
+      <Part pts={neck} w={neckW} />
+
+      <Part pts={[fk.shoulderR, fk.elbowR, fk.handR]} w={armW} />
+      <Part pts={[fk.shoulderL, fk.elbowL, fk.handL]} w={armW} />
+      <Hand at={fk.handR} />
+      <Hand at={fk.handL} />
+
+      <HeadFront at={fk.headCentre} angle={fk.headAngle} />
     </g>
   );
 }
 
-function Leg({
-  hip,
-  knee,
-  ankle,
-  toe,
-}: {
-  hip: Point;
-  knee: Point;
-  ankle: Point;
-  toe: Point;
-}) {
-  const pts = `${hip.x},${hip.y} ${knee.x},${knee.y} ${ankle.x},${ankle.y} ${toe.x},${toe.y}`;
+/* ------------------------------------------------------------ primitives */
+
+/**
+ * One body part: dark outline underneath, skin fill on top.
+ *
+ * A filled disc is stamped at every vertex as well as drawing the tapered
+ * band. The band's end caps are arcs, and an arc that sweeps the wrong way
+ * leaves a zero-winding region that renders as a hole; the discs make joints
+ * and caps solid regardless.
+ */
+function Part({ pts, w }: { pts: Point[]; w: number[] }) {
+  const outer = taperedPath(
+    pts,
+    w.map((n) => n + EDGE)
+  );
+  const inner = taperedPath(pts, w);
   return (
     <g>
-      <polyline
-        points={pts}
+      <path d={outer} fill={LINE} />
+      {pts.map((p, i) => (
+        <circle key={`o${i}`} cx={p.x} cy={p.y} r={w[i] + EDGE} fill={LINE} />
+      ))}
+      <path d={inner} fill={SKIN} />
+      {pts.map((p, i) => (
+        <circle key={`i${i}`} cx={p.x} cy={p.y} r={w[i]} fill={SKIN} />
+      ))}
+    </g>
+  );
+}
+
+function Hand({ at }: { at: Point }) {
+  return (
+    <g>
+      <circle cx={at.x} cy={at.y} r={8.4} fill={LINE} />
+      <circle cx={at.x} cy={at.y} r={8.4 - EDGE} fill={SKIN} />
+    </g>
+  );
+}
+
+function Foot({ at, dir }: { at: Point; dir: number }) {
+  const toe = { x: at.x + dir * 4, y: at.y + 13 };
+  return <Part pts={[at, toe]} w={[7, 9]} />;
+}
+
+/**
+ * Head in profile. Deliberately a soft, rounded face — brow, a gentle nose
+ * curve and a real chin — rather than the wedge-shaped nose of the first pass.
+ */
+function HeadProfile({ at, angle }: { at: Point; angle: number }) {
+  const d = `M -3 -21
+    C 8 -21.5 16 -15 16.5 -6.5
+    C 16.7 -4 18.2 -3.2 18.6 -1.6
+    C 19.2 0.6 18.6 2.4 16.8 3.4
+    C 15.8 4 15.4 4.6 15.4 6
+    C 15.4 8 14.6 9 13.2 9.6
+    C 14 11.4 13.4 13.6 11.4 15.2
+    C 8.6 17.6 3.8 19.2 -2.4 19.2
+    C -13 19.2 -20 12 -20 -1
+    C -20 -13 -13 -20.6 -3 -21 Z`;
+
+  return (
+    <g transform={`translate(${at.x} ${at.y}) rotate(${angle})`}>
+      <path d={d} fill={LINE} stroke={LINE} strokeWidth={EDGE * 2} strokeLinejoin="round" />
+      <path d={d} fill={SKIN} />
+      {/* ear and eye give the profile its read */}
+      <path
+        d="M -7 -1 C -4 -3 -1.5 -1 -2 2 C -2.5 4.6 -5 5 -7 3.4"
         fill="none"
-        stroke={SKIN_LINE}
-        strokeWidth={LIMB_W + 8}
+        stroke={SHADE}
+        strokeWidth={2.2}
         strokeLinecap="round"
-        strokeLinejoin="round"
       />
-      <polyline
-        points={pts}
-        fill="none"
-        stroke={SKIN}
-        strokeWidth={LIMB_W + 4}
+      <circle cx={8.5} cy={-6} r={2.1} fill={LINE} />
+    </g>
+  );
+}
+
+/** Head seen from the front: an oval with a jaw, eyes and a soft nose line. */
+function HeadFront({ at, angle }: { at: Point; angle: number }) {
+  const d = `M 0 -22
+    C 12 -22 18.5 -14 18.5 -3
+    C 18.5 6 14 15 7 19.6
+    C 4.4 21.4 -4.4 21.4 -7 19.6
+    C -14 15 -18.5 6 -18.5 -3
+    C -18.5 -14 -12 -22 0 -22 Z`;
+
+  return (
+    <g transform={`translate(${at.x} ${at.y}) rotate(${angle})`}>
+      <path d={d} fill={LINE} stroke={LINE} strokeWidth={EDGE * 2} strokeLinejoin="round" />
+      <path d={d} fill={SKIN} />
+      <circle cx={-6.6} cy={-4} r={2.1} fill={LINE} />
+      <circle cx={6.6} cy={-4} r={2.1} fill={LINE} />
+      <path
+        d="M 0 -1 L 0 5"
+        stroke={SHADE}
+        strokeWidth={2.2}
         strokeLinecap="round"
-        strokeLinejoin="round"
       />
     </g>
   );
@@ -316,50 +372,57 @@ function Leg({
 
 /* -------------------------------------------------------------- equipment */
 
-function PropBehind({ prop, sk }: { prop: Prop; sk: Skeleton }) {
+function PropBehind({
+  prop,
+  sk,
+  fk,
+}: {
+  prop: Prop;
+  sk: Skeleton | null;
+  fk: FrontalSkeleton | null;
+}) {
   switch (prop.kind) {
     case "mat":
       return (
         <g>
-          <rect
-            x={20}
-            y={332}
-            width={360}
-            height={13}
-            rx={6.5}
-            fill="#14676b"
-            opacity={0.16}
-          />
-          <rect x={20} y={332} width={360} height={5} rx={2.5} fill="#14676b" opacity={0.3} />
+          <rect x={18} y={332} width={364} height={14} rx={7} fill="#14676b" opacity={0.16} />
+          <rect x={18} y={332} width={364} height={5} rx={2.5} fill="#14676b" opacity={0.3} />
         </g>
       );
     case "wall":
-      // Positioned to meet the back of a figure standing at rootX ≈ 130.
       return (
         <g>
-          <rect x={92} y={26} width={14} height={330} rx={5} fill="#14676b" opacity={0.18} />
-          <line x1={106} y1={26} x2={106} y2={356} stroke="#14676b" strokeWidth={3.5} opacity={0.42} />
-          <line x1={40} y1={356} x2={370} y2={356} stroke="#14676b" strokeWidth={3.5} opacity={0.28} />
+          <rect x={92} y={24} width={14} height={334} rx={5} fill="#14676b" opacity={0.18} />
+          <line x1={106} y1={24} x2={106} y2={358} stroke="#14676b" strokeWidth={3.5} opacity={0.42} />
+          <line x1={40} y1={358} x2={372} y2={358} stroke="#14676b" strokeWidth={3.5} opacity={0.28} />
+        </g>
+      );
+    case "doorway":
+      return (
+        <g stroke="#14676b" strokeWidth={7} fill="none" opacity={0.3} strokeLinecap="round">
+          <path d="M 70 30 L 70 372" />
+          <path d="M 330 30 L 330 372" />
+          <path d="M 70 34 L 330 34" />
         </g>
       );
     case "chair":
-      // The figure faces +x, so the backrest sits behind it on the left.
       return (
-        <g
-          stroke="#14676b"
-          strokeWidth={6}
-          fill="none"
-          opacity={0.42}
-          strokeLinecap="round"
-        >
+        <g stroke="#14676b" strokeWidth={6} fill="none" opacity={0.42} strokeLinecap="round">
           <path d="M 112 272 L 244 272" />
           <path d="M 126 272 L 126 348 M 232 272 L 232 348" />
           <path d="M 116 272 L 116 150" />
           <path d="M 116 168 L 150 168" />
         </g>
       );
-    case "gymBall":
+    case "tableSupport":
       return (
+        <g stroke="#14676b" strokeWidth={6} fill="none" opacity={0.4} strokeLinecap="round">
+          <path d="M 40 262 L 210 262" />
+          <path d="M 56 262 L 56 356 M 194 262 L 194 356" />
+        </g>
+      );
+    case "gymBall":
+      return sk ? (
         <circle
           cx={sk.near.knee.x + 10}
           cy={sk.near.knee.y + 16}
@@ -369,22 +432,30 @@ function PropBehind({ prop, sk }: { prop: Prop; sk: Skeleton }) {
           stroke="#14676b"
           strokeWidth={3}
         />
-      );
+      ) : null;
     default:
       return null;
   }
 }
 
-function PropFront({ prop, sk }: { prop: Prop; sk: Skeleton }) {
+function PropFront({
+  prop,
+  sk,
+  fk,
+}: {
+  prop: Prop;
+  sk: Skeleton | null;
+  fk: FrontalSkeleton | null;
+}) {
   switch (prop.kind) {
     case "ballBetweenKnees": {
-      // Sits at the midpoint of the two knees, so it tracks the movement.
+      if (!sk) return null;
       const cx = (sk.near.knee.x + sk.far.knee.x) / 2;
       const cy = (sk.near.knee.y + sk.far.knee.y) / 2;
       const r = prop.radius ?? 21;
       return (
         <g>
-          <circle cx={cx} cy={cy} r={r} fill="#f2a03d" stroke="#8f281c" strokeWidth={3} />
+          <circle cx={cx} cy={cy} r={r} fill="#f2a03d" stroke={LINE} strokeWidth={3} />
           <path
             d={`M ${cx - r * 0.55} ${cy - r * 0.35} Q ${cx} ${cy - r * 0.9} ${
               cx + r * 0.55
@@ -398,30 +469,61 @@ function PropFront({ prop, sk }: { prop: Prop; sk: Skeleton }) {
       );
     }
     case "band": {
-      const a = sk.near.knee;
-      const b = sk.far.knee;
+      // Between the hands in the front view, between the knees side-on.
+      const a = fk ? fk.handR : sk!.near.knee;
+      const b = fk ? fk.handL : sk!.far.knee;
+      const sag = fk ? 18 : -16;
+      const d = `M ${a.x} ${a.y} Q ${(a.x + b.x) / 2} ${
+        (a.y + b.y) / 2 + sag
+      } ${b.x} ${b.y}`;
       return (
         <g>
-          <path
-            d={`M ${a.x} ${a.y} Q ${(a.x + b.x) / 2} ${(a.y + b.y) / 2 - 16} ${b.x} ${b.y}`}
-            fill="none"
-            stroke="#cf3a26"
-            strokeWidth={9}
+          <path d={d} fill="none" stroke="#cf3a26" strokeWidth={9} strokeLinecap="round" opacity={0.85} />
+          <path d={d} fill="none" stroke="#f7a89b" strokeWidth={3} strokeLinecap="round" />
+        </g>
+      );
+    }
+    case "stick": {
+      if (!fk) return null;
+      return (
+        <g>
+          <line
+            x1={fk.handR.x}
+            y1={fk.handR.y}
+            x2={fk.handL.x}
+            y2={fk.handL.y}
+            stroke={LINE}
+            strokeWidth={11}
             strokeLinecap="round"
-            opacity={0.85}
           />
-          <path
-            d={`M ${a.x} ${a.y} Q ${(a.x + b.x) / 2} ${(a.y + b.y) / 2 - 16} ${b.x} ${b.y}`}
-            fill="none"
-            stroke="#f7a89b"
-            strokeWidth={3}
+          <line
+            x1={fk.handR.x}
+            y1={fk.handR.y}
+            x2={fk.handL.x}
+            y2={fk.handL.y}
+            stroke="#f2a03d"
+            strokeWidth={6}
             strokeLinecap="round"
           />
         </g>
       );
     }
-    case "towelUnderKnee":
+    case "dumbbells": {
+      if (!fk) return null;
       return (
+        <g fill="#33201b">
+          {[fk.handR, fk.handL].map((h, i) => (
+            <g key={i}>
+              <rect x={h.x - 12} y={h.y - 4.5} width={24} height={9} rx={3} />
+              <rect x={h.x - 15} y={h.y - 9} width={7} height={18} rx={2.5} />
+              <rect x={h.x + 8} y={h.y - 9} width={7} height={18} rx={2.5} />
+            </g>
+          ))}
+        </g>
+      );
+    }
+    case "towelUnderKnee":
+      return sk ? (
         <ellipse
           cx={sk.near.knee.x}
           cy={sk.near.knee.y + 18}
@@ -429,10 +531,10 @@ function PropFront({ prop, sk }: { prop: Prop; sk: Skeleton }) {
           ry={11}
           fill="#f2a03d"
           opacity={0.6}
-          stroke="#8f281c"
+          stroke={LINE}
           strokeWidth={2.5}
         />
-      );
+      ) : null;
     default:
       return null;
   }
@@ -443,38 +545,30 @@ function PropFront({ prop, sk }: { prop: Prop; sk: Skeleton }) {
 function MovementArrow({
   arrow,
   sk,
+  fk,
   uid,
 }: {
   arrow: Arrow;
-  sk: Skeleton;
+  sk: Skeleton | null;
+  fk: FrontalSkeleton | null;
   uid: string;
 }) {
-  const anchor: Record<Arrow["at"], Point> = {
-    head: sk.headCentre,
-    pelvis: sk.pelvis,
-    knee: sk.near.knee,
-    hip: sk.near.hip,
-    hand: sk.near.hand,
-    ankle: sk.near.ankle,
-    t12: sk.t12,
-  };
-  const p = anchor[arrow.at];
-  const len = arrow.len ?? 46;
-  const rad = (arrow.dir * Math.PI) / 180;
-  const gap = 32;
+  const p = anchorPoint(arrow.at, sk, fk);
+  if (!p) return null;
 
+  const len = arrow.len ?? 44;
+  const rad = (arrow.dir * Math.PI) / 180;
+  const gap = 30;
   const sx = p.x + Math.sin(rad) * gap;
   const sy = p.y - Math.cos(rad) * gap;
   const ex = p.x + Math.sin(rad) * (gap + len);
   const ey = p.y - Math.cos(rad) * (gap + len);
-
-  // markerUnits="userSpaceOnUse" is essential: the default scales the head by
-  // the stroke width, which makes a 5px stroke produce a huge arrowhead.
   const markerId = `ah-${uid}`;
 
   return (
     <g>
       <defs>
+        {/* userSpaceOnUse stops the head scaling with the stroke width */}
         <marker
           id={markerId}
           markerUnits="userSpaceOnUse"
@@ -529,8 +623,35 @@ function MovementArrow({
   );
 }
 
-/* ------------------------------------------------------------------ utils */
-
-function angleOf(a: Point, b: Point): number {
-  return (Math.atan2(b.y - a.y, b.x - a.x) * 180) / Math.PI + 90;
+function anchorPoint(
+  at: Arrow["at"],
+  sk: Skeleton | null,
+  fk: FrontalSkeleton | null
+): Point | null {
+  if (fk) {
+    switch (at) {
+      case "handR": return fk.handR;
+      case "handL": return fk.handL;
+      case "elbowR": return fk.elbowR;
+      case "elbowL": return fk.elbowL;
+      case "shoulderR": return fk.shoulderR;
+      case "shoulderL": return fk.shoulderL;
+      case "head": return fk.headCentre;
+      case "pelvis": return fk.pelvis;
+      default: return fk.chest;
+    }
+  }
+  if (!sk) return null;
+  switch (at) {
+    case "head": return sk.headCentre;
+    case "pelvis": return sk.pelvis;
+    case "knee": return sk.near.knee;
+    case "hip": return sk.near.hip;
+    case "hand": return sk.near.hand;
+    case "ankle": return sk.near.ankle;
+    case "t12": return sk.t12;
+    default: return sk.t12;
+  }
 }
+
+export { SEG };

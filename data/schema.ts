@@ -1,14 +1,23 @@
 import type { FigureSpec } from "@/components/figure/PhysioFigure";
+import type { Bi, BiList } from "@/lib/i18n";
 
 /* ==========================================================================
    The exercise record.
-   Fields follow the specification you supplied, plus the extra filter axes
-   you described (contraction type, load type, patient position).
+
+   Fields follow the specification supplied, plus the extra filter axes
+   (contraction type, load type, patient position) and the "Special
+   instructions" block from the reference handout.
+
+   Patient-facing prose is bilingual (English / Urdu). Clinical taxonomy —
+   muscle names, joint names, condition names — stays in English, which is how
+   it is taught and documented.
    ========================================================================== */
 
 export type BodyRegion =
   | "Cervical"
   | "Shoulder"
+  | "Elbow"
+  | "Wrist & Hand"
   | "Thoracic"
   | "Lumbar"
   | "Pelvis & Hip"
@@ -18,12 +27,12 @@ export type BodyRegion =
 
 export type Difficulty = "Beginner" | "Intermediate" | "Advanced";
 
-/** How the muscle works during the exercise. */
 export type ContractionType =
   | "Isometric"
   | "Concentric"
   | "Eccentric"
-  | "Isotonic";
+  | "Isotonic"
+  | "Passive";
 
 export type LoadType =
   | "Bodyweight"
@@ -41,14 +50,12 @@ export type Position =
   | "Standing"
   | "Quadruped";
 
-/**
- * Provenance for the clinical guidance shown to patients.
- * `status` is deliberately explicit: nothing should reach patients while it
- * is still `unreviewed`.
- */
+/** How the movement is produced — the classic AROM / AAROM / PROM ladder. */
+export type MovementMode = "Passive" | "Active-assisted" | "Active" | "Resisted";
+
 export type Evidence = {
   status: "unreviewed" | "in-review" | "approved";
-  /** Free-text summary of the rationale. No citation is invented here. */
+  /** Plain rationale. No citation is invented here. */
   rationale: string;
   reviewedBy?: string;
   reviewedOn?: string;
@@ -57,30 +64,32 @@ export type Evidence = {
 export type Exercise = {
   id: string;
   slug: string;
-  name: string;
+  name: Bi;
   bodyRegion: BodyRegion;
   joint: string[];
   musclesTargeted: string[];
   conditions: string[];
-  purpose: string;
+  purpose: Bi;
   difficulty: Difficulty;
   contraction: ContractionType[];
+  mode: MovementMode;
   load: LoadType;
   position: Position;
   equipment: string[];
-  startingPosition: string;
-  steps: string[];
-  commonMistakes: string[];
-  safetyPrecautions: string[];
+  startingPosition: Bi;
+  steps: BiList;
+  /** The pinned notes shown alongside the animation. */
+  specialInstructions: BiList;
+  commonMistakes: BiList;
+  safetyPrecautions: BiList;
   repetitions: string;
   sets: string;
   holdTime: string;
   frequency: string;
-  /** Slugs of harder variations. */
+  restBetweenSets: string;
   progressions: string[];
-  /** Slugs of easier variations. */
   regressions: string[];
-  contraindications: string[];
+  contraindications: BiList;
   evidence: Evidence;
   figure: FigureSpec;
 };

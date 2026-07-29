@@ -79,6 +79,19 @@ main, section { overflow-x: clip; }
   line-height: 0.95;
 }
 
+/* ------------------------------------------------------------ Urdu text
+   Nastaliq sits on a much taller line than Latin type and reads right to
+   left, so any element marked rtl gets the Urdu stack and extra leading. */
+[dir="rtl"] {
+  font-family: "Noto Nastaliq Urdu", "Jameel Noori Nastaleeq", "Nafees Nastaleeq",
+    system-ui, serif;
+}
+[dir="rtl"] .display {
+  font-family: "Noto Nastaliq Urdu", "Jameel Noori Nastaleeq", serif;
+  line-height: 1.9;
+  letter-spacing: normal;
+}
+
 /* --------------------------------------------------------- scrollbars */
 .no-scrollbar::-webkit-scrollbar { display: none; }
 .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }

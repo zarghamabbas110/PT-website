@@ -13,7 +13,7 @@ export default function FiguresPage() {
       <div className="grid grid-cols-2 gap-6 lg:grid-cols-3">
         {EXERCISES.map((ex) => (
           <div key={ex.id} className="rounded-2xl bg-cream-50 p-3 ring-1 ring-crimson-200">
-            <p className="mb-1 text-sm font-bold">{ex.name}</p>
+            <p className="mb-1 text-sm font-bold">{ex.name.en}</p>
             <div className="relative aspect-square bg-[repeating-linear-gradient(0deg,#0001_0_1px,transparent_1px_40px),repeating-linear-gradient(90deg,#0001_0_1px,transparent_1px_40px)]">
               <PhysioFigure spec={ex.figure} className="h-full w-full" />
             </div>
