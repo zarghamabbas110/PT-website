@@ -7,18 +7,15 @@ import { sampleSequence } from "@/lib/figure";
 
 const VIEWS: View3D[] = ["front", "side", "threeQuarter"];
 const VIEW_LABEL: Record<View3D, string> = {
-  front: "front view",
-  side: "side view",
-  threeQuarter: "3/4 view",
+  front: "front",
+  side: "side",
+  threeQuarter: "3/4",
 };
 
 /**
- * Calibration and review page for the 3D character.
- *
- * The animation is deliberately not the default. A movement that loops is very
- * hard to fault-check — you need to hold one position and look at it. So this
- * opens frozen on a keyframe, with every keyframe of the exercise listed, and
- * all three camera angles side by side.
+ * Review page for the 3D character. A movement that loops is hard to fault; a
+ * still position is easy. So this opens frozen on a position, lists every
+ * position of the exercise, and shows all three camera angles at once.
  */
 export default function Human3DPage() {
   const list = EXERCISES.filter((e) => e.figure.frames);
@@ -26,27 +23,25 @@ export default function Human3DPage() {
   const [view, setView] = useState<View3D>("side");
   const [allViews, setAllViews] = useState(true);
   const [playing, setPlaying] = useState(false);
-  const [frame, setFrame] = useState(-1); // -1 = last (the working position)
+  const [frame, setFrame] = useState(0);
   const [ms, setMs] = useState(0);
 
   useEffect(() => {
     if (!playing) return;
     let raf = 0;
     const t0 = performance.now();
-    const tick = (now: number) => {
+    const loop = (now: number) => {
       setMs(now - t0);
-      raf = requestAnimationFrame(tick);
+      raf = requestAnimationFrame(loop);
     };
-    raf = requestAnimationFrame(tick);
+    raf = requestAnimationFrame(loop);
     return () => cancelAnimationFrame(raf);
   }, [playing]);
 
   const ex = list.find((e) => e.slug === slug) ?? list[0];
   const frames = ex.figure.frames!;
-  const idx = frame < 0 ? frames.length - 1 : Math.min(frame, frames.length - 1);
+  const idx = Math.min(frame, frames.length - 1);
 
-  // Freezing at an arbitrary time lands mid-transition. Settling on the middle
-  // of a keyframe's hold gives the position the exercise actually teaches.
   let at = 0;
   for (let i = 0; i < idx; i++) at += frames[i].travel + frames[i].hold;
   at += frames[idx].travel + frames[idx].hold / 2;
@@ -55,28 +50,25 @@ export default function Human3DPage() {
   const pose = sampled.pose;
   const label = frames[playing ? sampled.index : idx]?.label;
 
-  // Hook for the screenshot harness, so a review sweep can drive this page
-  // without clicking. Harmless in the browser; this page never ships to users.
+  // Screenshot hook for the review harness. Harmless in a browser; this page
+  // never ships to end users.
   useEffect(() => {
-    (window as unknown as Record<string, unknown>).__catalog = list.map((e) => ({
+    const w = window as unknown as Record<string, unknown>;
+    w.__catalog = list.map((e) => ({
       slug: e.slug,
       name: e.name.en,
       region: e.bodyRegion,
       position: e.position,
       labels: e.figure.frames!.map((f) => f.label ?? ""),
     }));
-    (window as unknown as Record<string, unknown>).__setShot = (
-      s: string,
-      v: View3D,
-      f = -1
-    ) => {
+    w.__setShot = (s: string, v: View3D, f = 0) => {
       setPlaying(false);
       setSlug(s);
       setView(v);
       setAllViews(false);
       setFrame(f);
     };
-  }, []);
+  });
 
   const shown = allViews ? VIEWS : [view];
 
@@ -89,11 +81,6 @@ export default function Human3DPage() {
         <h1 className="display text-4xl text-espresso-900 sm:text-5xl">
           Adam, driven by the exercise library
         </h1>
-        <p className="mt-3 max-w-2xl text-[0.95rem] leading-relaxed text-espresso-700/80">
-          Pick an exercise, then step through its positions. Each position is
-          held still so it can be checked properly — press Play only to see how
-          the movement flows.
-        </p>
 
         <div className="mt-7 flex flex-wrap gap-2">
           {list.map((e) => (
@@ -101,7 +88,7 @@ export default function Human3DPage() {
               key={e.slug}
               onClick={() => {
                 setSlug(e.slug);
-                setFrame(-1);
+                setFrame(0);
               }}
               className={`rounded-full px-4 py-2 text-[0.85rem] font-semibold transition-all ${
                 e.slug === slug
@@ -114,9 +101,8 @@ export default function Human3DPage() {
           ))}
         </div>
 
-        {/* positions within the chosen exercise */}
         <div className="mt-4 flex flex-wrap items-center gap-2">
-          <span className="text-[0.78rem] font-bold uppercase tracking-wider text-espresso-700/50">
+          <span className="text-[0.75rem] font-bold uppercase tracking-wider text-espresso-700/50">
             position
           </span>
           {frames.map((f, i) => (
@@ -143,9 +129,8 @@ export default function Human3DPage() {
           </button>
         </div>
 
-        {/* camera */}
         <div className="mt-3 flex flex-wrap items-center gap-2">
-          <span className="text-[0.78rem] font-bold uppercase tracking-wider text-espresso-700/50">
+          <span className="text-[0.75rem] font-bold uppercase tracking-wider text-espresso-700/50">
             camera
           </span>
           <button
@@ -165,7 +150,7 @@ export default function Human3DPage() {
                 setAllViews(false);
                 setView(v);
               }}
-              className={`rounded-full px-4 py-1.5 text-[0.8rem] font-bold transition-all ${
+              className={`rounded-full px-4 py-1.5 text-[0.8rem] font-bold capitalize transition-all ${
                 !allViews && v === view
                   ? "bg-espresso-900 text-cream-50"
                   : "bg-cream-50 text-espresso-700/70 ring-1 ring-crimson-100"
@@ -178,31 +163,26 @@ export default function Human3DPage() {
 
         <div
           id="stage"
-          className={`mt-6 grid gap-3 ${
-            allViews ? "sm:grid-cols-3" : "grid-cols-1"
-          }`}
+          className={`mt-6 grid gap-3 ${allViews ? "sm:grid-cols-3" : "grid-cols-1"}`}
         >
           {shown.map((v) => (
             <div
-              // Keying on the view itself would tear down the canvas and reload
-              // the 19 MB character every time the camera changes. The renderer
-              // reads the view live, so one stable slot is all that is needed.
               key={allViews ? v : "single"}
               className="overflow-hidden rounded-[22px] border border-crimson-100 bg-gradient-to-b from-crimson-50 to-cream-50"
             >
               <Human3D
                 pose={pose}
                 view={v}
-                className={allViews ? "h-[420px] w-full" : "h-[560px] w-full"}
+                className={allViews ? "h-[440px] w-full" : "h-[580px] w-full"}
               />
-              <p className="border-t border-crimson-100 bg-cream-50 py-2.5 text-center text-[0.8rem] font-bold uppercase tracking-wider text-espresso-700/60">
-                {VIEW_LABEL[v]}
+              <p className="border-t border-crimson-100 bg-cream-50 py-2.5 text-center text-[0.78rem] font-bold uppercase tracking-wider text-espresso-700/60">
+                {VIEW_LABEL[v]} view
               </p>
             </div>
           ))}
         </div>
 
-        <p className="mt-4 text-center text-[1.05rem] font-semibold text-espresso-800">
+        <p className="mt-4 text-center text-[1.02rem] font-semibold text-espresso-800">
           {label ?? ex.name.en}
         </p>
       </div>
