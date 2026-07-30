@@ -1201,6 +1201,32 @@ export const SHOULDER: Exercise[] = [
     },
     figure: {
       view: "front",
+      frames: [
+        {
+          pose: pose({ shoulderNear: 178, shoulderFar: 178, elbowNear: 2, elbowFar: 2 }, NEUTRAL),
+          travel: 800,
+          hold: 400,
+          label: "Start — arms at the sides",
+        },
+        {
+          // Elevation to shoulder height (90) with the arms swung fully out to
+          // the side (abduction 88) and the elbows straight.
+          pose: pose(
+            {
+              shoulderNear: 90,
+              shoulderFar: 90,
+              shoulderAbductNear: 88,
+              shoulderAbductFar: 88,
+              elbowNear: 2,
+              elbowFar: 2,
+            },
+            NEUTRAL
+          ),
+          travel: 1100,
+          hold: 800,
+          label: "Lift to shoulder height, thumbs up",
+        },
+      ],
       frontFrames: [
         {
           pose: frontPose({ abductR: 6, abductL: 6 }, STAND),
