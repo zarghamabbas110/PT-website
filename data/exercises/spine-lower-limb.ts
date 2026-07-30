@@ -480,7 +480,7 @@ export const SPINE_LOWER_LIMB: Exercise[] = [
       anchor: { joint: "t1", x: 101, y: 300 },
       frames: [
         {
-          pose: pose({ farDX: 9, farDY: 7 }, SUPINE),
+          pose: pose({ farDX: 9, farDY: 7, hipRotNear: 9, hipRotFar: 9 }, SUPINE),
           travel: 800,
           hold: 400,
           label: "Start — hips down, ball squeezed",
@@ -496,9 +496,13 @@ export const SPINE_LOWER_LIMB: Exercise[] = [
               hipNear: 2,
               kneeNear: 100,
               ankleNear: 0,
+              // Knees held apart around the ball — squeezing a 15-25cm ball
+              // means the knees sit that far apart, not touching.
+              hipRotNear: 9,
               hipFar: 2,
               kneeFar: 100,
               ankleFar: 0,
+              hipRotFar: 9,
               farDX: 9,
               farDY: 7,
             },

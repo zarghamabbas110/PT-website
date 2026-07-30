@@ -38,7 +38,7 @@ export type Prop =
   | { kind: "chair" }
   | { kind: "ballBetweenKnees"; radius?: number }
   | { kind: "gymBall"; radius?: number }
-  | { kind: "band" }
+  | { kind: "band"; anchor?: "front" | "between" }
   | { kind: "towelUnderKnee" }
   | { kind: "stick" }
   | { kind: "dumbbells" }

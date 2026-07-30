@@ -170,6 +170,16 @@ export default function Human3D({
     scene.add(new THREE.HemisphereLight(0xffffff, 0x60605a, 2.0));
     const key = new THREE.DirectionalLight(0xffffff, 2.0);
     key.position.set(2.5, 4.5, 3.5);
+    key.castShadow = true;
+    key.shadow.mapSize.set(2048, 2048);
+    key.shadow.radius = 3;
+    key.shadow.bias = -0.0008;
+    {
+      const c = key.shadow.camera;
+      c.near = 0.5; c.far = 14;
+      c.left = -2.2; c.right = 2.2; c.top = 2.2; c.bottom = -2.2;
+      c.updateProjectionMatrix();
+    }
     scene.add(key);
     const fill = new THREE.DirectionalLight(0xffffff, 0.7);
     fill.position.set(-3, 2, -2);
@@ -177,9 +187,25 @@ export default function Human3D({
 
     const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true, preserveDrawingBuffer: true });
     renderer.setSize(width, height);
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    // Draw at least twice the CSS size. On an ordinary (non-retina) screen the
+    // default 1x render is what makes the figure look soft and low-grade.
+    renderer.setPixelRatio(Math.min(Math.max(window.devicePixelRatio, 2), 3));
     renderer.outputColorSpace = THREE.SRGBColorSpace;
+    renderer.toneMapping = THREE.ACESFilmicToneMapping;
+    renderer.toneMappingExposure = 1.05;
+    renderer.shadowMap.enabled = true;
+    renderer.shadowMap.type = THREE.PCFSoftShadowMap;
     host.appendChild(renderer.domElement);
+
+    // A soft contact shadow on an invisible floor. Without it the figure and
+    // its equipment look pasted onto the background rather than standing on it.
+    const shadowFloor = new THREE.Mesh(
+      new THREE.PlaneGeometry(12, 12),
+      new THREE.ShadowMaterial({ opacity: 0.22 })
+    );
+    shadowFloor.rotation.x = -Math.PI / 2;
+    shadowFloor.receiveShadow = true;
+    scene.add(shadowFloor);
 
     const resize = new ResizeObserver(() => {
       const w = host.clientWidth || width, h = host.clientHeight || height;
@@ -189,27 +215,11 @@ export default function Human3D({
     });
     resize.observe(host);
 
-    const place = (v: View3D, mode: "stand" | "lying" | "seated") => {
-      if (mode === "lying") {
-        // Pulled back and centred over the reclining body so the whole figure
-        // and its mat/ball are in frame.
-        const look = new THREE.Vector3(0, 0.15, -0.55);
-        if (v === "front") camera.position.set(0, 3.7, 3.2);
-        else if (v === "side") camera.position.set(5.6, 1.5, -0.55);
-        else camera.position.set(3.9, 2.6, 2.4);
-        camera.lookAt(look);
-      } else if (mode === "seated") {
-        const look = new THREE.Vector3(0, 0.6, 0);
-        if (v === "front") camera.position.set(0, 0.75, 3.9);
-        else if (v === "side") camera.position.set(3.9, 0.75, 0);
-        else camera.position.set(2.8, 1.0, 2.8);
-        camera.lookAt(look);
-      } else {
-        if (v === "front") camera.position.set(0, 0.9, 5.6);
-        else if (v === "side") camera.position.set(5.6, 0.9, 0);
-        else camera.position.set(3.9, 1.2, 3.9);
-        camera.lookAt(0, 0.8, 0);
-      }
+    /** Which way the camera sits relative to the body, per view. */
+    const VIEW_DIR: Record<View3D, THREE.Vector3> = {
+      front: new THREE.Vector3(0, 0.1, 1).normalize(),
+      side: new THREE.Vector3(1, 0.1, 0).normalize(),
+      threeQuarter: new THREE.Vector3(0.75, 0.16, 0.75).normalize(),
     };
 
     let raf = 0;
@@ -225,8 +235,8 @@ export default function Human3D({
       gltf.scene.rotation.y = MODEL_FACING;
       scene.updateMatrixWorld(true);
       // Normalise height so the camera framing holds for any source model.
-      const box = new THREE.Box3().setFromObject(gltf.scene);
-      const h0 = box.max.y - box.min.y;
+      const restBox = new THREE.Box3().setFromObject(gltf.scene);
+      const h0 = restBox.max.y - restBox.min.y;
       gltf.scene.scale.setScalar(TARGET_HEIGHT / (h0 || 1));
       scene.updateMatrixWorld(true);
 
@@ -238,6 +248,10 @@ export default function Human3D({
           (raw.get(k) ?? raw.set(k, []).get(k)!).push(o as THREE.Bone);
         }
         (o as THREE.Mesh).frustumCulled = false;
+        if ((o as THREE.Mesh).isMesh) {
+          (o as THREE.Mesh).castShadow = true;
+          (o as THREE.Mesh).receiveShadow = true;
+        }
       });
 
       // Resolve each logical joint to the first candidate name present.
@@ -278,6 +292,50 @@ export default function Human3D({
       const rig: Rig = { joints };
       const first = (k: J) => rig.joints.get(k)?.[0]?.bone;
 
+      /**
+       * Point the camera at whatever the figure and its equipment actually
+       * occupy, and stand far enough back to fit it.
+       *
+       * Fixed camera positions cannot work here: standing, seated and lying
+       * bodies fill completely different volumes, and adding a chair or a mat
+       * changes it again. Guessing distances is what cut the chair off and left
+       * a lying figure adrift in empty space.
+       *
+       * A skinned mesh's bounding box does not follow its pose, so the extent is
+       * measured from the posed bones and padded for flesh, then merged with the
+       * props' own boxes.
+       */
+      const fitBox = new THREE.Box3();
+      const frameCamera = (v: View3D) => {
+        fitBox.makeEmpty();
+        rig.joints.forEach((list) => {
+          list[0]?.bone.getWorldPosition(_v);
+          fitBox.expandByPoint(_v);
+        });
+        if (fitBox.isEmpty()) return;
+        fitBox.expandByScalar(0.14); // flesh, hair and shoes beyond the joints
+
+        // Keep the body in the middle of the shot. Centring on the union with
+        // the equipment instead pushes the figure off to one side, because a
+        // long mat or a wall is far bigger than the person on it.
+        const centre = fitBox.getCenter(new THREE.Vector3());
+        if (propGroup.children.length) {
+          fitBox.union(new THREE.Box3().setFromObject(propGroup));
+        }
+        let radius = 0;
+        for (const cx of [fitBox.min.x, fitBox.max.x])
+          for (const cy of [fitBox.min.y, fitBox.max.y])
+            for (const cz of [fitBox.min.z, fitBox.max.z])
+              radius = Math.max(radius, centre.distanceTo(_v.set(cx, cy, cz)));
+        const vFov = camera.fov * DEG;
+        const hFov = 2 * Math.atan(Math.tan(vFov / 2) * camera.aspect);
+        // 1.06 leaves a little air around the subject rather than cropping it.
+        const dist = (radius / Math.sin(Math.min(vFov, hFov) / 2)) * 1.06;
+
+        camera.position.copy(centre).addScaledVector(VIEW_DIR[v], dist);
+        camera.lookAt(centre);
+      };
+
       const X_AXIS = new THREE.Vector3(1, 0, 0);
       const wp = (k: J) => {
         const b = first(k);
@@ -290,6 +348,8 @@ export default function Human3D({
       // chair, wall); some follow the body every frame (ball between the knees,
       // wand in the hands, band, dumbbells). Kept simple and readable — real
       // objects, not detailed models — so they place the movement in context.
+      /** The direction the chest faces, in world space, kept fresh each frame. */
+      const bodyFront = new THREE.Vector3(0, 0, 1);
       const propGroup = new THREE.Group();
       scene.add(propGroup);
       const M = (color: number, opts: THREE.MeshStandardMaterialParameters = {}) =>
@@ -307,11 +367,13 @@ export default function Human3D({
 
       const cyl = (mat: THREE.Material, r: number, len: number) => {
         const m = new THREE.Mesh(new THREE.CylinderGeometry(r, r, len, 16), mat);
+        m.castShadow = true; m.receiveShadow = true;
         propGroup.add(m);
         return m;
       };
       const boxMesh = (mat: THREE.Material, w: number, h: number, d: number) => {
         const m = new THREE.Mesh(new THREE.BoxGeometry(w, h, d), mat);
+        m.castShadow = true; m.receiveShadow = true;
         propGroup.add(m);
         return m;
       };
@@ -335,18 +397,35 @@ export default function Human3D({
         for (const prop of propsRef.current ?? []) {
         switch (prop.kind) {
           case "mat": {
-            const m = boxMesh(mats.mat, 0.95, 0.04, 2.3);
-            m.position.set(0, 0.02, -0.55);
+            // The mat's top surface must sit at the floor line, not above it.
+            // Any higher and its near edge draws over the shoes and shoulders
+            // instead of lying under them.
+            const m = boxMesh(mats.mat, 0.78, 0.035, 2.1);
+            m.position.set(0, -0.0175, -0.55);
             break;
           }
           case "chair": {
-            const seat = boxMesh(mats.chair, 0.5, 0.06, 0.5);
-            const back = boxMesh(mats.chair, 0.5, 0.5, 0.05);
+            // The seat has to clear the buttocks. The hip *joint* sits well
+            // inside the flesh, so a seat level with it cuts through the body —
+            // it belongs a hand's width below, with the figure resting on top.
+            const seat = boxMesh(mats.chair, 0.42, 0.05, 0.44);
+            const back = boxMesh(mats.chair, 0.42, 0.46, 0.045);
+            const legs = [0, 1, 2, 3].map(() => boxMesh(mats.chair, 0.045, 1, 0.045));
             dynamic.push(() => {
               const h = wp("hips");
-              const seatY = h ? h.y - 0.06 : 0.44;
-              seat.position.set(0, seatY, -0.02);
-              back.position.set(0, seatY + 0.28, -0.26);
+              const hipY = h ? h.y : 0.5;
+              const hipZ = h ? h.z : 0;
+              const topY = hipY - 0.13;
+              const seatZ = hipZ - 0.04;
+              seat.position.set(0, topY - 0.025, seatZ);
+              back.position.set(0, topY + 0.23, seatZ - 0.2);
+              legs.forEach((leg, i) => {
+                const sx = i < 2 ? -0.17 : 0.17;
+                const sz = i % 2 === 0 ? -0.17 : 0.17;
+                const legTop = topY - 0.05;
+                leg.scale.y = Math.max(legTop, 0.05);
+                leg.position.set(sx, Math.max(legTop, 0.05) / 2, seatZ + sz);
+              });
             });
             break;
           }
@@ -359,12 +438,34 @@ export default function Human3D({
           }
           case "ballBetweenKnees":
           case "gymBall": {
-            const r = (prop.kind === "gymBall" ? 0.32 : prop.radius ?? 0.12);
-            const ball = new THREE.Mesh(new THREE.SphereGeometry(r, 24, 20), mats.ball);
+            const gym = prop.kind === "gymBall";
+            const ball = new THREE.Mesh(new THREE.SphereGeometry(1, 28, 22), mats.ball);
+            ball.castShadow = true; ball.receiveShadow = true;
             propGroup.add(ball);
             dynamic.push(() => {
               const a = wp("rShin"), b = wp("lShin");
-              if (a && b) ball.position.copy(a.clone().add(b).multiplyScalar(0.5));
+              if (!a || !b) return;
+              // Sit it between the thighs a little above the knees, which is
+              // where a squeeze ball actually rests. Centred on the knee joints
+              // it reads as a lump growing out of the knee.
+              const kneeMid = a.clone().add(b).multiplyScalar(0.5);
+              const hR = wp("rThigh"), hL = wp("lThigh");
+              if (hR && hL) {
+                const hipMid = hR.clone().add(hL).multiplyScalar(0.5);
+                kneeMid.lerp(hipMid, 0.22);
+              }
+              ball.position.copy(kneeMid);
+              // Size it to the gap it actually sits in. A ball wider than the
+              // knees are apart bulges out past them and hides the joints —
+              // which is exactly what a fixed radius did.
+              // Size it to the gap between the knee *surfaces*, not the joint
+              // centres — those sit deep inside the leg, so a ball matched to
+              // them swallows both knees, which is what it was doing.
+              const KNEE_HALF_WIDTH = 0.055;
+              const gap = a.distanceTo(b);
+              const free = gap / 2 - KNEE_HALF_WIDTH;
+              const r = gym ? 0.3 : Math.min(prop.radius ?? 0.09, Math.max(free, 0.03));
+              ball.scale.setScalar(r);
             });
             break;
           }
@@ -399,16 +500,42 @@ export default function Human3D({
             break;
           }
           case "band": {
-            // A band from each hand to an anchor out to the side at chest height.
-            const bR = cyl(mats.band, 0.018, 1);
-            const bL = cyl(mats.band, 0.018, 1);
-            dynamic.push(() => {
-              const a = wp("rHand"), b = wp("lHand");
-              const anchorR = new THREE.Vector3(-0.9, 1.1, 0.1);
-              const anchorL = new THREE.Vector3(0.9, 1.1, 0.1);
-              if (a) spanCyl(bR, a, anchorR);
-              if (b) spanCyl(bL, b, anchorL);
-            });
+            // Two ways a band is actually used. Held BETWEEN the hands, it is
+            // pulled apart — that is rotation and pull-apart work. Anchored in
+            // FRONT, it is pulled towards you — that is a row. A band running
+            // away to both sides, as this drew before, is neither.
+            const anchored = prop.anchor === "front";
+            if (anchored) {
+              const bR = cyl(mats.band, 0.016, 1);
+              const bL = cyl(mats.band, 0.016, 1);
+              dynamic.push(() => {
+                const a = wp("rHand"), b = wp("lHand");
+                const s = wp("spineUpper");
+                const y = s ? s.y : 1.2;
+                if (a) spanCyl(bR, a, new THREE.Vector3(-0.16, y, 1.15));
+                if (b) spanCyl(bL, b, new THREE.Vector3(0.16, y, 1.15));
+              });
+            } else {
+              // A band held in both hands passes IN FRONT of the body, so it is
+              // drawn as a curve bowed forwards. A straight line between the
+              // hands runs through the stomach and disappears behind the torso.
+              const tube = new THREE.Mesh(undefined, mats.band);
+              tube.castShadow = true;
+              propGroup.add(tube);
+              const curve = new THREE.QuadraticBezierCurve3(
+                new THREE.Vector3(), new THREE.Vector3(), new THREE.Vector3()
+              );
+              dynamic.push(() => {
+                const a = wp("rHand"), b = wp("lHand");
+                if (!a || !b) return;
+                curve.v0.copy(a);
+                curve.v2.copy(b);
+                curve.v1.copy(a).add(b).multiplyScalar(0.5)
+                  .addScaledVector(bodyFront, 0.26);
+                tube.geometry?.dispose();
+                tube.geometry = new THREE.TubeGeometry(curve, 20, 0.016, 10, false);
+              });
+            }
             break;
           }
           case "tableSupport": {
@@ -509,9 +636,6 @@ export default function Human3D({
       const tick = () => {
         const p = poseRef.current;
         const lying = Math.abs(p.rootRot) > 45;
-        // Seated: upright but hips deeply flexed (a chair beneath). Framed lower.
-        const seated = !lying && p.hipNear > 55;
-        place(viewRef.current, lying ? "lying" : seated ? "seated" : "stand");
 
         poseBody(p, 0);
 
@@ -524,10 +648,15 @@ export default function Human3D({
           b.getWorldPosition(_v);
           if (_v.y < low) low = _v.y;
         }
-        if (Number.isFinite(low)) root.position.y -= low - (lying ? 0.05 : 0.04);
+        // Joint centres sit inside the flesh, so the body is lifted until the
+        // skin — not the bone — meets the floor. A lying body needs more of a
+        // margin than a standing one: the trunk is thick, an ankle is not.
+        if (Number.isFinite(low)) root.position.y -= low - (lying ? 0.055 : 0.04);
 
         root.updateMatrixWorld(true);
+        bodyFront.set(0, 0, 1).applyQuaternion(root.getWorldQuaternion(_wq));
         updateProps();
+        frameCamera(viewRef.current);
 
         renderer.render(scene, camera);
         host.dataset.ready = "1";

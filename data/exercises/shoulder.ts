@@ -1801,7 +1801,7 @@ export const SHOULDER: Exercise[] = [
           label: "Pull back, squeeze the blades",
         },
       ],
-      props: [{ kind: "band" }],
+      props: [{ kind: "band", anchor: "front" }],
       arrows: [{ at: "shoulderR", dir: 90, len: 26, label: "squeeze" }],
     },
   },
