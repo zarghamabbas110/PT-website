@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import PhysioFigure from "@/components/figure/PhysioFigure";
+import AnimatedHuman3D from "@/components/figure/AnimatedHuman3D";
 import PinnedNotes from "./PinnedNotes";
 import Collapsible from "./Collapsible";
 import LanguageToggle from "@/components/LanguageToggle";
@@ -71,7 +72,7 @@ export default function ExerciseDetail({
           <div className="lg:sticky lg:top-24 lg:self-start">
             <div className="overflow-hidden rounded-[30px] border border-crimson-100 bg-cream-50 shadow-[0_20px_50px_rgba(90,30,20,0.1)]">
               <div className="bg-gradient-to-b from-crimson-50 to-cream-50 p-3">
-                <PhysioFigure spec={ex.figure} className="w-full" />
+                <AnimatedHuman3D spec={ex.figure} className="w-full" />
               </div>
               <div className="grid grid-cols-2 gap-px bg-crimson-100 sm:grid-cols-4">
                 <Stat label={ui("sets")} value={ex.sets} />
