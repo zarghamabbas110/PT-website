@@ -273,6 +273,19 @@ export type Pose = {
    * knee outward. 3D only — this is what opens a clamshell. Ignored in 2D.
    */
   hipRotNear: number;
+  /**
+   * Shoulder abduction of the near arm, degrees: how far the arm swings out to
+   * the side (the frontal plane) rather than forward. 0 = forward/flexion
+   * plane, 90 = straight out to the side. 3D only; the flat side view can't
+   * show it, so the 2D engine ignores it.
+   */
+  shoulderAbductNear: number;
+  /**
+   * Shoulder rotation of the near arm, degrees: with the elbow bent, positive
+   * swings the forearm outward (external rotation) while the upper arm stays
+   * put; negative swings it across the body (internal rotation). 3D only.
+   */
+  shoulderRotNear: number;
 
   /** Far-side limb (drawn behind, slightly faded for depth). */
   shoulderFar: number;
@@ -281,6 +294,10 @@ export type Pose = {
   kneeFar: number;
   ankleFar: number;
   hipRotFar: number;
+  /** Shoulder abduction of the far arm; see shoulderAbductNear. 3D only. */
+  shoulderAbductFar: number;
+  /** Shoulder rotation of the far arm; see shoulderRotNear. 3D only. */
+  shoulderRotFar: number;
 
   /**
    * Offsets the far-side limbs, turning a flat side-on view into a slight
@@ -309,12 +326,16 @@ export const NEUTRAL: Pose = {
   kneeNear: 2,
   ankleNear: 0,
   hipRotNear: 0,
+  shoulderAbductNear: 0,
+  shoulderRotNear: 0,
   shoulderFar: 182,
   elbowFar: 6,
   hipFar: 0,
   kneeFar: 2,
   ankleFar: 0,
   hipRotFar: 0,
+  shoulderAbductFar: 0,
+  shoulderRotFar: 0,
   farDX: 0,
   farDY: 0,
 };

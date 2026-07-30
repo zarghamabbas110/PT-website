@@ -300,11 +300,19 @@ export default function Human3D({
         // Arms roll so the thumb stays up (palm facing inward), which reads as
         // natural in every raise. Rolling their front toward the body-front
         // instead pronates the hand — thumb rolling down — as the arm lifts.
+        // Abduction widens the arm's lateral swing, carrying it out to the side
+        // (the frontal plane) instead of forward.
         const armUp = new THREE.Vector3(0, 1, 0);
-        aim(rig, "rUpper", d(p.shoulderNear, -ARM_SPLAY), armUp);
-        aim(rig, "lUpper", d(p.shoulderFar, ARM_SPLAY), armUp);
-        aim(rig, "rFore", d(p.shoulderNear - p.elbowNear, -ARM_SPLAY), armUp);
-        aim(rig, "lFore", d(p.shoulderFar - p.elbowFar, ARM_SPLAY), armUp);
+        const rArmLat = -ARM_SPLAY - (p.shoulderAbductNear ?? 0);
+        const lArmLat = ARM_SPLAY + (p.shoulderAbductFar ?? 0);
+        // Rotation swings only the forearm out (external) or across (internal),
+        // leaving the upper arm where it is — the shoulder's rotation DOF.
+        const rForeLat = rArmLat - (p.shoulderRotNear ?? 0);
+        const lForeLat = lArmLat + (p.shoulderRotFar ?? 0);
+        aim(rig, "rUpper", d(p.shoulderNear, rArmLat), armUp);
+        aim(rig, "lUpper", d(p.shoulderFar, lArmLat), armUp);
+        aim(rig, "rFore", d(p.shoulderNear - p.elbowNear, rForeLat), armUp);
+        aim(rig, "lFore", d(p.shoulderFar - p.elbowFar, lForeLat), armUp);
 
         const rThigh = 180 - p.hipNear, lThigh = 180 - p.hipFar;
         const rShin = rThigh + p.kneeNear, lShin = lThigh + p.kneeFar;
