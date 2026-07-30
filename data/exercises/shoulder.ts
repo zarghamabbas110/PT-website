@@ -315,7 +315,19 @@ export const SHOULDER: Exercise[] = [
         "Active-assisted range of motion with a wand is standard practice for restoring elevation where active movement is limited by pain or stiffness. Citations to be attached at clinical review.",
     },
     figure: {
-      view: "front",
+      view: "side",
+      frames: [
+        {
+          pose: pose({ shoulderNear: 158, shoulderFar: 158, elbowNear: 24, elbowFar: 24 }, NEUTRAL),
+          travel: 800, hold: 400,
+          label: "Start — wand held in front at the waist",
+        },
+        {
+          pose: pose({ shoulderNear: 42, shoulderFar: 42, elbowNear: 8, elbowFar: 8 }, NEUTRAL),
+          travel: 1100, hold: 800,
+          label: "The good arm helps raise the wand forward and up",
+        },
+      ],
       frontFrames: [
         {
           pose: frontPose({ abductR: 4, abductL: 4, elbowR: 0, elbowL: 0 }, STAND),
@@ -458,6 +470,24 @@ export const SHOULDER: Exercise[] = [
     },
     figure: {
       view: "front",
+      frames: [
+        {
+          pose: pose({ shoulderNear: 172, shoulderFar: 172, elbowNear: 16, elbowFar: 16 }, NEUTRAL),
+          travel: 800, hold: 400,
+          label: "Start — holding the wand across the front",
+        },
+        {
+          // The good (far) arm pushes across the body so the affected (near) arm
+          // is carried out into abduction — both cannot abduct at once.
+          pose: pose(
+            { shoulderNear: 96, shoulderAbductNear: 84, elbowNear: 6,
+              shoulderFar: 118, shoulderAbductFar: -26, elbowFar: 10 },
+            NEUTRAL
+          ),
+          travel: 1100, hold: 800,
+          label: "Good arm pushes the affected arm out to the side",
+        },
+      ],
       // Both arms cannot abduct on one stick. To push the affected right arm
       // out to the side, the assisting left hand has to travel the same way,
       // which means the left arm ADDUCTS across the front of the body.
@@ -609,6 +639,26 @@ export const SHOULDER: Exercise[] = [
     },
     figure: {
       view: "front",
+      frames: [
+        {
+          pose: pose(
+            { shoulderNear: 172, shoulderFar: 172, elbowNear: 90, elbowFar: 90,
+              shoulderRotNear: -42, shoulderRotFar: -42 },
+            NEUTRAL
+          ),
+          travel: 800, hold: 400,
+          label: "Start — elbows at the sides, forearms across the tummy",
+        },
+        {
+          pose: pose(
+            { shoulderNear: 172, shoulderFar: 172, elbowNear: 90, elbowFar: 90,
+              shoulderRotNear: 48, shoulderRotFar: 48 },
+            NEUTRAL
+          ),
+          travel: 1000, hold: 900,
+          label: "Wand guides the forearms outward — elbows stay pinned",
+        },
+      ],
       frontFrames: [
         {
           pose: frontPose(
@@ -913,6 +963,21 @@ export const SHOULDER: Exercise[] = [
     },
     figure: {
       view: "front",
+      frames: [
+        {
+          pose: pose({ shoulderNear: 178, shoulderFar: 178, elbowNear: 6, elbowFar: 6 }, NEUTRAL),
+          travel: 700, hold: 500,
+          label: "Start — shoulders relaxed",
+        },
+        {
+          pose: pose(
+            { shoulderNear: 184, shoulderFar: 184, shoulderRotNear: 10, shoulderRotFar: 10, elbowNear: 4, elbowFar: 4 },
+            NEUTRAL
+          ),
+          travel: 900, hold: 1400,
+          label: "Gently draw the shoulder blades back and down — hold",
+        },
+      ],
       frontFrames: [
         {
           pose: frontPose({ scapulaR: -6, scapulaL: -6 }, STAND),
@@ -1372,6 +1437,22 @@ export const SHOULDER: Exercise[] = [
     },
     figure: {
       view: "front",
+      frames: [
+        {
+          pose: pose({ shoulderNear: 172, shoulderFar: 172, shoulderAbductNear: 16, shoulderAbductFar: 16, elbowNear: 2, elbowFar: 2 }, NEUTRAL),
+          travel: 800, hold: 400,
+          label: "Start — arms a little forward of the sides",
+        },
+        {
+          // Scaption is the scapular plane: part-way between forward and out.
+          pose: pose(
+            { shoulderNear: 92, shoulderFar: 92, shoulderAbductNear: 44, shoulderAbductFar: 44, elbowNear: 2, elbowFar: 2 },
+            NEUTRAL
+          ),
+          travel: 1100, hold: 800,
+          label: "Raise on the diagonal, thumbs up",
+        },
+      ],
       frontFrames: [
         {
           pose: frontPose({ abductR: 14, abductL: 14, elbowR: 2, elbowL: 2 }, STAND),
@@ -1516,6 +1597,26 @@ export const SHOULDER: Exercise[] = [
     },
     figure: {
       view: "front",
+      frames: [
+        {
+          pose: pose(
+            { shoulderNear: 174, shoulderFar: 174, shoulderAbductNear: 8, shoulderAbductFar: 8,
+              elbowNear: 90, elbowFar: 90, shoulderRotNear: -50, shoulderRotFar: -50 },
+            NEUTRAL
+          ),
+          travel: 800, hold: 400,
+          label: "Start — forearms across the body",
+        },
+        {
+          pose: pose(
+            { shoulderNear: 174, shoulderFar: 174, shoulderAbductNear: 8, shoulderAbductFar: 8,
+              elbowNear: 90, elbowFar: 90, shoulderRotNear: 70, shoulderRotFar: 70 },
+            NEUTRAL
+          ),
+          travel: 1000, hold: 900,
+          label: "Rotate outward against the band — elbows stay pinned",
+        },
+      ],
       frontFrames: [
         {
           pose: frontPose(
@@ -1667,7 +1768,19 @@ export const SHOULDER: Exercise[] = [
         "Rowing patterns with deliberate scapular retraction are standard for periscapular strengthening. Citations to be attached at clinical review.",
     },
     figure: {
-      view: "front",
+      view: "side",
+      frames: [
+        {
+          pose: pose({ shoulderNear: 82, shoulderFar: 82, elbowNear: 6, elbowFar: 6 }, NEUTRAL),
+          travel: 800, hold: 400,
+          label: "Start — arms reaching forward to the band",
+        },
+        {
+          pose: pose({ shoulderNear: 168, shoulderFar: 168, elbowNear: 82, elbowFar: 82 }, NEUTRAL),
+          travel: 1000, hold: 900,
+          label: "Draw the elbows back, squeeze the shoulder blades",
+        },
+      ],
       frontFrames: [
         {
           pose: frontPose(
@@ -1819,6 +1932,24 @@ export const SHOULDER: Exercise[] = [
     },
     figure: {
       view: "front",
+      frames: [
+        {
+          pose: pose({ shoulderNear: 92, shoulderAbductNear: 4, elbowNear: 6, shoulderFar: 150, elbowFar: 40 }, NEUTRAL),
+          travel: 800, hold: 400,
+          label: "Bring the arm up to shoulder height",
+        },
+        {
+          // The near arm adducts across the chest (negative abduction); the far
+          // arm reaches across to hold it there.
+          pose: pose(
+            { shoulderNear: 108, shoulderAbductNear: -34, elbowNear: 8,
+              shoulderFar: 116, shoulderAbductFar: -26, elbowFar: 82 },
+            NEUTRAL
+          ),
+          travel: 1000, hold: 1200,
+          label: "Draw it across the chest with the other hand — hold",
+        },
+      ],
       frontFrames: [
         {
           pose: frontPose(
@@ -1970,6 +2101,26 @@ export const SHOULDER: Exercise[] = [
     },
     figure: {
       view: "front",
+      frames: [
+        {
+          pose: pose(
+            { shoulderNear: 104, shoulderFar: 104, shoulderAbductNear: 78, shoulderAbductFar: 78,
+              elbowNear: 88, elbowFar: 88 },
+            NEUTRAL
+          ),
+          travel: 800, hold: 500,
+          label: "Forearms on the door frame at shoulder height",
+        },
+        {
+          pose: pose(
+            { shoulderNear: 96, shoulderFar: 96, shoulderAbductNear: 74, shoulderAbductFar: 74,
+              elbowNear: 84, elbowFar: 84, thorax: -6 },
+            NEUTRAL
+          ),
+          travel: 1000, hold: 1300,
+          label: "Step forward until you feel the stretch across the chest",
+        },
+      ],
       frontFrames: [
         {
           pose: frontPose(
