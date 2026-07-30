@@ -42,7 +42,7 @@ export default function AnimatedHuman3D({
 
   return (
     <div className={className}>
-      <Human3D pose={pose} view={view} className="h-[420px] w-full sm:h-[460px]" />
+      <Human3D pose={pose} view={view} props={spec.props} className="h-[420px] w-full sm:h-[460px]" />
       {showLabel && label && (
         <p className="px-4 pb-1 pt-2 text-center text-[0.9rem] font-semibold text-espresso-800">
           {label}

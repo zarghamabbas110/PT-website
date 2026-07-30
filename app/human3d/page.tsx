@@ -173,6 +173,7 @@ export default function Human3DPage() {
               <Human3D
                 pose={pose}
                 view={v}
+                props={ex.figure.props}
                 className={allViews ? "h-[440px] w-full" : "h-[580px] w-full"}
               />
               <p className="border-t border-crimson-100 bg-cream-50 py-2.5 text-center text-[0.78rem] font-bold uppercase tracking-wider text-espresso-700/60">
