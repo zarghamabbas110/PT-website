@@ -272,6 +272,13 @@ export type Pose = {
   hipNear: number;
   kneeNear: number;
   ankleNear: number;
+  /**
+   * Hip rotation about the length of the thigh; positive turns the knee
+   * outwards. Flat side-on drawing cannot show it, so the 2D solver ignores
+   * this — but without it a clamshell has to be faked as hip flexion, which
+   * in 3D lifts the knee forwards instead of opening it.
+   */
+  hipRotNear: number;
 
   /** Far-side limb (drawn behind, slightly faded for depth). */
   shoulderFar: number;
@@ -279,6 +286,7 @@ export type Pose = {
   hipFar: number;
   kneeFar: number;
   ankleFar: number;
+  hipRotFar: number;
 
   /**
    * Offsets the far-side limbs, turning a flat side-on view into a slight
@@ -306,11 +314,13 @@ export const NEUTRAL: Pose = {
   hipNear: 0,
   kneeNear: 2,
   ankleNear: 0,
+  hipRotNear: 0,
   shoulderFar: 182,
   elbowFar: 6,
   hipFar: 0,
   kneeFar: 2,
   ankleFar: 0,
+  hipRotFar: 0,
   farDX: 0,
   farDY: 0,
 };

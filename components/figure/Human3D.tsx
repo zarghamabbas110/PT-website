@@ -32,6 +32,11 @@ import type { Pose } from "@/lib/figure";
 
 const DEG = Math.PI / 180;
 
+/** Set by the review harness to publish joint positions for inspection. */
+const DEBUG =
+  typeof window !== "undefined" &&
+  window.location.search.includes("debug");
+
 /** Bone names, once the Mixamo prefix is stripped. */
 const B = {
   hips: "Hips",
@@ -110,15 +115,27 @@ function dir(angleDeg: number, lateral = 0): THREE.Vector3 {
  */
 type RollRef = "fwd" | "up";
 
-type Rig = {
-  bones: Map<string, THREE.Bone>;
-  /** Direction from each bone toward its child, in that bone's own space. */
-  restDir: Map<string, THREE.Vector3>;
-  /** World +Z at rest, expressed in each bone's own space. */
-  restFwd: Map<string, THREE.Vector3>;
-  /** World +Y at rest, expressed in each bone's own space. */
-  restUp: Map<string, THREE.Vector3>;
+/**
+ * One bone, plus the reference frame it rests in.
+ *
+ * This file converts an FBX exported per-mesh, and the conversion gave every
+ * mesh its own copy of the skeleton — three copies of every joint across seven
+ * skins. Keeping only one copy per name meant posing the skeleton that drove
+ * the trousers while the shoe still followed another, which is how a foot ends
+ * up facing backwards. So a name maps to *every* copy, and all are driven
+ * together.
+ */
+type Joint = {
+  bone: THREE.Bone;
+  /** Direction from this bone toward its child, in the bone's own space. */
+  restDir: THREE.Vector3;
+  /** World +Z at rest, expressed in the bone's own space. */
+  restFwd: THREE.Vector3;
+  /** World +Y at rest, expressed in the bone's own space. */
+  restUp: THREE.Vector3;
 };
+
+type Rig = { joints: Map<string, Joint[]> };
 
 const _parentQ = new THREE.Quaternion();
 const _worldQ = new THREE.Quaternion();
@@ -137,44 +154,46 @@ function aim(
   targetWorld: THREE.Vector3,
   roll?: { toward: THREE.Vector3; ref: RollRef }
 ) {
-  const bone = rig.bones.get(name);
-  const rest = rig.restDir.get(name);
-  if (!bone || !rest || !bone.parent) return;
-
-  // A bone's rotation is relative to its parent, so the target moves there too.
-  bone.parent.getWorldQuaternion(_parentQ);
-  const invParent = _parentQ.clone().invert();
+  const joints = rig.joints.get(name);
+  if (!joints) return;
 
   const axis = targetWorld.clone().normalize();
-  const targetLocal = axis.clone().applyQuaternion(invParent).normalize();
-  bone.quaternion.setFromUnitVectors(rest, targetLocal);
-  bone.updateMatrixWorld(true);
 
-  if (!roll) return;
+  for (const { bone, restDir, restFwd, restUp } of joints) {
+    if (!bone.parent) continue;
 
-  const restRef = (roll.ref === "up" ? rig.restUp : rig.restFwd).get(name);
-  if (!restRef) return;
+    // A bone's rotation is relative to its parent, so the target moves there too.
+    bone.parent.getWorldQuaternion(_parentQ);
+    const invParent = _parentQ.clone().invert();
 
-  // Compare where the bone's front actually points with where it should,
-  // both flattened into the plane square to the bone. Whatever angle is left
-  // between them is the unwanted spin.
-  bone.getWorldQuaternion(_worldQ);
-  const have = restRef.clone().applyQuaternion(_worldQ);
-  const flatten = (v: THREE.Vector3) =>
-    v.clone().addScaledVector(axis, -v.dot(axis));
+    const targetLocal = axis.clone().applyQuaternion(invParent).normalize();
+    bone.quaternion.setFromUnitVectors(restDir, targetLocal);
+    bone.updateMatrixWorld(true);
 
-  const from = flatten(have);
-  const to = flatten(roll.toward);
-  if (from.lengthSq() < 1e-6 || to.lengthSq() < 1e-6) return;
-  from.normalize();
-  to.normalize();
+    if (!roll) continue;
 
-  let angle = Math.acos(THREE.MathUtils.clamp(from.dot(to), -1, 1));
-  if (from.cross(to).dot(axis) < 0) angle = -angle;
+    // Compare where the bone's front actually points with where it should,
+    // both flattened into the plane square to the bone. Whatever angle is left
+    // between them is the unwanted spin.
+    const restRef = roll.ref === "up" ? restUp : restFwd;
+    bone.getWorldQuaternion(_worldQ);
+    const have = restRef.clone().applyQuaternion(_worldQ);
+    const flatten = (v: THREE.Vector3) =>
+      v.clone().addScaledVector(axis, -v.dot(axis));
 
-  const twist = new THREE.Quaternion().setFromAxisAngle(axis, angle);
-  bone.quaternion.copy(invParent.multiply(twist).multiply(_worldQ));
-  bone.updateMatrixWorld(true);
+    const from = flatten(have);
+    const to = flatten(roll.toward);
+    if (from.lengthSq() < 1e-6 || to.lengthSq() < 1e-6) continue;
+    from.normalize();
+    to.normalize();
+
+    let angle = Math.acos(THREE.MathUtils.clamp(from.dot(to), -1, 1));
+    if (from.cross(to).dot(axis) < 0) angle = -angle;
+
+    const twist = new THREE.Quaternion().setFromAxisAngle(axis, angle);
+    bone.quaternion.copy(invParent.multiply(twist).multiply(_worldQ));
+    bone.updateMatrixWorld(true);
+  }
 }
 
 export type View3D = "front" | "side" | "threeQuarter";
@@ -221,7 +240,14 @@ export default function Human3D({
     fill.position.set(-3, 2, -2);
     scene.add(fill);
 
-    const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+    // preserveDrawingBuffer keeps the last frame readable after it is drawn.
+    // Without it the canvas reads back empty outside a render tick, so
+    // screenshots — ours for review, and any the user takes — come out blank.
+    const renderer = new THREE.WebGLRenderer({
+      antialias: true,
+      alpha: true,
+      preserveDrawingBuffer: true,
+    });
     renderer.setSize(width, height);
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
     renderer.outputColorSpace = THREE.SRGBColorSpace;
@@ -261,6 +287,11 @@ export default function Human3D({
       }
     };
 
+    // Loading is not instant, and a canvas that has not drawn yet is simply
+    // blank. Publishing readiness on the element lets the review harness wait
+    // for a real frame instead of guessing at a timeout.
+    host.dataset.ready = "0";
+
     new GLTFLoader().load("/models/adam.glb", (gltf) => {
       if (disposed) return;
 
@@ -271,17 +302,24 @@ export default function Human3D({
       // NOTE: the hoodie cannot be hidden. This character has no torso mesh
       // beneath it — the body mesh is only head, hands and feet — so removing
       // the hoodie leaves a floating head and forearms.
-      const bones = new Map<string, THREE.Bone>();
+      // Every copy of every bone, grouped by joint name. See the Joint type:
+      // this file's character carries three skeletons, and driving only one of
+      // them leaves the other meshes posed differently.
+      const raw = new Map<string, THREE.Bone[]>();
       gltf.scene.traverse((o) => {
-        if ((o as THREE.Bone).isBone) bones.set(boneKey(o.name), o as THREE.Bone);
+        if ((o as THREE.Bone).isBone) {
+          const k = boneKey(o.name);
+          const list = raw.get(k);
+          if (list) list.push(o as THREE.Bone);
+          else raw.set(k, [o as THREE.Bone]);
+        }
+        // A skinned mesh is culled against a bounding sphere measured once, in
+        // the T-pose, and posing bones does not update it. Lay the character on
+        // his side and the whole body is judged off-screen and simply never
+        // drawn — the side-lying exercises rendered as an empty frame.
+        (o as THREE.Mesh).frustumCulled = false;
       });
 
-      // Record, for every bone, where it points at rest and which way its front
-      // faces. Everything else is expressed relative to these, so the rig's own
-      // conventions never leak into the exercise data.
-      const restDir = new Map<string, THREE.Vector3>();
-      const restFwd = new Map<string, THREE.Vector3>();
-      const restUp = new Map<string, THREE.Vector3>();
       const CHILD: Record<string, string> = {
         [B.spine]: B.spine1,
         [B.spine1]: B.spine2,
@@ -298,22 +336,41 @@ export default function Human3D({
         [B.lShin]: B.lFoot,
         [B.lFoot]: B.lToe,
       };
-      for (const [parent, child] of Object.entries(CHILD)) {
-        const c = bones.get(child);
-        if (c) restDir.set(parent, c.position.clone().normalize());
-      }
-      // The head has no useful child joint; treat it as continuing the neck.
-      if (bones.get(B.head)) restDir.set(B.head, new THREE.Vector3(0, 1, 0));
-
+      // Record, for every bone, where it points at rest and which way its front
+      // faces. Everything else is expressed relative to these, so the rig's own
+      // conventions never leak into the exercise data. Each copy is measured
+      // separately — they should agree, but assuming it would reintroduce the
+      // very mismatch this is here to avoid.
       scene.updateMatrixWorld(true);
-      bones.forEach((bone, name2) => {
-        bone.getWorldQuaternion(_worldQ);
-        const inv = _worldQ.clone().invert();
-        restFwd.set(name2, new THREE.Vector3(0, 0, 1).applyQuaternion(inv));
-        restUp.set(name2, new THREE.Vector3(0, 1, 0).applyQuaternion(inv));
+      const joints = new Map<string, Joint[]>();
+      raw.forEach((copies, name2) => {
+        const childName = CHILD[name2];
+        const list: Joint[] = [];
+        copies.forEach((bone, i) => {
+          // Pair each copy with the child from its own skeleton where possible,
+          // falling back to the first if the skeletons are not parallel.
+          const childCopies = childName ? raw.get(childName) : undefined;
+          const child = childCopies ? childCopies[i] ?? childCopies[0] : undefined;
+          const restDir = child
+            ? child.position.clone().normalize()
+            : // The head has no useful child joint; treat it as continuing the neck.
+              new THREE.Vector3(0, 1, 0);
+
+          bone.getWorldQuaternion(_worldQ);
+          const inv = _worldQ.clone().invert();
+          list.push({
+            bone,
+            restDir,
+            restFwd: new THREE.Vector3(0, 0, 1).applyQuaternion(inv),
+            restUp: new THREE.Vector3(0, 1, 0).applyQuaternion(inv),
+          });
+        });
+        joints.set(name2, list);
       });
 
-      const rig: Rig = { bones, restDir, restFwd, restUp };
+      const rig: Rig = { joints };
+      /** First copy of a joint — enough for measuring, since all are driven alike. */
+      const boneAt = (n: string) => rig.joints.get(n)?.[0]?.bone;
 
       /**
        * Where a lying body would come to rest.
@@ -327,7 +384,7 @@ export default function Human3D({
       const settleAngle = () => {
         let pts: { z: number; y: number }[] = [];
         for (const n of SUPPORT_BONES) {
-          const b = bones.get(n);
+          const b = boneAt(n);
           if (!b) continue;
           b.getWorldPosition(_v);
           pts.push({ z: _v.z, y: _v.y });
@@ -368,7 +425,7 @@ export default function Human3D({
 
         // The body tips onto whichever hull edge lies under its weight, and the
         // pelvis is close enough to the centre of mass for this purpose.
-        const hipBone = bones.get(B.hips);
+        const hipBone = boneAt(B.hips);
         let cz = hull[0].z;
         if (hipBone) {
           hipBone.getWorldPosition(_v);
@@ -417,8 +474,6 @@ export default function Human3D({
         // limbs spinning about their own axis: the kneecap, the tibial crest
         // and the top of the foot all face the same way down one leg.
         const front = d(90);
-        const frontR = d(90, -TOE_OUT);
-        const frontL = d(90, TOE_OUT);
 
         // --- spine -----------------------------------------------------
         // Our four-point chain is spread across Mixamo's three spine bones.
@@ -442,26 +497,53 @@ export default function Human3D({
         aim(rig, B.lFore, d(lUpper - p.elbowFar, ARM_SPLAY), fwd);
 
         // --- legs ------------------------------------------------------
-        // Hip flexion lifts the thigh forward from straight down; knee flexion
-        // swings the shin back behind it; the ankle then sets the foot, which
-        // is measured square to the shin exactly as the flat figure measures it.
-        const rThighA = 180 - p.hipNear;
-        const lThighA = 180 - p.hipFar;
-        const rShinA = rThighA + p.kneeNear;
-        const lShinA = lThighA + p.kneeFar;
-        const rFootA = rShinA - 90 + p.ankleNear + FOOT_DROP;
-        const lFootA = lShinA - 90 + p.ankleFar + FOOT_DROP;
+        // The knee and ankle are hinges carried by the thigh, so the shin and
+        // foot are built *from* the thigh rather than from absolute angles.
+        // Angles alone cannot express hip rotation: turn the femur out and the
+        // shin has to swing with it, which is the whole of a clamshell.
+        const leg = (
+          hip: number,
+          knee: number,
+          ankle: number,
+          hipRot: number,
+          splay: number,
+          toeOut: number,
+          thighBone: string,
+          shinBone: string,
+          footBone: string
+        ) => {
+          const thighDir = d(180 - hip, splay);
+          // The front of the leg — where the kneecap looks — turned out by
+          // however much the hip is rotated.
+          const legFront = d(90, toeOut + hipRot);
+          // The knee's hinge axis runs across the leg, square to both.
+          const hinge = new THREE.Vector3()
+            .crossVectors(thighDir, legFront)
+            .normalize();
+          if (hinge.lengthSq() < 0.5) hinge.set(1, 0, 0);
 
-        const rollR = { toward: frontR, ref: "fwd" as const };
-        const rollL = { toward: frontL, ref: "fwd" as const };
-        aim(rig, B.rThigh, d(rThighA, -LEG_SPLAY), rollR);
-        aim(rig, B.lThigh, d(lThighA, LEG_SPLAY), rollL);
-        aim(rig, B.rShin, d(rShinA, -LEG_SPLAY), rollR);
-        aim(rig, B.lShin, d(lShinA, LEG_SPLAY), rollL);
-        // The foot uses the top of the foot as its front reference, since the
-        // foot itself already runs forward.
-        aim(rig, B.rFoot, d(rFootA, -TOE_OUT), { toward: frontR, ref: "up" });
-        aim(rig, B.lFoot, d(lFootA, TOE_OUT), { toward: frontL, ref: "up" });
+          const shinDir = thighDir.clone().applyAxisAngle(hinge, -knee * DEG);
+          const footDir = shinDir
+            .clone()
+            .applyAxisAngle(hinge, (90 - ankle - FOOT_DROP) * DEG);
+
+          const roll = { toward: legFront, ref: "fwd" as const };
+          aim(rig, thighBone, thighDir, roll);
+          aim(rig, shinBone, shinDir, roll);
+          // The foot's front reference is the top of the foot, since the foot
+          // itself already runs forward.
+          aim(rig, footBone, footDir, { toward: legFront, ref: "up" });
+        };
+
+        // The character's right is -X, so its splay and toe-out are negative.
+        leg(
+          p.hipNear, p.kneeNear, p.ankleNear, -(p.hipRotNear ?? 0),
+          -LEG_SPLAY, -TOE_OUT, B.rThigh, B.rShin, B.rFoot
+        );
+        leg(
+          p.hipFar, p.kneeFar, p.ankleFar, p.hipRotFar ?? 0,
+          LEG_SPLAY, TOE_OUT, B.lThigh, B.lShin, B.lFoot
+        );
 
         root.updateMatrixWorld(true);
       };
@@ -475,14 +557,15 @@ export default function Human3D({
         // that levelling applied. Two passes, because the resting angle depends
         // on the pose and the pose depends on the resting angle.
         applyPose(0);
-        applyPose(lying ? settleAngle() : 0);
+        const settle = lying ? settleAngle() : 0;
+        applyPose(settle);
 
         // --- ground it -------------------------------------------------
         // Re-seated every frame. Grounding once at load uses the T-pose bounds,
         // so the moment a hip or knee bends the character floats or sinks.
         let lowest = Infinity;
         for (const nm of GROUND_BONES) {
-          const b = bones.get(nm);
+          const b = boneAt(nm);
           if (!b) continue;
           b.getWorldPosition(_v);
           if (_v.y < lowest) lowest = _v.y;
@@ -493,7 +576,31 @@ export default function Human3D({
           root.position.y -= lowest - (lying ? 0.07 : 0.09);
         }
 
+        if (DEBUG) {
+          const g = window as unknown as Record<string, unknown>;
+          const read = (n: string) => {
+            const b = boneAt(n);
+            if (!b) return null;
+            b.getWorldPosition(_v);
+            return [+_v.x.toFixed(3), +_v.y.toFixed(3), +_v.z.toFixed(3)];
+          };
+          g.__dbg = {
+            roll: p.roll,
+            rootRot: p.rootRot,
+            lumbar: p.lumbar,
+            shoulderNear: p.shoulderNear,
+            settle: +(settle / DEG).toFixed(1),
+            rootY: +root.position.y.toFixed(3),
+            hips: read(B.hips),
+            head: read(B.head),
+            rFoot: read(B.rFoot),
+            lFoot: read(B.lFoot),
+            camera: camera.position.toArray().map((n) => +n.toFixed(2)),
+          };
+        }
+
         renderer.render(scene, camera);
+        host.dataset.ready = "1";
         raf = requestAnimationFrame(tick);
       };
       tick();

@@ -58,6 +58,13 @@ export default function Human3DPage() {
   // Hook for the screenshot harness, so a review sweep can drive this page
   // without clicking. Harmless in the browser; this page never ships to users.
   useEffect(() => {
+    (window as unknown as Record<string, unknown>).__catalog = list.map((e) => ({
+      slug: e.slug,
+      name: e.name.en,
+      region: e.bodyRegion,
+      position: e.position,
+      labels: e.figure.frames!.map((f) => f.label ?? ""),
+    }));
     (window as unknown as Record<string, unknown>).__setShot = (
       s: string,
       v: View3D,
@@ -177,7 +184,10 @@ export default function Human3DPage() {
         >
           {shown.map((v) => (
             <div
-              key={v}
+              // Keying on the view itself would tear down the canvas and reload
+              // the 19 MB character every time the camera changes. The renderer
+              // reads the view live, so one stable slot is all that is needed.
+              key={allViews ? v : "single"}
               className="overflow-hidden rounded-[22px] border border-crimson-100 bg-gradient-to-b from-crimson-50 to-cream-50"
             >
               <Human3D
