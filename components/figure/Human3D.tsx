@@ -140,6 +140,12 @@ export type View3D = "front" | "side" | "threeQuarter";
 const LEG_SPLAY = 6;
 const TOE_OUT = 12;
 const ARM_SPLAY = 7;
+/**
+ * The ankle sits above and behind the toes, so a foot flat on the floor has its
+ * bone pointing forward AND downward. Aiming it horizontally leaves the toe up
+ * in the air — a dorsiflexed look. This tips it down so the sole lies flat.
+ */
+const FOOT_PITCH = 24;
 
 export default function Human3D({
   pose, view = "front", className,
@@ -188,10 +194,10 @@ export default function Human3D({
         else camera.position.set(3.1, 2.2, 1.9);
         camera.lookAt(look);
       } else {
-        if (v === "front") camera.position.set(0, 0.95, 5.4);
-        else if (v === "side") camera.position.set(5.4, 0.95, 0);
-        else camera.position.set(3.8, 1.25, 3.8);
-        camera.lookAt(0, 0.85, 0);
+        if (v === "front") camera.position.set(0, 0.9, 5.6);
+        else if (v === "side") camera.position.set(5.6, 0.9, 0);
+        else camera.position.set(3.9, 1.2, 3.9);
+        camera.lookAt(0, 0.8, 0);
       }
     };
 
@@ -261,54 +267,66 @@ export default function Human3D({
       const rig: Rig = { joints };
       const first = (k: J) => rig.joints.get(k)?.[0]?.bone;
 
-      const tick = () => {
-        const p = poseRef.current;
-        const lying = Math.abs(p.rootRot) > 45;
-        place(viewRef.current, lying);
+      const X_AXIS = new THREE.Vector3(1, 0, 0);
+      const wp = (k: J) => {
+        const b = first(k);
+        if (!b) return null;
+        return b.getWorldPosition(new THREE.Vector3());
+      };
 
+      // Pose every bone from the current Pose, with an extra `settle` rotation
+      // about world-X. Split out so a lying body can be posed twice: once to see
+      // where it lands, then again tilted so it rests on its ground contacts.
+      const poseBody = (p: Pose, settle: number) => {
         root.rotation.set(0, 0, 0);
         root.position.set(0, 0, 0);
         root.rotateX(p.rootRot * DEG);
         root.rotateY((p.roll ?? 0) * DEG);
+        if (settle) root.rotateOnWorldAxis(X_AXIS, settle);
         root.updateMatrixWorld(true);
 
-        const rootQ = new THREE.Quaternion();
-        root.getWorldQuaternion(rootQ);
+        const rootQ = root.getWorldQuaternion(new THREE.Quaternion());
         const d = (angle: number, lateral = 0) => dir(angle, lateral).applyQuaternion(rootQ);
         const front = d(90);
-        const up = d(0);
 
-        // --- spine (two segments cover our lumbar + thoracic curl) ---
         const lumbarA = p.pelvisTilt + p.lumbar;
         const thoraxA = lumbarA + p.thorax;
         aim(rig, "spineLower", d(lumbarA * 0.7), front);
         aim(rig, "spineUpper", d(thoraxA * 0.6), front);
         aim(rig, "neck", d(thoraxA + p.neck), front);
-        // The head is a leaf bone with no child to give it a reliable axis, so
-        // aiming it directly threw it back. It rides the neck instead, which
-        // looks natural; chin-specific movement can be revisited if needed.
+        // The head rides the neck: it is a leaf bone with no child to give it a
+        // reliable axis, and aiming it directly threw it back.
 
-        // --- arms ---
         aim(rig, "rUpper", d(p.shoulderNear, -ARM_SPLAY), front);
         aim(rig, "lUpper", d(p.shoulderFar, ARM_SPLAY), front);
         aim(rig, "rFore", d(p.shoulderNear - p.elbowNear, -ARM_SPLAY), front);
         aim(rig, "lFore", d(p.shoulderFar - p.elbowFar, ARM_SPLAY), front);
 
-        // --- legs ---
         const rThigh = 180 - p.hipNear, lThigh = 180 - p.hipFar;
         const rShin = rThigh + p.kneeNear, lShin = lThigh + p.kneeFar;
-        const rFootA = rShin - 90 + p.ankleNear, lFootA = lShin - 90 + p.ankleFar;
+        const rFootA = rShin - 90 + p.ankleNear + FOOT_PITCH;
+        const lFootA = lShin - 90 + p.ankleFar + FOOT_PITCH;
         const rLat = -LEG_SPLAY - (p.hipRotNear ?? 0);
         const lLat = LEG_SPLAY + (p.hipRotFar ?? 0);
         aim(rig, "rThigh", d(rThigh, rLat), front);
         aim(rig, "lThigh", d(lThigh, lLat), front);
         aim(rig, "rShin", d(rShin, rLat), front);
         aim(rig, "lShin", d(lShin, lLat), front);
-        aim(rig, "rFoot", d(rFootA, -TOE_OUT), up, "up");
-        aim(rig, "lFoot", d(lFootA, TOE_OUT), up, "up");
-
-        // --- sit on the floor ---
+        // Foot aimed by direction only; it inherits the shin's forward frame,
+        // which keeps the sole down. An independent world-up roll flipped it.
+        aim(rig, "rFoot", d(rFootA, -TOE_OUT));
+        aim(rig, "lFoot", d(lFootA, TOE_OUT));
         root.updateMatrixWorld(true);
+      };
+
+      const tick = () => {
+        const p = poseRef.current;
+        const lying = Math.abs(p.rootRot) > 45;
+        place(viewRef.current, lying);
+
+        poseBody(p, 0);
+
+        // Sit on the floor: drop so the lowest contact rests on it.
         const contacts = lying ? GROUND_LYING : GROUND;
         let low = Infinity;
         for (const k of contacts) {
@@ -317,7 +335,7 @@ export default function Human3D({
           b.getWorldPosition(_v);
           if (_v.y < low) low = _v.y;
         }
-        if (Number.isFinite(low)) root.position.y -= low - (lying ? 0.06 : 0.04);
+        if (Number.isFinite(low)) root.position.y -= low - (lying ? 0.05 : 0.04);
 
         renderer.render(scene, camera);
         host.dataset.ready = "1";

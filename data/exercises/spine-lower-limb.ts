@@ -486,17 +486,19 @@ export const SPINE_LOWER_LIMB: Exercise[] = [
           label: "Start — hips down, ball squeezed",
         },
         {
+          // In 3D the lift is real: the trunk tilts so the pelvis rises while
+          // the upper back and shoulders stay on the mat (rootRot past -90
+          // pitches the shoulder-end down and the pelvis-end up), and the hips
+          // and knees fold so the shins stay vertical over planted feet.
           pose: pose(
             {
-              pelvisTilt: -16,
-              lumbar: -6,
-              thorax: 22,
-              hipNear: 16,
-              kneeNear: 86,
-              ankleNear: 60,
-              hipFar: 14,
-              kneeFar: 84,
-              ankleFar: 60,
+              rootRot: -125,
+              hipNear: 2,
+              kneeNear: 92,
+              ankleNear: 0,
+              hipFar: 2,
+              kneeFar: 92,
+              ankleFar: 0,
               farDX: 9,
               farDY: 7,
             },
