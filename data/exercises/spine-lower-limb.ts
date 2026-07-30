@@ -492,12 +492,12 @@ export const SPINE_LOWER_LIMB: Exercise[] = [
           // and knees fold so the shins stay vertical over planted feet.
           pose: pose(
             {
-              rootRot: -125,
+              rootRot: -112,
               hipNear: 2,
-              kneeNear: 92,
+              kneeNear: 100,
               ankleNear: 0,
               hipFar: 2,
-              kneeFar: 92,
+              kneeFar: 100,
               ankleFar: 0,
               farDX: 9,
               farDY: 7,
