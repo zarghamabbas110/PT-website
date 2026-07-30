@@ -24,12 +24,15 @@ const SUPINE = pose({
 
 const SIDE_LYING = pose({
   rootRot: -90,
+  // Rolled onto the side. The flat drawing can't show this; in 3D, without it a
+  // clamshell would just be a hip abduction performed lying on the back.
+  roll: 90,
   rootX: 245,
   rootY: 300,
-  hipNear: 45,
+  hipNear: 40,
   kneeNear: 90,
   ankleNear: 40,
-  hipFar: 45,
+  hipFar: 40,
   kneeFar: 90,
   ankleFar: 40,
   shoulderNear: 150,
@@ -639,11 +642,11 @@ export const SPINE_LOWER_LIMB: Exercise[] = [
           label: "Start — knees together, hips stacked",
         },
         {
-          // Knee flexion is held constant and the ankle compensates, so the
-          // top leg rotates about the hip instead of straightening — which is
-          // what a clamshell actually is.
+          // A clamshell is hip rotation, not flexion: the hip and knee angles
+          // hold while the top thigh turns out, lifting the knee open. hipRotNear
+          // is that opening; the shin carries it so the feet stay together.
           pose: pose(
-            { hipNear: 74, kneeNear: 90, ankleNear: 8, farDX: 12, farDY: 10 },
+            { hipRotNear: 40, farDX: 12, farDY: 10 },
             SIDE_LYING
           ),
           travel: 900,

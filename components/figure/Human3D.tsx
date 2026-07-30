@@ -304,6 +304,9 @@ export default function Human3D({
         root.rotation.set(0, 0, 0);
         root.position.set(0, 0, 0);
         root.rotateX(p.rootRot * DEG);
+        // Roll is about the body's own long axis (local Y, after laying down),
+        // which turns lying-on-the-back into lying-on-the-side.
+        root.rotateY((p.roll ?? 0) * DEG);
         root.updateMatrixWorld(true);
 
         const rootQ = new THREE.Quaternion();
@@ -342,10 +345,14 @@ export default function Human3D({
         const lShin = lThigh + p.kneeFar;
         const rFootA = rShin - 90 + p.ankleNear;
         const lFootA = lShin - 90 + p.ankleFar;
-        aim(rig, B.rThigh, d(rThigh, -LEG_SPLAY), front);
-        aim(rig, B.lThigh, d(lThigh, LEG_SPLAY), front);
-        aim(rig, B.rShin, d(rShin, -LEG_SPLAY), front);
-        aim(rig, B.lShin, d(lShin, LEG_SPLAY), front);
+        // Hip rotation swings the bent leg out to the side — the clamshell open.
+        // The thigh and shin carry the same lateral so the knee opens as a unit.
+        const rLat = -LEG_SPLAY - (p.hipRotNear ?? 0);
+        const lLat = LEG_SPLAY + (p.hipRotFar ?? 0);
+        aim(rig, B.rThigh, d(rThigh, rLat), front);
+        aim(rig, B.lThigh, d(lThigh, lLat), front);
+        aim(rig, B.rShin, d(rShin, rLat), front);
+        aim(rig, B.lShin, d(lShin, lLat), front);
         // The foot's "front" is its top; aligning that with body-up keeps the
         // sole flat on the floor.
         aim(rig, B.rFoot, d(rFootA, -TOE_OUT), up, "up");

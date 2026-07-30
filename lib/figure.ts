@@ -242,6 +242,12 @@ export type Pose = {
   rootY: number;
   /** Whole-body rotation — 0 upright, 90 lying on the back, -90 face down. */
   rootRot: number;
+  /**
+   * Roll about the body's own head-to-toe axis, degrees. 3D only — a flat
+   * side drawing cannot tell lying-on-back from lying-on-side, so the 2D
+   * engine ignores it. Needed to put someone on their side for a clamshell.
+   */
+  roll: number;
 
   /** Positive = anterior pelvic tilt (pubic bone drops, lower back arches). */
   pelvisTilt: number;
@@ -262,6 +268,11 @@ export type Pose = {
   hipNear: number;
   kneeNear: number;
   ankleNear: number;
+  /**
+   * Hip rotation of the near leg about the thigh, degrees, positive turns the
+   * knee outward. 3D only — this is what opens a clamshell. Ignored in 2D.
+   */
+  hipRotNear: number;
 
   /** Far-side limb (drawn behind, slightly faded for depth). */
   shoulderFar: number;
@@ -269,6 +280,7 @@ export type Pose = {
   hipFar: number;
   kneeFar: number;
   ankleFar: number;
+  hipRotFar: number;
 
   /**
    * Offsets the far-side limbs, turning a flat side-on view into a slight
@@ -284,6 +296,7 @@ export const NEUTRAL: Pose = {
   rootX: 200,
   rootY: 240,
   rootRot: 0,
+  roll: 0,
   pelvisTilt: 0,
   lumbar: 0,
   thorax: 0,
@@ -295,11 +308,13 @@ export const NEUTRAL: Pose = {
   hipNear: 0,
   kneeNear: 2,
   ankleNear: 0,
+  hipRotNear: 0,
   shoulderFar: 182,
   elbowFar: 6,
   hipFar: 0,
   kneeFar: 2,
   ankleFar: 0,
+  hipRotFar: 0,
   farDX: 0,
   farDY: 0,
 };
