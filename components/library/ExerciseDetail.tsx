@@ -70,16 +70,16 @@ export default function ExerciseDetail({
         {/* ----------------------------- animation + the lines that matter */}
         <div className="grid gap-8 lg:grid-cols-[1.02fr_0.98fr]">
           <div className="lg:sticky lg:top-24 lg:self-start">
-            <div className="overflow-hidden rounded-[30px] border border-crimson-100 bg-cream-50 shadow-[0_20px_50px_rgba(90,30,20,0.1)]">
-              <div className="bg-gradient-to-b from-crimson-50 to-cream-50 p-3">
-                <AnimatedHuman3D spec={ex.figure} className="w-full" />
-              </div>
-              <div className="grid grid-cols-2 gap-px bg-crimson-100 sm:grid-cols-4">
-                <Stat label={ui("sets")} value={ex.sets} />
-                <Stat label={ui("reps")} value={ex.repetitions} />
-                <Stat label={ui("hold")} value={ex.holdTime} />
-                <Stat label={ui("frequency")} value={ex.frequency} />
-              </div>
+            <div className="overflow-hidden rounded-[30px] border border-crimson-100 bg-gradient-to-b from-crimson-50 to-cream-50 p-3 shadow-[0_20px_50px_rgba(90,30,20,0.1)]">
+              <AnimatedHuman3D spec={ex.figure} className="w-full" />
+            </div>
+
+            {/* the four numbers, as their own tidy cards */}
+            <div className="mt-4 grid grid-cols-2 gap-3">
+              <Stat label={ui("sets")} value={ex.sets} />
+              <Stat label={ui("reps")} value={ex.repetitions} />
+              <Stat label={ui("hold")} value={ex.holdTime} />
+              <Stat label={ui("frequency")} value={ex.frequency} />
             </div>
 
             <button className="mt-4 w-full rounded-2xl bg-espresso-900 px-6 py-4 font-semibold text-cream-50 transition-colors hover:bg-crimson-600">
@@ -272,11 +272,11 @@ export default function ExerciseDetail({
 
 function Stat({ label, value }: { label: string; value: string }) {
   return (
-    <div className="bg-cream-50 px-3 py-3.5 text-center">
-      <p className="text-[0.62rem] font-bold uppercase tracking-widest text-espresso-700/50">
+    <div className="rounded-2xl border border-crimson-100 bg-cream-50 px-4 py-4 text-center shadow-[0_6px_18px_rgba(90,30,20,0.05)]">
+      <p className="text-[0.6rem] font-bold uppercase tracking-widest text-crimson-600/80">
         {label}
       </p>
-      <p className="mt-0.5 text-[0.88rem] font-semibold text-espresso-900">
+      <p className="mt-1 text-[0.95rem] font-semibold leading-snug text-espresso-900">
         {value}
       </p>
     </div>

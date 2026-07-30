@@ -642,7 +642,7 @@ export const SHOULDER: Exercise[] = [
       frames: [
         {
           pose: pose(
-            { shoulderNear: 172, shoulderFar: 172, elbowNear: 90, elbowFar: 90,
+            { shoulderNear: 172, shoulderFar: 172, elbowNear: 84, elbowFar: 84,
               shoulderRotNear: -42, shoulderRotFar: -42 },
             NEUTRAL
           ),
@@ -651,7 +651,7 @@ export const SHOULDER: Exercise[] = [
         },
         {
           pose: pose(
-            { shoulderNear: 172, shoulderFar: 172, elbowNear: 90, elbowFar: 90,
+            { shoulderNear: 172, shoulderFar: 172, elbowNear: 84, elbowFar: 84,
               shoulderRotNear: 48, shoulderRotFar: 48 },
             NEUTRAL
           ),
@@ -1601,7 +1601,7 @@ export const SHOULDER: Exercise[] = [
         {
           pose: pose(
             { shoulderNear: 174, shoulderFar: 174, shoulderAbductNear: 8, shoulderAbductFar: 8,
-              elbowNear: 90, elbowFar: 90, shoulderRotNear: -50, shoulderRotFar: -50 },
+              elbowNear: 84, elbowFar: 84, shoulderRotNear: -50, shoulderRotFar: -50 },
             NEUTRAL
           ),
           travel: 800, hold: 400,
@@ -1610,7 +1610,7 @@ export const SHOULDER: Exercise[] = [
         {
           pose: pose(
             { shoulderNear: 174, shoulderFar: 174, shoulderAbductNear: 8, shoulderAbductFar: 8,
-              elbowNear: 90, elbowFar: 90, shoulderRotNear: 70, shoulderRotFar: 70 },
+              elbowNear: 84, elbowFar: 84, shoulderRotNear: 70, shoulderRotFar: 70 },
             NEUTRAL
           ),
           travel: 1000, hold: 900,
