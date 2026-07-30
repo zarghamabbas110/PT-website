@@ -170,6 +170,9 @@ const LEG_SPLAY = 6;
 const TOE_OUT = 12;
 const ARM_SPLAY = 7;
 
+/** Half-turn if the model is authored facing away from the camera, else 0. */
+const MODEL_FACING = Math.PI;
+
 export default function Human3D({
   pose,
   view = "front",
@@ -245,11 +248,15 @@ export default function Human3D({
     let disposed = false;
     host.dataset.ready = "0";
 
-    new GLTFLoader().load("/models/adam.glb", (gltf) => {
+    new GLTFLoader().load("/models/human.glb", (gltf) => {
       if (disposed) return;
       const root = new THREE.Group();
       root.add(gltf.scene);
       scene.add(root);
+
+      // Some source models are authored facing away from +Z. We want the chest
+      // toward +Z so "front" in the pose data means the front of the body.
+      gltf.scene.rotation.y = MODEL_FACING;
 
       // Gather every bone of every skeleton, grouped by name. See the note at
       // the top: this character carries seven of them.
