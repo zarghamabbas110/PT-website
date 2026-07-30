@@ -319,8 +319,12 @@ export default function Human3D({
         // the equipment instead pushes the figure off to one side, because a
         // long mat or a wall is far bigger than the person on it.
         const centre = fitBox.getCenter(new THREE.Vector3());
-        if (propGroup.children.length) {
-          fitBox.union(new THREE.Box3().setFromObject(propGroup));
+        // Walls and door frames are scenery: they are far larger than the
+        // person, and letting them drive the framing shrinks the figure to a
+        // speck. They are drawn but not fitted to.
+        for (const child of propGroup.children) {
+          if (child.userData.noFrame) continue;
+          fitBox.union(new THREE.Box3().setFromObject(child));
         }
         let radius = 0;
         for (const cx of [fitBox.min.x, fitBox.max.x])
@@ -431,9 +435,21 @@ export default function Human3D({
           }
           case "wall":
           case "wallRight": {
-            const w = boxMesh(mats.wall, 1.6, 2.4, 0.08);
-            // Crawl faces the wall (front, +Z); a back-to-wall sit uses behind.
+            // A solid slab in front of the figure hides the figure. This is a
+            // single-sided panel turned away from the viewer, so you see
+            // through it from the front and the person stays visible, while it
+            // still reads as a wall from any other angle.
+            const w = new THREE.Mesh(
+              new THREE.PlaneGeometry(1.8, 2.4),
+              new THREE.MeshStandardMaterial({
+                color: 0xe7e2d6, roughness: 1, side: THREE.FrontSide,
+              })
+            );
+            w.rotation.y = Math.PI;
             w.position.set(0, 1.2, 0.62);
+            w.receiveShadow = true;
+            w.userData.noFrame = true;
+            propGroup.add(w);
             break;
           }
           case "ballBetweenKnees":
@@ -552,9 +568,11 @@ export default function Human3D({
             for (const sx of [-0.75, 0.75]) {
               const post = boxMesh(mats.wall, 0.12, 2.3, 0.12);
               post.position.set(sx, 1.15, 0.15);
+              post.userData.noFrame = true;
             }
             const top = boxMesh(mats.wall, 1.62, 0.12, 0.12);
             top.position.set(0, 2.25, 0.15);
+            top.userData.noFrame = true;
             break;
           }
           case "towelUnderKnee": {
