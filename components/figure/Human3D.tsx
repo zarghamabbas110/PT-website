@@ -83,6 +83,8 @@ const THUMB_CURL = [26, 34, 30];
 
 const GROUND: J[] = ["rFoot", "rToe", "lFoot", "lToe"];
 const GROUND_LYING: J[] = ["head", "spineUpper", "hips", "rFoot", "lFoot", "rHand", "lHand"];
+/** How far past a contact bone the body actually reaches, in metres. */
+const REACH: Partial<Record<J, number>> = { rHand: 0.05, lHand: 0.05 };
 
 /** Strip a rig prefix ("mixamorig7:") and a numeric suffix ("_084"). */
 function baseName(name: string): string {
@@ -506,7 +508,25 @@ export default function Human3D({
             // Any higher and its near edge draws over the shoes and shoulders
             // instead of lying under them.
             const m = boxMesh(mats.mat, 0.78, 0.035, 2.1);
-            m.position.set(0, -0.0175, -0.55);
+            // Like the wall, the mat is floor covering rather than subject: it
+            // is longer than the person, so fitting the camera to it shrinks
+            // them. It is drawn, and may run off the edge of the shot.
+            m.userData.noFrame = true;
+            dynamic.push(() => {
+              // Centre it under whoever is on it. A fixed position was set for
+              // someone lying on their back, whose head and feet run one way
+              // along the floor; face down or on all fours they run the other,
+              // and the mat ended up alongside the body instead of beneath it.
+              const head = wp("head");
+              const rf = wp("rFoot"), lf = wp("lFoot");
+              if (!head || !rf || !lf) { m.position.set(0, -0.0175, -0.55); return; }
+              const feet = rf.clone().add(lf).multiplyScalar(0.5);
+              m.position.set(
+                (head.x + feet.x) / 2,
+                -0.0175,
+                (head.z + feet.z) / 2
+              );
+            });
             break;
           }
           case "chair": {
@@ -755,7 +775,9 @@ export default function Human3D({
         // it turned them over — soles up, shoes upside down. A planted foot
         // points along the ground away from the head, sole down, whatever the
         // rest of the body is doing.
-        const supine = Math.abs(p.rootRot) > 45 && Math.abs(p.roll ?? 0) < 30;
+        // Only a body on its back: face down with a bent knee is all-fours,
+        // where the shin lies along the floor and the foot follows it.
+        const supine = p.rootRot < -45 && Math.abs(p.roll ?? 0) < 30;
         if (supine) {
           const caudal = d(180);
           caudal.y = 0;
@@ -776,24 +798,68 @@ export default function Human3D({
       const tick = () => {
         const p = poseRef.current;
         const lying = Math.abs(p.rootRot) > 45;
+        const contacts = lying ? GROUND_LYING : GROUND;
+
+        /** Where each ground contact reaches, lowest first. */
+        const touchPoints = () => {
+          const pts: THREE.Vector3[] = [];
+          for (const k of contacts) {
+            const b = first(k);
+            if (!b) continue;
+            const w = b.getWorldPosition(new THREE.Vector3());
+            // The hand bone is the wrist. With the palm planted — all fours, a
+            // plank, a press up — the fingers reach well below it, so the
+            // wrist has to be held that much clear or the hand sinks in.
+            w.y -= REACH[k] ?? 0;
+            pts.push(w);
+          }
+          return pts.sort((a, b) => a.y - b.y);
+        };
+
+        /** Drop so the lowest contact rests on the floor. */
+        const settleDown = () => {
+          const pts = touchPoints();
+          if (!pts.length) return;
+          // Joint centres sit inside the flesh, so the body is lifted until the
+          // skin — not the bone — meets the floor. A lying body needs more of a
+          // margin than a standing one: the trunk is thick, an ankle is not.
+          root.position.y -= pts[0].y - (lying ? 0.055 : 0.04);
+          root.updateMatrixWorld(true);
+        };
 
         poseBody(p, 0);
+        settleDown();
 
-        // Sit on the floor: drop so the lowest contact rests on it.
-        const contacts = lying ? GROUND_LYING : GROUND;
-        let low = Infinity;
-        for (const k of contacts) {
-          const b = first(k);
-          if (!b) continue;
-          b.getWorldPosition(_v);
-          if (_v.y < low) low = _v.y;
+        // A body propped on its forearms is not lying flat: it rests on two
+        // contacts — forearms and toes in a plank, forearm and feet in a side
+        // plank — and everything between them is held clear of the floor.
+        // Dropping the single lowest point onto the floor leaves the rest of
+        // the body hovering, so find the smallest tilt about the floor that
+        // brings a second contact down, and rest on both. On someone genuinely
+        // lying flat the second contact is already down and this is a no-op.
+        if (lying) {
+          const pts = touchPoints();
+          const p0 = pts[0];
+          let settle = 0;
+          for (let i = 1; i < pts.length; i++) {
+            const dz = pts[i].z - p0.z, dy = pts[i].y - p0.y;
+            // Nearly above the pivot: no rotation brings it down sensibly.
+            if (Math.abs(dz) < 0.08 || dy < 0.02) continue;
+            let t = Math.atan2(dy, dz);
+            if (t > Math.PI / 2) t -= Math.PI;
+            if (t < -Math.PI / 2) t += Math.PI;
+            // The smallest tilt wins: any larger one would have driven another
+            // contact through the floor on the way.
+            if (settle === 0 || Math.abs(t) < Math.abs(settle)) settle = t;
+          }
+          const LIMIT = 22 * DEG;
+          settle = Math.max(-LIMIT, Math.min(LIMIT, settle));
+          if (Math.abs(settle) > 0.5 * DEG) {
+            poseBody(p, settle);
+            settleDown();
+          }
         }
-        // Joint centres sit inside the flesh, so the body is lifted until the
-        // skin — not the bone — meets the floor. A lying body needs more of a
-        // margin than a standing one: the trunk is thick, an ankle is not.
-        if (Number.isFinite(low)) root.position.y -= low - (lying ? 0.055 : 0.04);
 
-        root.updateMatrixWorld(true);
         bodyFront.set(0, 0, 1).applyQuaternion(root.getWorldQuaternion(_wq));
         updateProps();
         frameCamera(viewRef.current);

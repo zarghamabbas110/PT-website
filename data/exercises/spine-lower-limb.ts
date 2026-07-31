@@ -58,7 +58,7 @@ const SEATED = pose({
 
 export const SPINE_LOWER_LIMB: Exercise[] = [
   {
-    id: "EX-C-001",
+    id: "EX-CX-008",
     slug: "chin-tuck",
     name: { en: "Chin Tuck (Cervical Retraction)", ur: "ٹھوڑی پیچھے کھینچنا" },
     bodyRegion: "Cervical",
@@ -207,7 +207,7 @@ export const SPINE_LOWER_LIMB: Exercise[] = [
   },
 
   {
-    id: "EX-L-002",
+    id: "EX-L-008",
     slug: "posterior-pelvic-tilt",
     name: { en: "Posterior Pelvic Tilt", ur: "کولہے کو پیچھے جھکانا" },
     bodyRegion: "Lumbar",
@@ -348,7 +348,7 @@ export const SPINE_LOWER_LIMB: Exercise[] = [
   },
 
   {
-    id: "EX-H-003",
+    id: "EX-H-010",
     slug: "glute-bridge-ball-squeeze",
     name: {
       en: "Glute Bridge with Ball Squeeze",
@@ -519,7 +519,7 @@ export const SPINE_LOWER_LIMB: Exercise[] = [
   },
 
   {
-    id: "EX-H-004",
+    id: "EX-H-011",
     slug: "clamshell-band",
     name: { en: "Banded Clamshell", ur: "بینڈ کے ساتھ گھٹنا کھولنا" },
     bodyRegion: "Pelvis & Hip",
@@ -666,7 +666,7 @@ export const SPINE_LOWER_LIMB: Exercise[] = [
   },
 
   {
-    id: "EX-K-005",
+    id: "EX-K-009",
     slug: "straight-leg-raise",
     name: { en: "Straight Leg Raise", ur: "سیدھی ٹانگ اٹھانا" },
     bodyRegion: "Knee",
@@ -807,7 +807,7 @@ export const SPINE_LOWER_LIMB: Exercise[] = [
   },
 
   {
-    id: "EX-K-006",
+    id: "EX-K-010",
     slug: "wall-sit",
     name: { en: "Wall Sit (Isometric)", ur: "دیوار کے سہارے بیٹھنا" },
     bodyRegion: "Knee",

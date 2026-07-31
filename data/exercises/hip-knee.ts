@@ -11,7 +11,7 @@ import { PRONE, SIDE_LYING, STAND, SUPINE_LONG } from "./bases";
 
 export const HIP_KNEE: Exercise[] = [
   {
-    id: "EX-H-005",
+    id: "EX-H-001",
     slug: "side-lying-hip-abduction",
     name: { en: "Side-Lying Hip Abduction", ur: "پہلو کے بل لیٹ کر ٹانگ اٹھانا" },
     bodyRegion: "Pelvis & Hip",
@@ -121,7 +121,7 @@ export const HIP_KNEE: Exercise[] = [
     },
   },
   {
-    id: "EX-H-006",
+    id: "EX-H-002",
     slug: "prone-hip-extension",
     name: { en: "Prone Hip Extension", ur: "اوندھے لیٹ کر ٹانگ اٹھانا" },
     bodyRegion: "Pelvis & Hip",
@@ -231,7 +231,7 @@ export const HIP_KNEE: Exercise[] = [
     },
   },
   {
-    id: "EX-H-007",
+    id: "EX-H-003",
     slug: "hip-flexor-stretch-kneeling",
     name: { en: "Kneeling Hip Flexor Stretch", ur: "گھٹنے کے بل کولہے کا کھنچاؤ" },
     bodyRegion: "Pelvis & Hip",
@@ -341,7 +341,7 @@ export const HIP_KNEE: Exercise[] = [
     },
   },
   {
-    id: "EX-H-008",
+    id: "EX-H-004",
     slug: "standing-hip-abduction",
     name: { en: "Standing Hip Abduction", ur: "کھڑے ہو کر ٹانگ ایک طرف اٹھانا" },
     bodyRegion: "Pelvis & Hip",
@@ -450,7 +450,7 @@ export const HIP_KNEE: Exercise[] = [
     },
   },
   {
-    id: "EX-K-003",
+    id: "EX-K-001",
     slug: "quad-setting",
     name: { en: "Quadriceps Setting", ur: "ران کے پٹھے کو سخت کرنا" },
     bodyRegion: "Knee",
@@ -560,7 +560,7 @@ export const HIP_KNEE: Exercise[] = [
     },
   },
   {
-    id: "EX-K-004",
+    id: "EX-K-002",
     slug: "heel-slides",
     name: { en: "Heel Slides", ur: "ایڑی کھسکا کر گھٹنا موڑنا" },
     bodyRegion: "Knee",
@@ -670,7 +670,7 @@ export const HIP_KNEE: Exercise[] = [
     },
   },
   {
-    id: "EX-K-005",
+    id: "EX-K-003",
     slug: "terminal-knee-extension",
     name: { en: "Terminal Knee Extension with Band", ur: "بینڈ کے ساتھ گھٹنا سیدھا کرنا" },
     bodyRegion: "Knee",
@@ -780,7 +780,7 @@ export const HIP_KNEE: Exercise[] = [
     },
   },
   {
-    id: "EX-K-006",
+    id: "EX-K-004",
     slug: "step-up",
     name: { en: "Step Up", ur: "سیڑھی پر چڑھنے کی مشق" },
     bodyRegion: "Knee",

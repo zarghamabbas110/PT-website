@@ -11,7 +11,7 @@ import { SEATED, STAND } from "./bases";
 
 export const ELBOW: Exercise[] = [
   {
-    id: "EX-E-001",
+    id: "EX-EL-001",
     slug: "active-elbow-flexion",
     name: { en: "Active Elbow Flexion", ur: "کہنی کو خود موڑنا" },
     bodyRegion: "Elbow",
@@ -121,7 +121,7 @@ export const ELBOW: Exercise[] = [
     },
   },
   {
-    id: "EX-E-002",
+    id: "EX-EL-002",
     slug: "active-elbow-extension",
     name: { en: "Active Elbow Extension", ur: "کہنی کو خود سیدھا کرنا" },
     bodyRegion: "Elbow",
@@ -231,7 +231,7 @@ export const ELBOW: Exercise[] = [
     },
   },
   {
-    id: "EX-E-003",
+    id: "EX-EL-003",
     slug: "forearm-pronation-supination",
     name: { en: "Forearm Pronation and Supination", ur: "ہتھیلی اوپر نیچے گھمانا" },
     bodyRegion: "Elbow",
@@ -341,7 +341,7 @@ export const ELBOW: Exercise[] = [
     },
   },
   {
-    id: "EX-E-004",
+    id: "EX-EL-004",
     slug: "wrist-extensor-stretch",
     name: { en: "Wrist Extensor Stretch (Tennis Elbow)", ur: "کلائی کے اوپری پٹھوں کا کھنچاؤ" },
     bodyRegion: "Elbow",
@@ -450,7 +450,7 @@ export const ELBOW: Exercise[] = [
     },
   },
   {
-    id: "EX-E-005",
+    id: "EX-EL-005",
     slug: "wrist-flexor-stretch",
     name: { en: "Wrist Flexor Stretch (Golfer's Elbow)", ur: "کلائی کے نچلے پٹھوں کا کھنچاؤ" },
     bodyRegion: "Elbow",
@@ -559,7 +559,7 @@ export const ELBOW: Exercise[] = [
     },
   },
   {
-    id: "EX-E-006",
+    id: "EX-EL-006",
     slug: "eccentric-wrist-extension",
     name: { en: "Eccentric Wrist Extension", ur: "کلائی کو آہستہ نیچے لانا" },
     bodyRegion: "Elbow",

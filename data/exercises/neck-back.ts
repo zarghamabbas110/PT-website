@@ -1,20 +1,17 @@
 import { pose } from "@/lib/figure";
 import type { Exercise } from "../schema";
-import { SEATED, SUPINE } from "./bases";
+import { QUADRUPED, SEATED, SUPINE } from "./bases";
 
 /* ==========================================================================
    NECK, UPPER BACK AND LOW BACK
    --------------------------------------------------------------------------
    Range and stretch work for the neck, mobility for the stiff upper back, and
    the low back control exercises. Poses are drafts pending clinical review.
-
-   NOTE: the quadruped positions (cat-camel, bird dog) are approximated by the
-   3D figure, which has no all-fours base yet; the written steps are correct.
    ========================================================================== */
 
 export const NECK_BACK: Exercise[] = [
   {
-    id: "EX-C-001",
+    id: "EX-CX-001",
     slug: "neck-side-flexion",
     name: { en: "Neck Side Bend", ur: "گردن ایک طرف جھکانا" },
     bodyRegion: "Cervical",
@@ -124,7 +121,7 @@ export const NECK_BACK: Exercise[] = [
     },
   },
   {
-    id: "EX-C-002",
+    id: "EX-CX-002",
     slug: "neck-rotation",
     name: { en: "Neck Rotation", ur: "گردن دائیں بائیں گھمانا" },
     bodyRegion: "Cervical",
@@ -234,7 +231,7 @@ export const NECK_BACK: Exercise[] = [
     },
   },
   {
-    id: "EX-C-003",
+    id: "EX-CX-003",
     slug: "upper-trapezius-stretch",
     name: { en: "Upper Trapezius Stretch", ur: "کندھے اور گردن کے پٹھے کا کھنچاؤ" },
     bodyRegion: "Cervical",
@@ -344,7 +341,7 @@ export const NECK_BACK: Exercise[] = [
     },
   },
   {
-    id: "EX-C-004",
+    id: "EX-CX-004",
     slug: "deep-neck-flexor-hold",
     name: { en: "Deep Neck Flexor Hold", ur: "گردن کے گہرے پٹھوں کی مشق" },
     bodyRegion: "Cervical",
@@ -777,8 +774,8 @@ export const NECK_BACK: Exercise[] = [
     figure: {
       view: "side",
       frames: [
-        { pose: pose({ lumbar: 0, thorax: 0 }, SUPINE), travel: 800, hold: 400, label: "Flat back on all fours" },
-        { pose: pose({ lumbar: 18, thorax: 14 }, SUPINE), travel: 1000, hold: 900, label: "Round up, then sag down" },
+        { pose: pose({ lumbar: 0, thorax: 0 }, QUADRUPED), travel: 800, hold: 400, label: "Flat back on all fours" },
+        { pose: pose({ lumbar: 18, thorax: 14, neck: 14 }, QUADRUPED), travel: 1000, hold: 900, label: "Round up, then sag down" },
       ],
       props: [{ kind: "mat" }],
     },
@@ -894,7 +891,7 @@ export const NECK_BACK: Exercise[] = [
     },
   },
   {
-    id: "EX-L-003",
+    id: "EX-CO-001",
     slug: "bird-dog",
     name: { en: "Bird Dog", ur: "برڈ ڈاگ — ایک ہاتھ ایک ٹانگ" },
     bodyRegion: "Core",
@@ -999,8 +996,8 @@ export const NECK_BACK: Exercise[] = [
     figure: {
       view: "side",
       frames: [
-        { pose: pose({ lumbar: 0, hipNear: 45, kneeNear: 100 }, SUPINE), travel: 800, hold: 400, label: "All fours, back flat" },
-        { pose: pose({ lumbar: 0, hipNear: 10, kneeNear: 6, shoulderNear: 90 }, SUPINE), travel: 1000, hold: 900, label: "Opposite arm and leg reach out" },
+        { pose: QUADRUPED, travel: 800, hold: 400, label: "All fours, back flat" },
+        { pose: pose({ hipNear: 178, kneeNear: 4, ankleNear: 20, shoulderFar: 178, elbowFar: 2 }, QUADRUPED), travel: 1000, hold: 900, label: "Opposite arm and leg reach out" },
       ],
       props: [{ kind: "mat" }],
     },

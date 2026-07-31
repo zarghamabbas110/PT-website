@@ -71,6 +71,25 @@ export const PRONE = pose({
   elbowFar: 6,
 });
 
+/**
+ * On hands and knees — the all-fours position. The trunk is horizontal and
+ * face down, the arms drop straight to the floor under the shoulders and the
+ * shins lie along the floor behind the knees.
+ */
+export const QUADRUPED = pose({
+  rootRot: 90,
+  hipNear: 90,
+  kneeNear: 90,
+  ankleNear: 0,
+  hipFar: 90,
+  kneeFar: 90,
+  ankleFar: 0,
+  shoulderNear: 90,
+  elbowNear: 2,
+  shoulderFar: 90,
+  elbowFar: 2,
+});
+
 /** Lying on one side, hips and knees bent, hips stacked. */
 export const SIDE_LYING = pose({
   rootRot: -90,

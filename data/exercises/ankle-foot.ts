@@ -559,7 +559,7 @@ export const ANKLE_FOOT: Exercise[] = [
     },
   },
   {
-    id: "EX-C-002",
+    id: "EX-CO-002",
     slug: "dead-bug",
     name: { en: "Dead Bug", ur: "ڈیڈ بگ — ہاتھ اور ٹانگ نیچے لانا" },
     bodyRegion: "Core",
@@ -669,7 +669,7 @@ export const ANKLE_FOOT: Exercise[] = [
     },
   },
   {
-    id: "EX-C-003",
+    id: "EX-CO-003",
     slug: "side-plank-knees",
     name: { en: "Side Plank on Knees", ur: "سائیڈ پلانک (گھٹنوں پر)" },
     bodyRegion: "Core",
@@ -772,8 +772,8 @@ export const ANKLE_FOOT: Exercise[] = [
     figure: {
       view: "side",
       frames: [
-        { pose: pose({ hipNear: 40, kneeNear: 90, hipFar: 40, kneeFar: 90, shoulderNear: 120, elbowNear: 90 }, SIDE_LYING), travel: 800, hold: 400, label: "Lying on the side, propped up" },
-        { pose: pose({ hipNear: 8, kneeNear: 90, hipFar: 8, kneeFar: 90, shoulderNear: 120, elbowNear: 90 }, SIDE_LYING), travel: 1000, hold: 900, label: "Lift the hips into a straight line" },
+        { pose: pose({ hipNear: 40, kneeNear: 90, hipFar: 40, kneeFar: 90, shoulderNear: 90, shoulderAbductNear: -90, elbowNear: 90, shoulderFar: 150, elbowFar: 10 }, SIDE_LYING), travel: 800, hold: 400, label: "Lying on the side, propped up" },
+        { pose: pose({ hipNear: 8, kneeNear: 90, hipFar: 8, kneeFar: 90, shoulderNear: 90, shoulderAbductNear: -90, elbowNear: 90, shoulderFar: 150, elbowFar: 10 }, SIDE_LYING), travel: 1000, hold: 900, label: "Lift the hips into a straight line" },
       ],
       props: [{ kind: "mat" }],
     },
