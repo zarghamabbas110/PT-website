@@ -306,6 +306,44 @@ export type Pose = {
    */
   farDX: number;
   farDY: number;
+
+  /* ----------------------------------------------------------------------
+     Movements out of the sagittal plane. All 3D only — a flat side-on
+     drawing cannot show any of them, so the 2D engine ignores them.
+
+     These were missing, and their absence is why a whole class of exercise
+     animated wrongly or not at all: trunk rotation, side-bending, turning
+     the head, dropping both knees to one side, turning the palm over and
+     bending the wrist had no way to be expressed. The records that needed
+     them were written with whichever existing channel looked closest, which
+     produced either the wrong movement or a figure standing perfectly still.
+     ---------------------------------------------------------------------- */
+
+  /** Axial rotation of the chest on the pelvis; positive turns to the left. */
+  twist: number;
+  /** Lateral flexion of the trunk; positive bends towards the left. */
+  sideBend: number;
+  /** Rotation of the head on the neck; positive turns to the left. */
+  neckRot: number;
+  /** Side-flexion of the neck; positive tips the ear towards the left. */
+  neckSide: number;
+  /**
+   * Rotation of the pelvis and both legs together about the body's long
+   * axis; positive carries both knees to the left. This is what a knee drop
+   * and a lower trunk rotation actually are — the two legs travelling
+   * together — and it is not the same as rotating each hip, which mirrors
+   * them and pulls the knees apart.
+   */
+  pelvisRot: number;
+  /** Abduction of the near leg in the frontal plane; positive lifts it away. */
+  hipAbductNear: number;
+  hipAbductFar: number;
+  /** Forearm rotation; positive supinates (palm turns up). */
+  foreRotNear: number;
+  foreRotFar: number;
+  /** Wrist; positive extends (back of the hand towards the forearm). */
+  wristNear: number;
+  wristFar: number;
 };
 
 /** A comfortable upright standing pose, used as the base for every exercise. */
@@ -338,6 +376,17 @@ export const NEUTRAL: Pose = {
   shoulderRotFar: 0,
   farDX: 0,
   farDY: 0,
+  twist: 0,
+  sideBend: 0,
+  neckRot: 0,
+  neckSide: 0,
+  pelvisRot: 0,
+  hipAbductNear: 0,
+  hipAbductFar: 0,
+  foreRotNear: 0,
+  foreRotFar: 0,
+  wristNear: 0,
+  wristFar: 0,
 };
 
 /** Segment lengths, roughly proportional to adult anatomy. */

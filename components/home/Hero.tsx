@@ -4,7 +4,7 @@ import Link from "next/link";
 import { motion, useScroll, useTransform } from "framer-motion";
 import { useRef } from "react";
 import PaperCut from "./PaperCut";
-import PhysioFigure from "@/components/figure/PhysioFigure";
+import AnimatedHuman3D from "@/components/figure/AnimatedHuman3D";
 import { EXERCISES } from "@/data/exercises";
 
 /* The bridge exercise makes the best hero demo — large, legible movement. */
@@ -144,7 +144,7 @@ export default function Hero() {
             {/* The card the figure "breaks out" of, as in your references */}
             <div className="absolute inset-x-4 bottom-6 top-10 rounded-[36px] bg-cream-50 shadow-[0_30px_80px_rgba(90,30,20,0.28)]" />
             <div className="relative">
-              <PhysioFigure
+              <AnimatedHuman3D
                 spec={HERO_FIGURE.figure}
                 className="w-full drop-shadow-[0_16px_30px_rgba(90,30,20,0.22)]"
                 showLabel={false}

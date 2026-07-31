@@ -1,7 +1,6 @@
 "use client";
 
 import Link from "next/link";
-import PhysioFigure from "@/components/figure/PhysioFigure";
 import AnimatedHuman3D from "@/components/figure/AnimatedHuman3D";
 import PinnedNotes from "./PinnedNotes";
 import Collapsible from "./Collapsible";
@@ -239,9 +238,6 @@ export default function ExerciseDetail({
                     href={`/exercises/${r.slug}`}
                     className="group flex items-center gap-4 rounded-[22px] border border-crimson-100 bg-cream-50 p-4 transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_16px_40px_rgba(90,30,20,0.14)]"
                   >
-                    <div className="h-16 w-16 shrink-0 overflow-hidden rounded-2xl bg-crimson-50">
-                      <PhysioFigure spec={r.figure} paused className="h-full w-full" showLabel={false} />
-                    </div>
                     <div dir={dir} className={rtl ? "text-right" : ""}>
                       <p className="text-[0.68rem] font-bold uppercase tracking-widest text-crimson-600">
                         {ex.progressions.includes(r.slug)

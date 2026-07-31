@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useState } from "react";
 import { motion } from "framer-motion";
-import PhysioFigure from "@/components/figure/PhysioFigure";
+import ExerciseThumb from "@/components/figure/ExerciseThumb";
 import { useLang } from "@/lib/i18n";
 import type { Exercise } from "@/data/schema";
 
@@ -29,9 +29,10 @@ export default function ExerciseCard({ exercise }: { exercise: Exercise }) {
         className="group flex h-full flex-col overflow-hidden rounded-[26px] border border-crimson-100 bg-cream-50 transition-shadow duration-500 hover:shadow-[0_24px_60px_rgba(90,30,20,0.16)]"
       >
         <div className="relative aspect-[4/3] overflow-hidden bg-gradient-to-b from-crimson-50 to-cream-100">
-          <PhysioFigure
+          <ExerciseThumb
+            slug={exercise.slug}
             spec={exercise.figure}
-            paused={!hover}
+            live={hover}
             className="h-full w-full"
           />
 

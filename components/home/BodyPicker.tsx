@@ -388,7 +388,7 @@ export default function BodyPicker({ className }: { className?: string }) {
       // and a dead stop the moment a region lights up, because a target that
       // keeps moving out from under the cursor cannot be clicked.
       if (spinning && !dragging && !debugFreeze) {
-        const rate = !pointerInside ? 0.42 : hoverRef.current ? 0 : 0.12;
+        const rate = !pointerInside ? 0.62 : hoverRef.current ? 0 : 0.18;
         spin.rotation.y += dt * rate;
       }
 

@@ -2117,8 +2117,12 @@ export const REGION_DEPTH: Exercise[] = [
     figure: {
       view: "front",
       frames: [
+        // Both knees travel together, which is `pelvisRot`. Rotating each hip
+        // instead — which is what this used to do — mirrors the legs and pulls
+        // the knees apart, so nothing appeared to happen at all.
         { pose: pose({ hipNear: 90, kneeNear: 90, hipFar: 90, kneeFar: 90, shoulderNear: 90, shoulderAbductNear: 84, elbowNear: 6, shoulderFar: 90, shoulderAbductFar: 84, elbowFar: 6 }, SUPINE), travel: 800, hold: 400, label: "Knees up over the hips" },
-        { pose: pose({ hipNear: 90, kneeNear: 90, hipFar: 90, kneeFar: 90, hipRotNear: 46, hipRotFar: 46, shoulderNear: 90, shoulderAbductNear: 84, elbowNear: 6, shoulderFar: 90, shoulderAbductFar: 84, elbowFar: 6 }, SUPINE), travel: 1000, hold: 900, label: "Let them fall to one side" },
+        { pose: pose({ hipNear: 90, kneeNear: 90, hipFar: 90, kneeFar: 90, pelvisRot: 52, shoulderNear: 90, shoulderAbductNear: 84, elbowNear: 6, shoulderFar: 90, shoulderAbductFar: 84, elbowFar: 6 }, SUPINE), travel: 1100, hold: 900, label: "Let them fall to one side" },
+        { pose: pose({ hipNear: 90, kneeNear: 90, hipFar: 90, kneeFar: 90, shoulderNear: 90, shoulderAbductNear: 84, elbowNear: 6, shoulderFar: 90, shoulderAbductFar: 84, elbowFar: 6 }, SUPINE), travel: 1100, hold: 500, label: "Bring them back to the middle" },
       ],
       props: [{ kind: "mat" }],
     },

@@ -1930,8 +1930,13 @@ export const POST_OPERATIVE: Exercise[] = [
     figure: {
       view: "front",
       frames: [
-        { pose: pose({ roll: 0 }, SUPINE), travel: 800, hold: 400, label: "Lying on your back, knees bent" },
-        { pose: pose({ roll: 74, hipNear: 44, kneeNear: 96, shoulderNear: 130, elbowNear: 60 }, SUPINE), travel: 1000, hold: 900, label: "Roll over as one piece" },
+        // The whole point of a log roll is that nothing moves relative to
+        // anything else — so every joint angle is identical across the roll and
+        // only `roll` changes. Previously the hips and knees shifted a few
+        // degrees as it turned, which read as the knees doing the work.
+        { pose: pose({ roll: 0, shoulderNear: 140, elbowNear: 60, shoulderFar: 140, elbowFar: 60 }, SUPINE), travel: 800, hold: 500, label: "On your back, knees bent, arms folded" },
+        { pose: pose({ roll: 46, shoulderNear: 140, elbowNear: 60, shoulderFar: 140, elbowFar: 60 }, SUPINE), travel: 900, hold: 300, label: "Turn head, shoulders and hips together" },
+        { pose: pose({ roll: 90, shoulderNear: 140, elbowNear: 60, shoulderFar: 140, elbowFar: 60 }, SUPINE), travel: 900, hold: 900, label: "All the way onto your side, in one piece" },
       ],
       props: [{ kind: "mat" }],
     },

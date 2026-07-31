@@ -6,7 +6,7 @@ import { useEffect, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 
 const LINKS = [
-  { href: "/", label: "Home" },
+  { href: "/patient", label: "Home" },
   { href: "/exercises", label: "Exercise Library" },
   { href: "/for-clinicians", label: "For Clinicians" },
 ];
@@ -16,9 +16,9 @@ export default function SiteHeader() {
   const [open, setOpen] = useState(false);
   const pathname = usePathname();
 
-  // The home hero is a solid crimson field, so at the top of that page the
+  // The patient hero is a solid crimson field, so at the top of that page the
   // header has to invert to stay legible. Every other page starts on cream.
-  const onDarkHero = pathname === "/" && !scrolled;
+  const onDarkHero = pathname === "/patient" && !scrolled;
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 24);
@@ -26,6 +26,10 @@ export default function SiteHeader() {
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
+
+  // The front door carries its own mark and two choices; a nav bar over it
+  // would offer a way past the question it is asking.
+  if (pathname === "/") return null;
 
   return (
     <header
@@ -36,7 +40,7 @@ export default function SiteHeader() {
       }`}
     >
       <nav className="mx-auto flex h-18 max-w-7xl items-center justify-between px-5 py-4 sm:px-8">
-        <Link href="/" className="group flex items-center gap-2.5">
+        <Link href="/patient" className="group flex items-center gap-2.5">
           <motion.span
             whileHover={{ rotate: -10, scale: 1.08 }}
             transition={{ type: "spring", stiffness: 400, damping: 14 }}
@@ -85,7 +89,7 @@ export default function SiteHeader() {
             </Link>
           ))}
           <Link
-            href="/for-clinicians"
+            href="/clinician/login"
             className={`rounded-full px-5 py-2.5 text-[0.9rem] font-semibold transition-all duration-500 ${
               onDarkHero
                 ? "bg-cream-50 text-crimson-700 hover:bg-espresso-900 hover:text-cream-50"

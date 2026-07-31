@@ -120,10 +120,13 @@ export const EQUIPMENT: Exercise[] = [
     figure: {
       view: "side",
       frames: [
-        { pose: pose({ pelvisTilt: 10, lumbar: -4 }, SEATED), travel: 800, hold: 400, label: "Sitting tall on the ball" },
-        { pose: pose({ pelvisTilt: -12, lumbar: 12 }, SEATED), travel: 1000, hold: 900, label: "Roll the pelvis forward and back" },
+        { pose: pose({ pelvisTilt: 12, lumbar: -6 }, SEATED), travel: 800, hold: 400, label: "Sitting tall on the ball" },
+        { pose: pose({ pelvisTilt: -16, lumbar: 16 }, SEATED), travel: 1000, hold: 700, label: "Roll the pelvis back, tail tucks under" },
+        { pose: pose({ pelvisTilt: 18, lumbar: -10 }, SEATED), travel: 1000, hold: 700, label: "Roll it forward, tail lifts behind" },
       ],
-      props: [{ kind: "gymBall" }],
+      // The ball is sat on, so it belongs under the pelvis. Without saying so
+      // it was placed like a squeeze ball — down between the knees.
+      props: [{ kind: "gymBall", under: "pelvis" }],
     },
   },
   {
@@ -459,10 +462,14 @@ export const EQUIPMENT: Exercise[] = [
     figure: {
       view: "side",
       frames: [
-        { pose: pose({ lumbar: 14, thorax: 10, shoulderNear: 150, elbowNear: 120, shoulderFar: 150, elbowFar: 120 }, PRONE), travel: 800, hold: 400, label: "Draped over the ball" },
-        { pose: pose({ lumbar: -8, thorax: -6, shoulderNear: 150, elbowNear: 120, shoulderFar: 150, elbowFar: 120 }, PRONE), travel: 1000, hold: 900, label: "Lift the chest to straight" },
+        // Face down over the ball with the feet braced behind: the trunk starts
+        // curled round the ball and the chest lifts to straight. The spine
+        // angles are large because the rig scales them down (0.7 at the lumbar
+        // segment, 0.6 at the thorax) — the old ±10 was invisible.
+        { pose: pose({ lumbar: 34, thorax: 26, hipNear: 34, hipFar: 34, kneeNear: 8, kneeFar: 8, shoulderNear: 150, elbowNear: 110, shoulderFar: 150, elbowFar: 110 }, PRONE), travel: 900, hold: 500, label: "Curled over the ball" },
+        { pose: pose({ lumbar: -30, thorax: -22, hipNear: 34, hipFar: 34, kneeNear: 8, kneeFar: 8, shoulderNear: 150, elbowNear: 110, shoulderFar: 150, elbowFar: 110 }, PRONE), travel: 1100, hold: 900, label: "Lift the chest to straight" },
       ],
-      props: [{ kind: "mat" }],
+      props: [{ kind: "gymBall", under: "trunk" }, { kind: "mat" }],
     },
   },
   {

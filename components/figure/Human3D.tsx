@@ -486,8 +486,16 @@ export default function Human3D({
               const h = wp("hips");
               const hipY = h ? h.y : 0.5;
               const hipZ = h ? h.z : 0;
-              const topY = hipY - 0.13;
-              const seatZ = hipZ - 0.04;
+              // A chair is furniture: it does not rise with the person who
+              // stands out of it, and it ends up behind them, because standing
+              // up carries the body forward over the feet. The rig holds the
+              // pelvis at the origin, so the chair is what has to travel.
+              const seated = Math.max(
+                0,
+                Math.min(1, (poseRef.current.hipNear - 30) / 55)
+              );
+              const topY = Math.min(hipY - 0.13, 0.5);
+              const seatZ = hipZ - 0.04 - (1 - seated) * 0.44;
               seat.position.set(0, topY - 0.025, seatZ);
               back.position.set(0, topY + 0.23, seatZ - 0.2);
               legs.forEach((leg, i) => {
@@ -519,9 +527,43 @@ export default function Human3D({
             propGroup.add(w);
             break;
           }
-          case "ballBetweenKnees":
           case "gymBall": {
-            const gym = prop.kind === "gymBall";
+            // A gym ball is furniture, not a hand-held: the body rests on it.
+            // Where it goes depends on what it is carrying, so the record says.
+            const r = prop.radius ?? 0.32;
+            const ball = new THREE.Mesh(new THREE.SphereGeometry(r, 30, 24), mats.ball);
+            ball.castShadow = true; ball.receiveShadow = true;
+            ball.userData.noFrame = true;
+            propGroup.add(ball);
+            dynamic.push(() => {
+              const under = prop.under ?? "pelvis";
+              let seat: THREE.Vector3 | null = null;
+
+              if (under === "feet") {
+                const a = wp("rFoot"), b = wp("lFoot");
+                if (a && b) seat = a.clone().add(b).multiplyScalar(0.5);
+              } else if (under === "trunk") {
+                // Draped over it. The ball is on the floor and the body is
+                // lifted onto it (see BALL_SUPPORT below) — placing the ball
+                // against a body still lying on the mat put it on top of him.
+                const h = wp("hips"), s = wp("spineUpper");
+                if (h && s) {
+                  const mid = h.clone().lerp(s, 0.45);
+                  ball.position.set(mid.x, r, mid.z);
+                }
+                return;
+              } else {
+                seat = wp("hips");
+              }
+              if (!seat) return;
+
+              // The ball's top surface meets the body, so its centre sits one
+              // radius below — and it rests on the floor, so never lower.
+              ball.position.set(seat.x, Math.max(seat.y - r * 0.82, r * 0.92), seat.z);
+            });
+            break;
+          }
+          case "ballBetweenKnees": {
             const ball = new THREE.Mesh(new THREE.SphereGeometry(1, 28, 22), mats.ball);
             ball.castShadow = true; ball.receiveShadow = true;
             propGroup.add(ball);
@@ -547,8 +589,9 @@ export default function Human3D({
               const KNEE_HALF_WIDTH = 0.055;
               const gap = a.distanceTo(b);
               const free = gap / 2 - KNEE_HALF_WIDTH;
-              const r = gym ? 0.3 : Math.min(prop.radius ?? 0.09, Math.max(free, 0.03));
-              ball.scale.setScalar(r);
+              ball.scale.setScalar(
+                Math.min(prop.radius ?? 0.09, Math.max(free, 0.03))
+              );
             });
             break;
           }
@@ -673,16 +716,35 @@ export default function Human3D({
         root.updateMatrixWorld(true);
 
         const rootQ = root.getWorldQuaternion(new THREE.Quaternion());
-        const d = (angle: number, lateral = 0) => dir(angle, lateral).applyQuaternion(rootQ);
+        const d = (angle: number, lateral = 0, side = 0) =>
+          dir(angle, lateral, side).applyQuaternion(rootQ);
         const front = d(90);
+
+        // The body's own long axis, which trunk rotation turns about. Rolling
+        // the *reference* vector rather than the aim direction is what turns
+        // the chest on the pelvis: the spine keeps pointing where it pointed,
+        // but the shoulders — and so the arms hanging off them — come round
+        // with it.
+        const longAxis = d(0);
+        const twisted = (deg: number) =>
+          front.clone().applyAxisAngle(longAxis, deg * DEG);
 
         const lumbarA = p.pelvisTilt + p.lumbar;
         const thoraxA = lumbarA + p.thorax;
-        aim(rig, "spineLower", d(lumbarA * 0.7), front);
-        aim(rig, "spineUpper", d(thoraxA * 0.6), front);
-        aim(rig, "neck", d(thoraxA + p.neck), front);
+        const sb = p.sideBend ?? 0;
+        const tw = p.twist ?? 0;
+        aim(rig, "spineLower", d(lumbarA * 0.7, 0, sb * 0.45), twisted(tw * 0.3));
+        aim(rig, "spineUpper", d(thoraxA * 0.6, 0, sb * 0.85), twisted(tw * 0.75));
+        aim(
+          rig,
+          "neck",
+          d(thoraxA + p.neck, 0, sb + (p.neckSide ?? 0)),
+          twisted(tw + (p.neckRot ?? 0))
+        );
         // The head rides the neck: it is a leaf bone with no child to give it a
-        // reliable axis, and aiming it directly threw it back.
+        // reliable axis, and aiming it directly threw it back. Turning the head
+        // is therefore done by rolling the neck's reference above, which carries
+        // the skull round exactly as the neck's own rotation does.
 
         // Arms roll so the thumb stays up (palm facing inward), which reads as
         // natural in every raise. Rolling their front toward the body-front
@@ -696,25 +758,62 @@ export default function Human3D({
         // leaving the upper arm where it is — the shoulder's rotation DOF.
         const rForeLat = rArmLat - (p.shoulderRotNear ?? 0);
         const lForeLat = lArmLat + (p.shoulderRotFar ?? 0);
-        aim(rig, "rUpper", d(p.shoulderNear, rArmLat), armUp);
-        aim(rig, "lUpper", d(p.shoulderFar, lArmLat), armUp);
-        aim(rig, "rFore", d(p.shoulderNear - p.elbowNear, rForeLat), armUp);
-        aim(rig, "lFore", d(p.shoulderFar - p.elbowFar, lForeLat), armUp);
+        // The arms are carried round by the chest, so trunk rotation has to
+        // reach them too or a twisting figure leaves its arms behind.
+        const armTwist = tw * 0.75;
+        aim(rig, "rUpper", d(p.shoulderNear, rArmLat + armTwist, sb * 0.85), armUp);
+        aim(rig, "lUpper", d(p.shoulderFar, lArmLat + armTwist, sb * 0.85), armUp);
+        // A rolled reference is what turns the palm over without moving the arm.
+        const rForeUp = armUp.clone().applyAxisAngle(
+          d(p.shoulderNear - p.elbowNear, rForeLat),
+          (p.foreRotNear ?? 0) * DEG
+        );
+        const lForeUp = armUp.clone().applyAxisAngle(
+          d(p.shoulderFar - p.elbowFar, lForeLat),
+          -(p.foreRotFar ?? 0) * DEG
+        );
+        aim(rig, "rFore", d(p.shoulderNear - p.elbowNear, rForeLat + armTwist, sb * 0.85), rForeUp);
+        aim(rig, "lFore", d(p.shoulderFar - p.elbowFar, lForeLat + armTwist, sb * 0.85), lForeUp);
+        // The hand is normally left to follow the forearm; only bend it when an
+        // exercise actually asks, so nothing that worked before changes.
+        if (p.wristNear) {
+          aim(
+            rig,
+            "rHand",
+            d(p.shoulderNear - p.elbowNear - p.wristNear, rForeLat + armTwist, sb * 0.85),
+            rForeUp
+          );
+        }
+        if (p.wristFar) {
+          aim(
+            rig,
+            "lHand",
+            d(p.shoulderFar - p.elbowFar - p.wristFar, lForeLat + armTwist, sb * 0.85),
+            lForeUp
+          );
+        }
 
         const rThigh = 180 - p.hipNear, lThigh = 180 - p.hipFar;
         const rShin = rThigh + p.kneeNear, lShin = lThigh + p.kneeFar;
         const rFootA = rShin - 90 + p.ankleNear + FOOT_PITCH;
         const lFootA = lShin - 90 + p.ankleFar + FOOT_PITCH;
-        const rLat = -LEG_SPLAY - (p.hipRotNear ?? 0);
-        const lLat = LEG_SPLAY + (p.hipRotFar ?? 0);
-        aim(rig, "rThigh", d(rThigh, rLat), front);
-        aim(rig, "lThigh", d(lThigh, lLat), front);
-        aim(rig, "rShin", d(rShin, rLat), front);
-        aim(rig, "lShin", d(lShin, lLat), front);
+        // Rotating each hip mirrors the legs and pulls the knees apart, which
+        // is right for a clamshell and wrong for a knee drop. `pelvisRot` is
+        // added to both in the same sense, so the legs travel together as one
+        // piece — which is what a lower trunk rotation actually is.
+        const pr = p.pelvisRot ?? 0;
+        const rLat = -LEG_SPLAY - (p.hipRotNear ?? 0) + pr;
+        const lLat = LEG_SPLAY + (p.hipRotFar ?? 0) + pr;
+        const rAbdS = -(p.hipAbductNear ?? 0);
+        const lAbdS = p.hipAbductFar ?? 0;
+        aim(rig, "rThigh", d(rThigh, rLat, rAbdS), front);
+        aim(rig, "lThigh", d(lThigh, lLat, lAbdS), front);
+        aim(rig, "rShin", d(rShin, rLat, rAbdS), front);
+        aim(rig, "lShin", d(lShin, lLat, lAbdS), front);
         // Foot aimed by direction only; it inherits the shin's forward frame,
         // which keeps the sole down. An independent world-up roll flipped it.
-        aim(rig, "rFoot", d(rFootA, -TOE_OUT));
-        aim(rig, "lFoot", d(lFootA, TOE_OUT));
+        aim(rig, "rFoot", d(rFootA, -TOE_OUT + pr, rAbdS));
+        aim(rig, "lFoot", d(lFootA, TOE_OUT + pr, lAbdS));
 
         // A foot planted on the floor is set by the floor, not by the body. In a
         // bridge the trunk is tilted right up, and carrying the feet round with
@@ -731,9 +830,13 @@ export default function Human3D({
             caudal.normalize();
             const worldUp = new THREE.Vector3(0, 1, 0);
             // Only a bent knee has its foot on the floor; a straight leg is
-            // being raised, as in a straight leg raise.
-            if (p.kneeNear > 40) aim(rig, "rFoot", caudal, worldUp, "up");
-            if (p.kneeFar > 40) aim(rig, "lFoot", caudal, worldUp, "up");
+            // being raised, as in a straight leg raise. And only while the hip
+            // is barely flexed: with the knees carried up over the hips the
+            // feet are in the air, and flattening them to the floor there bent
+            // the ankles backwards.
+            const planted = (hip: number, knee: number) => knee > 40 && hip < 70;
+            if (planted(p.hipNear, p.kneeNear)) aim(rig, "rFoot", caudal, worldUp, "up");
+            if (planted(p.hipFar, p.kneeFar)) aim(rig, "lFoot", caudal, worldUp, "up");
           }
         }
 
@@ -773,8 +876,30 @@ export default function Human3D({
           root.updateMatrixWorld(true);
         };
 
+        // A gym ball the body is draped over is not scenery — it is the surface
+        // the body rests on, in place of the floor. Without this the figure
+        // settles onto the mat and the ball ends up sitting on his back.
+        const support = (propsRef.current ?? []).find(
+          (q) => q.kind === "gymBall" && q.under === "trunk"
+        ) as { radius?: number } | undefined;
+
+        /** Lift the trunk onto the top of the ball once it has been posed. */
+        const restOnBall = () => {
+          if (!support) return;
+          const r = support.radius ?? 0.32;
+          const h = first("hips"), s = first("spineUpper");
+          if (!h || !s) return;
+          const mid = h
+            .getWorldPosition(new THREE.Vector3())
+            .lerp(s.getWorldPosition(new THREE.Vector3()), 0.45);
+          // Top of the ball, less the half-thickness of a trunk sinking into it.
+          root.position.y += r * 2 - 0.1 - mid.y;
+          root.updateMatrixWorld(true);
+        };
+
         poseBody(p, 0);
         settleDown();
+        restOnBall();
 
         // A body propped on its forearms is not lying flat: it rests on two
         // contacts — forearms and toes in a plank, forearm and feet in a side
@@ -783,7 +908,7 @@ export default function Human3D({
         // the body hovering, so find the smallest tilt about the floor that
         // brings a second contact down, and rest on both. On someone genuinely
         // lying flat the second contact is already down and this is a no-op.
-        if (lying) {
+        if (lying && !support) {
           const pts = touchPoints();
           const p0 = pts[0];
           let settle = 0;

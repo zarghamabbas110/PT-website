@@ -1558,8 +1558,12 @@ export const FINAL_SET: Exercise[] = [
     figure: {
       view: "front",
       frames: [
+        // A side glide is the trunk bending sideways over a fixed pelvis, which
+        // is `sideBend`. The old record used hip rotation, which turns a leg
+        // and does nothing to the trunk at all.
         { pose: pose({ shoulderNear: 150, elbowNear: 100 }, STAND), travel: 800, hold: 400, label: "Shoulder against the wall" },
-        { pose: pose({ shoulderNear: 150, elbowNear: 100, hipRotNear: -20, lumbar: -4 }, STAND), travel: 1000, hold: 900, label: "Push the hips towards the wall" },
+        { pose: pose({ shoulderNear: 150, elbowNear: 100, sideBend: -26, hipAbductNear: 8, hipAbductFar: 8 }, STAND), travel: 1100, hold: 1000, label: "Glide the hips towards the wall" },
+        { pose: pose({ shoulderNear: 150, elbowNear: 100 }, STAND), travel: 900, hold: 400, label: "Return to upright" },
       ],
       props: [{ kind: "wall" }],
     },

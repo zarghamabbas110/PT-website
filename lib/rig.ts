@@ -62,16 +62,32 @@ export function baseName(name: string): string {
 
 /**
  * A pose angle as a direction in the body's own frame. 0 up, 90 forward, 180
- * down; `lateral` swings it out to the side. Up is +Y, forward is +Z.
+ * down. Up is +Y, forward is +Z, the body's left is +X.
+ *
+ * Two sideways controls, and they are not the same movement:
+ *
+ * - `lateral` turns the direction *about the body's long axis*. It is what
+ *   swings a raised limb across or away from the midline, and what turns the
+ *   chest on the pelvis. It has no effect on a limb pointing straight up or
+ *   straight down, because there is nothing off-axis to swing — which is
+ *   correct, and is why it cannot be used for the movement below.
+ * - `side` tips the direction *in the frontal plane*, towards the body's left.
+ *   This is side-bending a spine and abducting a hanging limb: the movements
+ *   that were impossible to express before, so the exercises needing them were
+ *   written with `lateral` and came out doing nothing at all.
  */
-export function dir(angle: number, lateral = 0): THREE.Vector3 {
+export function dir(angle: number, lateral = 0, side = 0): THREE.Vector3 {
   const a = angle * DEG, l = lateral * DEG;
-  return new THREE.Vector3(
+  const v = new THREE.Vector3(
     Math.sin(a) * Math.sin(l),
     Math.cos(a),
     Math.sin(a) * Math.cos(l)
-  ).normalize();
+  );
+  if (side) v.applyAxisAngle(FORWARD, side * DEG);
+  return v.normalize();
 }
+
+const FORWARD = new THREE.Vector3(0, 0, 1);
 
 /** Every bone in the model, indexed by its normalised base name. */
 export function collectBones(root: THREE.Object3D): Map<string, THREE.Bone[]> {

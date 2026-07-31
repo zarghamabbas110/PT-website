@@ -37,7 +37,12 @@ export type Prop =
   | { kind: "wallRight" }
   | { kind: "chair" }
   | { kind: "ballBetweenKnees"; radius?: number }
-  | { kind: "gymBall"; radius?: number }
+  /**
+   * A large exercise ball. `under` says what part of the body it carries —
+   * without it the ball was placed between the knees like a squeeze ball, so
+   * a pelvic tilt sat on a ball showed the ball down by the shins.
+   */
+  | { kind: "gymBall"; radius?: number; under?: "pelvis" | "trunk" | "feet" }
   | { kind: "band"; anchor?: "front" | "between" }
   | { kind: "towelUnderKnee" }
   | { kind: "stick" }

@@ -21,6 +21,34 @@ unless asked.
   review."
 - Animation captions (`Keyframe.label`) are still English-only.
 
+## The shape of the site
+
+    /                  the front door: intro, and two ways in
+    /patient           the marketing/landing page (hero, body picker,
+                       four sample exercises, About, Contact)
+    /exercises         the library
+    /clinician/login   sign in with email + access code
+    /clinician/register  request an account, for the owner to approve
+    /admin             owner only — exercise review console, account queue
+
+`SiteHeader` and `SiteFooter` return `null` on `/` so the front door offers
+only its two choices.
+
+**Never put the whole library on a page that is not the library.** The old
+landing page rendered all 300 `ExerciseCard`s. Clicking "Home" then took
+**3.3 seconds**, which reads as a dead button — and was reported as one.
+
+## Accounts, and what they are not
+
+`lib/session.ts` holds roles, access requests, approvals and the owner's
+review verdicts **in localStorage**. None of it is security, and every screen
+says so out loud. A request sent from one computer cannot be seen from
+another. Replacing it means a database, hashed passwords and signed sessions;
+the data shapes are already close to the tables they will become.
+
+The `/admin` passphrase is in the client bundle. It closes a door; it does
+not lock one.
+
 ## Stack
 
 Next.js 16 (App Router, Turbopack), React 19, Tailwind v4, three.js 0.185,
@@ -99,6 +127,64 @@ flat SVG figure uses. Hard-won details, do not undo them:
 
 Bases live in `data/exercises/bases.ts`: STAND, SEATED, SUPINE, SUPINE_LONG,
 PRONE, SIDE_LYING, QUADRUPED.
+
+### Movements outside the sagittal plane — read this before writing a record
+
+The pose model originally had no way to say "turn", "bend sideways", "look
+over your shoulder", "drop both knees to one side", "turn the palm over" or
+"bend the wrist". Records that needed those were written with whichever
+existing field looked closest, and came out either doing the wrong movement
+or standing perfectly still. The owner caught it region by region.
+
+The channels now exist (`lib/figure.ts`, driven in `Human3D.tsx`):
+
+| channel | movement |
+|---|---|
+| `twist` | chest turns on the pelvis; carries the arms round |
+| `sideBend` | trunk bends sideways |
+| `neckRot` / `neckSide` | head turns / ear to shoulder |
+| `pelvisRot` | **both** legs travel together — knee drops, lower trunk rotation |
+| `hipAbductNear/Far` | leg lifts away from the midline |
+| `foreRotNear/Far` | palm turns up or down |
+| `wristNear/Far` | wrist bends (only applied when non-zero) |
+
+Two traps:
+
+- **`hipRot` mirrors the legs; `pelvisRot` does not.** Setting `hipRotNear`
+  and `hipRotFar` to the same number pulls the knees *apart*. A knee drop
+  needs `pelvisRot`.
+- **`lateral` and `side` are different axes.** `lateral` turns about the
+  body's long axis and does nothing to a limb pointing straight up or down.
+  `side` tips in the frontal plane. Side-bending and abducting a hanging limb
+  need `side`.
+
+Spine angles are scaled down by the rig (0.7 lumbar, 0.6 thorax), so ±10
+is invisible. A back extension wants 30 or more.
+
+### Props that are furniture, not held
+
+- **`gymBall` takes `under: "pelvis" | "trunk" | "feet"`.** Without it the
+  ball was placed like a squeeze ball, between the knees — which is what the
+  owner saw on a seated pelvic tilt.
+- **`under: "trunk"` makes the ball a support surface.** The ball sits on the
+  floor and the *body is lifted onto it* (`restOnBall`), and the two-contact
+  ground settle is skipped. Placing the ball against a body still lying on
+  the mat put the ball on his back.
+- **A chair does not rise with the person standing out of it**, and ends up
+  behind them: seat height is clamped, and the chair slides back as the hip
+  extends. Otherwise a sit-to-stand walks through its own chair.
+
+### Card stills
+
+`components/figure/ExerciseThumb.tsx` shows a pre-rendered still on library
+cards and swaps to the live figure only on hover — a browser gives you about
+sixteen WebGL contexts and a filtered grid wants far more. Regenerate after
+any animation change:
+
+    npx next build && npx next start -p 4400 &
+    node scripts/thumbs.cjs 4400
+
+It skips slugs already present, so delete the ones you want redone.
 
 ## The landing-page body picker
 

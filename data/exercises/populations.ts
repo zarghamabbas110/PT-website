@@ -1023,9 +1023,20 @@ export const POPULATIONS: Exercise[] = [
     figure: {
       view: "side",
       frames: [
-        { pose: pose({ shoulderNear: 168, elbowNear: 72, shoulderFar: 168, elbowFar: 72 }, STAND), travel: 800, hold: 400, label: "Standing, hands on the back" },
-        { pose: pose({ lumbar: -18, thorax: -6, neck: -8, shoulderNear: 168, elbowNear: 78, shoulderFar: 168, elbowFar: 78 }, STAND), travel: 1000, hold: 900, label: "Lean back over the hands" },
+        // The exercise is named for getting out of the chair, so it has to
+        // start in the chair. It used to open standing and only lean back,
+        // which is why the figure appeared to be doing nothing.
+        //
+        // Leaning the trunk forward out of a chair tips the whole body, legs
+        // included — so `rootRot` is matched by an equal increase in hip
+        // flexion, which holds the thighs on the seat while the chest travels.
+        { pose: pose({}, SEATED), travel: 800, hold: 500, label: "Sitting at the desk" },
+        { pose: pose({ rootRot: 26, hipNear: 112, hipFar: 110, shoulderNear: 140, elbowNear: 30, shoulderFar: 140, elbowFar: 30 }, SEATED), travel: 900, hold: 400, label: "Nose over toes — lean forward" },
+        { pose: pose({ kneeNear: 22, kneeFar: 22, hipNear: 24, hipFar: 22, rootRot: 14, shoulderNear: 158, elbowNear: 20, shoulderFar: 158, elbowFar: 20 }, STAND), travel: 900, hold: 400, label: "Push through the feet and stand" },
+        { pose: pose({ shoulderNear: 168, elbowNear: 78, shoulderFar: 168, elbowFar: 78 }, STAND), travel: 700, hold: 400, label: "Stand tall, hands on the back" },
+        { pose: pose({ lumbar: -26, thorax: -10, neck: -10, shoulderNear: 168, elbowNear: 82, shoulderFar: 168, elbowFar: 82 }, STAND), travel: 900, hold: 900, label: "Lean back over the hands" },
       ],
+      props: [{ kind: "chair" }],
     },
   },
   {

@@ -1,7 +1,15 @@
+"use client";
+
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import PaperCut from "./home/PaperCut";
 
 export default function SiteFooter() {
+  const pathname = usePathname();
+  // The front door is a single screen with two choices on it — a footer would
+  // add a third way out of a question that should be answered.
+  if (pathname === "/") return null;
+
   return (
     <footer className="relative">
       <PaperCut layers={["#ad2d1d", "#cf3a26", "#241512"]} height={110} />
@@ -41,9 +49,17 @@ export default function SiteFooter() {
               Contact
             </h4>
             <ul className="space-y-2 text-sm text-cream-300/70">
-              <li>Your clinic address</li>
-              <li>Your phone number</li>
-              <li>hello@physioflow.com</li>
+              <li>
+                <Link href="/patient#about" className="hover:text-crimson-300">
+                  About
+                </Link>
+              </li>
+              <li>
+                <Link href="/patient#contact" className="hover:text-crimson-300">
+                  Contact
+                </Link>
+              </li>
+              <li>hello@physioflow.pk</li>
             </ul>
           </div>
         </div>
