@@ -125,3 +125,45 @@ export const DIFFICULTIES = ["Beginner", "Intermediate", "Advanced"] as const;
 export function bySlug(slug: string): Exercise | undefined {
   return EXERCISES.find((e) => e.slug === slug);
 }
+
+/* The joint angles a figure can move. Position and the far-side offsets are
+   left out: shifting the whole body across the frame is not a movement. */
+const MOVING_KEYS = [
+  "rootRot", "roll", "pelvisTilt", "lumbar", "thorax", "neck", "head", "headSlide",
+  "shoulderNear", "elbowNear", "hipNear", "kneeNear", "ankleNear",
+  "hipRotNear", "shoulderAbductNear", "shoulderRotNear",
+  "shoulderFar", "elbowFar", "hipFar", "kneeFar", "ankleFar",
+  "hipRotFar", "shoulderAbductFar", "shoulderRotFar",
+  "twist", "sideBend", "neckRot", "neckSide", "pelvisRot",
+  "hipAbductNear", "hipAbductFar", "foreRotNear", "foreRotFar",
+  "wristNear", "wristFar",
+] as const;
+
+/**
+ * Does this exercise's figure actually move?
+ *
+ * Some movements the rig genuinely cannot show yet — a finger tendon glide has
+ * no fingers to glide, ankle inversion has no subtalar joint. Those exercises
+ * stay in the library in full; what changes is that the page says so plainly
+ * instead of presenting a figure standing still as if it were the exercise.
+ *
+ * The test is the total travel across every joint over the whole sequence.
+ * Fifteen degrees is about the point below which nothing is visible at the
+ * size the figure is drawn.
+ */
+export function hasMovement(ex: Exercise): boolean {
+  const frames = ex.figure.frames;
+  if (!frames || frames.length < 2) return false;
+  let total = 0;
+  for (const k of MOVING_KEYS) {
+    let lo = Infinity;
+    let hi = -Infinity;
+    for (const f of frames) {
+      const v = (f.pose as unknown as Record<string, number>)[k] ?? 0;
+      if (v < lo) lo = v;
+      if (v > hi) hi = v;
+    }
+    total += hi - lo;
+  }
+  return total >= 15;
+}

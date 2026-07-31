@@ -131,6 +131,111 @@ export function signOut() {
   if (can()) localStorage.removeItem(AUTH_KEY);
 }
 
+/* ---------------------------------------------- patients and their programmes
+
+   A physiotherapist should not have to print a PDF to hand exercises over. He
+   creates a login for the patient, ticks the exercises that patient is to do,
+   sets the dosage for each, and the patient signs in and sees those exercises
+   only — with the full instructions and the moving figure, which a sheet of
+   paper cannot give them.
+   ---------------------------------------------------------------------- */
+
+export type Assignment = {
+  slug: string;
+  /** Blank means "use whatever the exercise itself recommends". */
+  sets: string;
+  reps: string;
+  hold: string;
+  frequency: string;
+  note: string;
+};
+
+export type PatientAccount = {
+  id: string;
+  name: string;
+  phone: string;
+  /** Which clinician created this patient, so a clinician sees only their own. */
+  clinicianEmail: string;
+  code: string;
+  createdOn: string;
+  diagnosis: string;
+  items: Assignment[];
+};
+
+const PATIENTS_KEY = "physioflow.patients";
+const PATIENT_AUTH_KEY = "physioflow.patientSession";
+
+export function listPatients(): PatientAccount[] {
+  if (!can()) return [];
+  try {
+    return JSON.parse(localStorage.getItem(PATIENTS_KEY) ?? "[]") as PatientAccount[];
+  } catch {
+    return [];
+  }
+}
+
+export function savePatients(rows: PatientAccount[]) {
+  if (can()) localStorage.setItem(PATIENTS_KEY, JSON.stringify(rows));
+}
+
+export function addPatient(
+  name: string,
+  phone: string,
+  diagnosis: string,
+  clinicianEmail: string
+): PatientAccount {
+  const row: PatientAccount = {
+    id: `PT-${Date.now().toString(36).toUpperCase()}`,
+    name,
+    phone,
+    diagnosis,
+    clinicianEmail,
+    code: makeLoginCode(),
+    createdOn: new Date().toISOString(),
+    items: [],
+  };
+  savePatients([...listPatients(), row]);
+  return row;
+}
+
+export function updatePatient(id: string, patch: Partial<PatientAccount>) {
+  savePatients(listPatients().map((p) => (p.id === id ? { ...p, ...patch } : p)));
+}
+
+export function removePatient(id: string) {
+  savePatients(listPatients().filter((p) => p.id !== id));
+}
+
+/* ---------------------------------------------------- the patient's session */
+
+export type PatientSession = { id: string; name: string };
+
+export function patientSignIn(code: string): PatientSession | null {
+  const row = listPatients().find(
+    (p) =>
+      p.code.replace(/[\s-]/g, "").toUpperCase() ===
+      code.replace(/[\s-]/g, "").toUpperCase()
+  );
+  if (!row) return null;
+  const s: PatientSession = { id: row.id, name: row.name };
+  if (can()) localStorage.setItem(PATIENT_AUTH_KEY, JSON.stringify(s));
+  return s;
+}
+
+export function currentPatient(): PatientSession | null {
+  if (!can()) return null;
+  try {
+    const raw = localStorage.getItem(PATIENT_AUTH_KEY);
+    return raw ? (JSON.parse(raw) as PatientSession) : null;
+  } catch {
+    return null;
+  }
+}
+
+export function patientSignOut() {
+  if (can()) localStorage.removeItem(PATIENT_AUTH_KEY);
+}
+
 /* ------------------------------------------------- the owner's review pass */
 
 export type Verdict = {

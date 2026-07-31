@@ -20,6 +20,12 @@ unless asked.
   invented; each `rationale` ends "Citations to be attached at clinical
   review."
 - Animation captions (`Keyframe.label`) are still English-only.
+- **44 of the 300 exercises have no working animation.** They are all present
+  in full and say "Animation not available yet" rather than showing a figure
+  standing still. `hasMovement()` in `data/exercises/index.ts` decides this by
+  measuring total joint travel. Concentrated in Wrist & Hand (12), Ankle &
+  Foot (9) and Cervical (7) — movements the rig could not express until the
+  new channels landed. **No exercise is ever to be removed for this.**
 
 ## The shape of the site
 
@@ -29,10 +35,18 @@ unless asked.
     /exercises         the library
     /clinician/login   sign in with email + access code
     /clinician/register  request an account, for the owner to approve
+    /patient/programme a patient signs in with a code from their
+                       physiotherapist and sees only the exercises assigned
+                       to them, with the moving figure
+    /clinician/patients  create patient logins, tick exercises, set dosage
     /admin             owner only — exercise review console, account queue
 
 `SiteHeader` and `SiteFooter` return `null` on `/` so the front door offers
 only its two choices.
+
+**A stale `.next` serves 404 for pages an update added.** The owner hit this
+after a pull: the front door rendered, both doors 404'd. `update-website.bat`
+now deletes `.next` before starting.
 
 **Never put the whole library on a page that is not the library.** The old
 landing page rendered all 300 `ExerciseCard`s. Clicking "Home" then took

@@ -58,6 +58,12 @@ export default function ClinicianLogin() {
               >
                 Open the library →
               </Link>
+              <Link
+                href="/clinician/patients"
+                className="rounded-full bg-crimson-500 px-6 py-3 font-semibold text-cream-50 hover:bg-crimson-600"
+              >
+                My patients →
+              </Link>
               <button
                 onClick={() => {
                   signOut();

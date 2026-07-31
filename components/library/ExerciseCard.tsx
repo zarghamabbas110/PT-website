@@ -5,6 +5,7 @@ import { useState } from "react";
 import { motion } from "framer-motion";
 import ExerciseThumb from "@/components/figure/ExerciseThumb";
 import { useLang } from "@/lib/i18n";
+import { hasMovement } from "@/data/exercises";
 import type { Exercise } from "@/data/schema";
 
 /**
@@ -43,6 +44,14 @@ export default function ExerciseCard({ exercise }: { exercise: Exercise }) {
           {exercise.evidence.status === "unreviewed" && (
             <span className="absolute right-4 top-4 rounded-full bg-amber-accent px-3 py-1 text-[0.68rem] font-bold uppercase tracking-wider text-espresso-900">
               Draft
+            </span>
+          )}
+
+          {/* The exercise is here in full; it is only the figure that cannot
+              show this particular movement yet. Say which. */}
+          {!hasMovement(exercise) && (
+            <span className="absolute bottom-3 left-4 rounded-full bg-espresso-900/80 px-3 py-1 text-[0.64rem] font-bold uppercase tracking-wider text-cream-100 backdrop-blur-sm">
+              No animation yet
             </span>
           )}
         </div>

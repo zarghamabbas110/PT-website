@@ -28,6 +28,7 @@ const DOORS = [
 
 export default function EntryGate() {
   return (
+    <>
     <div className="mt-5 grid w-full max-w-3xl gap-5 sm:grid-cols-2">
       {DOORS.map((d, i) => (
         <motion.div
@@ -60,5 +61,24 @@ export default function EntryGate() {
         </motion.div>
       ))}
     </div>
+
+    {/* A patient whose physiotherapist has already given them a code does not
+        want the tour — they want their own exercises, now. */}
+    <motion.p
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 0.7, delay: 0.5 }}
+      className="mt-6 text-center text-[0.92rem] text-cream-50/85"
+    >
+      Been given a code by your physiotherapist?{" "}
+      <Link
+        href="/patient/programme"
+        onClick={() => setRole("patient")}
+        className="font-bold text-amber-accent underline decoration-amber-accent/50 underline-offset-4 hover:decoration-amber-accent"
+      >
+        Go straight to your exercises
+      </Link>
+    </motion.p>
+    </>
   );
 }

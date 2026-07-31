@@ -2,6 +2,8 @@
 
 import Link from "next/link";
 import AnimatedHuman3D from "@/components/figure/AnimatedHuman3D";
+import { NoAnimation } from "@/components/patient/ProgrammeView";
+import { hasMovement } from "@/data/exercises";
 import PinnedNotes from "./PinnedNotes";
 import Collapsible from "./Collapsible";
 import LanguageToggle from "@/components/LanguageToggle";
@@ -70,7 +72,15 @@ export default function ExerciseDetail({
         <div className="grid gap-8 lg:grid-cols-[1.02fr_0.98fr]">
           <div className="lg:sticky lg:top-24 lg:self-start">
             <div className="overflow-hidden rounded-[30px] border border-crimson-100 bg-gradient-to-b from-crimson-50 to-cream-50 p-3 shadow-[0_20px_50px_rgba(90,30,20,0.1)]">
-              <AnimatedHuman3D spec={ex.figure} className="w-full" />
+              {/* Some movements the figure genuinely cannot show yet — it has
+                  no fingers to glide, no subtalar joint to turn. Saying so is
+                  better than presenting a figure standing still as though that
+                  were the exercise. The exercise itself stays in full. */}
+              {hasMovement(ex) ? (
+                <AnimatedHuman3D spec={ex.figure} className="w-full" />
+              ) : (
+                <NoAnimation />
+              )}
             </div>
 
             {/* the four numbers, as their own tidy cards */}
