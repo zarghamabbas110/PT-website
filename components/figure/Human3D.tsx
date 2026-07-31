@@ -75,6 +75,12 @@ const CHILD: Partial<Record<J, J>> = {
   lThigh: "lShin", lShin: "lFoot", lFoot: "lToe",
 };
 
+/** Finger chains, for closing the hand around a wand or a band. */
+const FINGERS = ["Index", "Middle", "Ring", "Pinky"];
+/** How far each knuckle curls, from the base joint outwards, in degrees. */
+const CURL = [58, 72, 66];
+const THUMB_CURL = [26, 34, 30];
+
 const GROUND: J[] = ["rFoot", "rToe", "lFoot", "lToe"];
 const GROUND_LYING: J[] = ["head", "spineUpper", "hips", "rFoot", "lFoot", "rHand", "lHand"];
 
@@ -292,6 +298,89 @@ export default function Human3D({
       const rig: Rig = { joints };
       const first = (k: J) => rig.joints.get(k)?.[0]?.bone;
 
+      /* --- gripping -------------------------------------------------------
+         A wand or a band has to be held, not passed through an open hand. Each
+         knuckle is curled about its own hinge — the axis square to the bone and
+         to the palm — starting from the pose the hand was modelled in, so the
+         hand closes the way a hand closes. */
+      type Knuckle = {
+        bone: THREE.Bone; child: THREE.Bone; hand: THREE.Bone;
+        restQ: THREE.Quaternion; axis: THREE.Vector3; deg: number; sign: number;
+      };
+      const knuckles: Knuckle[] = [];
+      for (const side of ["Left", "Right"]) {
+        const hands = raw.get(`${side}Hand`);
+        if (!hands) continue;
+        for (const finger of [...FINGERS, "Thumb"]) {
+          const curl = finger === "Thumb" ? THUMB_CURL : CURL;
+          for (let i = 1; i <= 3; i++) {
+            const bones = raw.get(`${side}Hand${finger}${i}`);
+            const kids = raw.get(`${side}Hand${finger}${i + 1}`);
+            if (!bones || !kids) continue;
+            bones.forEach((bone, n) => {
+              const kid = kids[n] ?? kids[0];
+              const restDir = kid.position.clone().normalize();
+              bone.getWorldQuaternion(_wq);
+              const restUp = new THREE.Vector3(0, 1, 0).applyQuaternion(_wq.clone().invert());
+              const axis = new THREE.Vector3().crossVectors(restDir, restUp);
+              if (axis.lengthSq() < 1e-6) return;
+              knuckles.push({
+                bone, child: kid, hand: hands[n] ?? hands[0],
+                restQ: bone.quaternion.clone(),
+                axis: axis.normalize(),
+                deg: curl[i - 1],
+                sign: 1,
+              });
+            });
+          }
+        }
+      }
+      const _grip = new THREE.Quaternion();
+
+      // Left and right hands are mirrored, so the same hinge axis closes one
+      // hand and opens the other. Rather than assume, each finger is curled
+      // both ways and keeps whichever brings its *tip* towards the wrist —
+      // which is what closing a hand does, on either side. The test has to use
+      // the fingertip: the next knuckle along barely moves, so measuring that
+      // cannot tell the two directions apart.
+      {
+        const tip = new THREE.Vector3();
+        const wrist = new THREE.Vector3();
+        const chains = new Map<string, Knuckle[]>();
+        for (const k of knuckles) {
+          const id = k.bone.name.replace(/[123](_\d+)?$/, "");
+          (chains.get(id) ?? chains.set(id, []).get(id)!).push(k);
+        }
+        chains.forEach((chain) => {
+          const hand = chain[0].hand;
+          const last = chain[chain.length - 1];
+          hand.getWorldPosition(wrist);
+          let best = 1, bestDist = Infinity;
+          for (const sign of [1, -1]) {
+            for (const k of chain) {
+              _grip.setFromAxisAngle(k.axis, k.deg * sign * DEG);
+              k.bone.quaternion.copy(k.restQ).multiply(_grip);
+            }
+            hand.updateMatrixWorld(true);
+            const dist = last.child.getWorldPosition(tip).distanceTo(wrist);
+            if (dist < bestDist) { bestDist = dist; best = sign; }
+          }
+          for (const k of chain) {
+            k.sign = best;
+            k.bone.quaternion.copy(k.restQ);
+          }
+          hand.updateMatrixWorld(true);
+        });
+      }
+      const setGrip = (amount: number) => {
+        for (const k of knuckles) {
+          _grip.setFromAxisAngle(k.axis, k.deg * k.sign * amount * DEG);
+          k.bone.quaternion.copy(k.restQ).multiply(_grip);
+        }
+      };
+      /** Closed when the exercise puts something in the hands. */
+      let gripAmount = 0;
+
       /**
        * Point the camera at whatever the figure and its equipment actually
        * occupy, and stand far enough back to fit it.
@@ -352,6 +441,12 @@ export default function Human3D({
       // chair, wall); some follow the body every frame (ball between the knees,
       // wand in the hands, band, dumbbells). Kept simple and readable — real
       // objects, not detailed models — so they place the movement in context.
+      /** Where a held object sits: the knuckles, not the wrist joint. */
+      const gripPoint = (side: "Left" | "Right") => {
+        const knuckle = raw.get(`${side}HandMiddle1`)?.[0] ?? raw.get(`${side}Hand`)?.[0];
+        return knuckle ? knuckle.getWorldPosition(new THREE.Vector3()) : null;
+      };
+
       /** The direction the chest faces, in world space, kept fresh each frame. */
       const bodyFront = new THREE.Vector3(0, 0, 1);
       const propGroup = new THREE.Group();
@@ -398,6 +493,12 @@ export default function Human3D({
       const rebuildProps = () => {
         propGroup.clear();
         dynamic.length = 0;
+        // Anything held in the hands closes them.
+        const held = (propsRef.current ?? []).some(
+          (q) => q.kind === "stick" || q.kind === "dumbbells" ||
+                 (q.kind === "band" && q.anchor !== "front")
+        );
+        gripAmount = held ? 1 : 0;
         for (const prop of propsRef.current ?? []) {
         switch (prop.kind) {
           case "mat": {
@@ -488,7 +589,7 @@ export default function Human3D({
           case "stick": {
             const wand = cyl(mats.wand, 0.02, 1);
             dynamic.push(() => {
-              const a = wp("rHand"), b = wp("lHand");
+              const a = gripPoint("Right"), b = gripPoint("Left");
               if (a && b) {
                 // Extend a little past each hand so it reads as a held bar.
                 const d = b.clone().sub(a).normalize().multiplyScalar(0.12);
@@ -509,7 +610,7 @@ export default function Human3D({
             };
             const dR = mk(), dL = mk();
             dynamic.push(() => {
-              const a = wp("rHand"), b = wp("lHand");
+              const a = gripPoint("Right"), b = gripPoint("Left");
               if (a) dR.position.copy(a);
               if (b) dL.position.copy(b);
             });
@@ -542,7 +643,7 @@ export default function Human3D({
                 new THREE.Vector3(), new THREE.Vector3(), new THREE.Vector3()
               );
               dynamic.push(() => {
-                const a = wp("rHand"), b = wp("lHand");
+                const a = gripPoint("Right"), b = gripPoint("Left");
                 if (!a || !b) return;
                 curve.v0.copy(a);
                 curve.v2.copy(b);
@@ -648,6 +749,27 @@ export default function Human3D({
         // which keeps the sole down. An independent world-up roll flipped it.
         aim(rig, "rFoot", d(rFootA, -TOE_OUT));
         aim(rig, "lFoot", d(lFootA, TOE_OUT));
+
+        // A foot planted on the floor is set by the floor, not by the body. In a
+        // bridge the trunk is tilted right up, and carrying the feet round with
+        // it turned them over — soles up, shoes upside down. A planted foot
+        // points along the ground away from the head, sole down, whatever the
+        // rest of the body is doing.
+        const supine = Math.abs(p.rootRot) > 45 && Math.abs(p.roll ?? 0) < 30;
+        if (supine) {
+          const caudal = d(180);
+          caudal.y = 0;
+          if (caudal.lengthSq() > 1e-4) {
+            caudal.normalize();
+            const worldUp = new THREE.Vector3(0, 1, 0);
+            // Only a bent knee has its foot on the floor; a straight leg is
+            // being raised, as in a straight leg raise.
+            if (p.kneeNear > 40) aim(rig, "rFoot", caudal, worldUp, "up");
+            if (p.kneeFar > 40) aim(rig, "lFoot", caudal, worldUp, "up");
+          }
+        }
+
+        setGrip(gripAmount);
         root.updateMatrixWorld(true);
       };
 
