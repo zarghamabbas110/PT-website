@@ -1,10 +1,25 @@
 import type { Exercise } from "../schema";
 import { SHOULDER } from "./shoulder";
+import { SHOULDER_B } from "./shoulder-b";
+import { ELBOW } from "./elbow";
+import { WRIST_HAND } from "./wrist-hand";
+import { NECK_BACK } from "./neck-back";
+import { HIP_KNEE } from "./hip-knee";
+import { ANKLE_FOOT } from "./ankle-foot";
 import { SPINE_LOWER_LIMB } from "./spine-lower-limb";
 
 /* The library is assembled from per-region files so batches can be written,
    reviewed and merged independently as it grows. */
-export const EXERCISES: Exercise[] = [...SHOULDER, ...SPINE_LOWER_LIMB];
+export const EXERCISES: Exercise[] = [
+  ...SHOULDER,
+  ...SHOULDER_B,
+  ...ELBOW,
+  ...WRIST_HAND,
+  ...NECK_BACK,
+  ...HIP_KNEE,
+  ...ANKLE_FOOT,
+  ...SPINE_LOWER_LIMB,
+];
 
 export const BODY_REGIONS = [
   "Cervical",
