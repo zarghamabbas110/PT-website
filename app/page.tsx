@@ -1,4 +1,5 @@
 import Hero from "@/components/home/Hero";
+import BodyPicker from "@/components/home/BodyPicker";
 import PinnedShowcase from "@/components/home/PinnedShowcase";
 import Reveal from "@/components/Reveal";
 import PaperCut from "@/components/home/PaperCut";
@@ -58,6 +59,31 @@ export default function HomePage() {
               </Reveal>
             ))}
           </div>
+        </div>
+      </section>
+
+      {/* ------------------------------------------------- pick a region */}
+      <section className="relative overflow-hidden bg-cream-50 px-5 pb-20 pt-16 sm:px-8">
+        <div className="mx-auto max-w-7xl">
+          <Reveal>
+            <div className="mx-auto max-w-2xl text-center">
+              <p className="mb-3 text-xs font-bold uppercase tracking-[0.2em] text-crimson-600">
+                Start from the body
+              </p>
+              <h2 className="display text-4xl text-espresso-900 sm:text-6xl">
+                Show me where it hurts.
+              </h2>
+              <p className="mx-auto mt-4 max-w-lg text-[1.02rem] leading-relaxed text-espresso-700/70">
+                Drag to turn the figure, then click where the problem is. The
+                library opens already filtered — narrow it from there by joint,
+                by what the exercise is for, and by what you have to hand.
+              </p>
+            </div>
+          </Reveal>
+
+          <Reveal delay={0.1}>
+            <BodyPicker className="mx-auto mt-8 flex h-[680px] w-full max-w-3xl flex-col sm:h-[760px]" />
+          </Reveal>
         </div>
       </section>
 

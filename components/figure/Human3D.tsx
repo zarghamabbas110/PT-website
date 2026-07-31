@@ -5,6 +5,9 @@ import * as THREE from "three";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
 import type { Pose } from "@/lib/figure";
 import type { Prop } from "./PhysioFigure";
+import {
+  CAND, CHILD, DEG, TARGET_HEIGHT, baseName, dir, type J,
+} from "@/lib/rig";
 
 /* ==========================================================================
    Human3D — poses a rigged character from the same Pose that draws the flat
@@ -28,52 +31,11 @@ import type { Prop } from "./PhysioFigure";
    therefore maps to *every* matching bone, and all are driven together.
    ========================================================================== */
 
-const DEG = Math.PI / 180;
-/** Scale every model to a consistent standing height so framing is stable. */
-const TARGET_HEIGHT = 1.8;
 /** Half-turn if the loaded model is authored facing away from the camera. */
 const MODEL_FACING = 0;
 
-/** The logical joints the driver knows how to pose. */
-type J =
-  | "hips" | "spineLower" | "spineUpper" | "neck" | "head"
-  | "rUpper" | "rFore" | "rHand" | "lUpper" | "lFore" | "lHand"
-  | "rThigh" | "rShin" | "rFoot" | "rToe"
-  | "lThigh" | "lShin" | "lFoot" | "lToe";
 
-/**
- * Candidate bone base-names per joint, best first. Standard (Mixamo) names lead
- * so a standard rig always wins; game-rip names follow as fallbacks.
- */
-const CAND: Record<J, string[]> = {
-  hips: ["Hips", "Hip"],
-  spineLower: ["Spine", "Waist"],
-  spineUpper: ["Spine2", "Spine1", "Bust", "Chest"],
-  neck: ["Neck"],
-  head: ["Head"],
-  rUpper: ["RightArm", "ShoulderR", "UpperArmR"],
-  rFore: ["RightForeArm", "ArmR", "ForearmR"],
-  rHand: ["RightHand", "HandR"],
-  lUpper: ["LeftArm", "ShoulderL", "UpperArmL"],
-  lFore: ["LeftForeArm", "ArmL", "ForearmL"],
-  lHand: ["LeftHand", "HandL"],
-  rThigh: ["RightUpLeg", "LegR", "ThighR"],
-  rShin: ["RightLeg", "KneeR", "ShinR", "CalfR"],
-  rFoot: ["RightFoot", "FootR"],
-  rToe: ["RightToeBase", "ToeR", "ToeBaseR"],
-  lThigh: ["LeftUpLeg", "LegL", "ThighL"],
-  lShin: ["LeftLeg", "KneeL", "ShinL", "CalfL"],
-  lFoot: ["LeftFoot", "FootL"],
-  lToe: ["LeftToeBase", "ToeL", "ToeBaseL"],
-};
 
-/** Which joint each bone points toward at rest (for measuring rest direction). */
-const CHILD: Partial<Record<J, J>> = {
-  spineLower: "spineUpper", spineUpper: "neck", neck: "head",
-  rUpper: "rFore", rFore: "rHand", lUpper: "lFore", lFore: "lHand",
-  rThigh: "rShin", rShin: "rFoot", rFoot: "rToe",
-  lThigh: "lShin", lShin: "lFoot", lFoot: "lToe",
-};
 
 /** Finger chains, for closing the hand around a wand or a band. */
 const FINGERS = ["Index", "Middle", "Ring", "Pinky"];
@@ -86,23 +48,7 @@ const GROUND_LYING: J[] = ["head", "spineUpper", "hips", "rFoot", "lFoot", "rHan
 /** How far past a contact bone the body actually reaches, in metres. */
 const REACH: Partial<Record<J, number>> = { rHand: 0.05, lHand: 0.05 };
 
-/** Strip a rig prefix ("mixamorig7:") and a numeric suffix ("_084"). */
-function baseName(name: string): string {
-  return name.replace(/^mixamorig\d*[:_]?/i, "").replace(/_\d+$/, "");
-}
 
-/**
- * A pose angle as a direction in the body's own frame. 0 up, 90 forward, 180
- * down; `lateral` swings it out to the side. Up is +Y, forward is +Z.
- */
-function dir(angle: number, lateral = 0): THREE.Vector3 {
-  const a = angle * DEG, l = lateral * DEG;
-  return new THREE.Vector3(
-    Math.sin(a) * Math.sin(l),
-    Math.cos(a),
-    Math.sin(a) * Math.cos(l)
-  ).normalize();
-}
 
 type Joint = {
   bone: THREE.Bone;

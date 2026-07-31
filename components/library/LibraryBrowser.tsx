@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import { useSearchParams } from "next/navigation";
 import { AnimatePresence, motion } from "framer-motion";
 import ExerciseCard from "./ExerciseCard";
 import {
@@ -59,8 +60,17 @@ const AXES: Axis[] = [
 ];
 
 export default function LibraryBrowser() {
+  // The body picker on the landing page arrives here with a region already
+  // chosen, so the filter starts from the URL rather than from nothing.
+  const params = useSearchParams();
+  const fromUrl = params.get("region");
+  const preset: Record<string, string[]> =
+    fromUrl && (BODY_REGIONS as readonly string[]).includes(fromUrl)
+      ? { bodyRegion: [fromUrl] }
+      : {};
+
   const [query, setQuery] = useState("");
-  const [active, setActive] = useState<Record<string, string[]>>({});
+  const [active, setActive] = useState<Record<string, string[]>>(preset);
   const [openAxis, setOpenAxis] = useState<string | null>("bodyRegion");
   const { lang } = useLang();
 
