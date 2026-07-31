@@ -209,7 +209,10 @@ export default function PhysioFigure({
     };
   }, [paused, reduced]);
 
-  const isFront = spec.view === "front";
+  // `view` is the camera the 3D figure uses. The flat figure can only draw a
+  // front view if the exercise carries frontal keyframes, so fall back to the
+  // side solver rather than crashing on the exercises that have only 3D poses.
+  const isFront = spec.view === "front" && !!spec.frontFrames;
   const frames = isFront ? spec.frontFrames! : spec.frames!;
 
   // Frozen thumbnails show the working end of the movement, not the rest
