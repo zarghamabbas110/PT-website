@@ -45,7 +45,12 @@ const OUT = path.join(process.cwd(), "public", "thumbs");
         if (!c) return null;
         window.scrollTo(0, c.getBoundingClientRect().top + window.scrollY - 8);
         const r = c.getBoundingClientRect();
-        return { x: r.x, y: r.y, width: r.width, height: r.height };
+        // The site header is fixed and sits over the top of the canvas, so a
+        // clip taken straight from the canvas rect stamps a "PhysioFlow" bar
+        // across every still. Start below it.
+        const HEADER = 76;
+        const top = Math.max(r.y, HEADER);
+        return { x: r.x, y: top, width: r.width, height: r.bottom - top };
       });
       if (!box || box.width < 10) continue;
       await pg.waitForTimeout(500);
