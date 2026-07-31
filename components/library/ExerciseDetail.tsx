@@ -192,10 +192,12 @@ export default function ExerciseDetail({
               {isClinician && (
               <Collapsible title={ui("clinicalDetail")}>
                 <div className="grid gap-4 sm:grid-cols-2">
+                  <Tags label="Exercise type" items={[ex.exerciseType]} />
                   <Tags label={ui("joint")} items={ex.joint} />
                   <Tags label={ui("muscles")} items={ex.musclesTargeted} />
                   <Tags label={ui("conditions")} items={ex.conditions} />
-                  <Tags label="Contraction" items={ex.contraction} />
+                  <Tags label="Muscle work" items={ex.contraction} />
+                  <Tags label="Movement" items={[ex.mode]} />
                   <Tags label="Position / load" items={[ex.position, ex.load]} />
                   <Tags
                     label={ui("equipment")}

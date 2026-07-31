@@ -7,11 +7,16 @@ import {
   BODY_REGIONS,
   CONTRACTION_TYPES,
   DIFFICULTIES,
+  EQUIPMENT_NEEDS,
+  EXERCISE_TYPES,
   EXERCISES,
+  JOINTS,
   LOAD_TYPES,
   MOVEMENT_MODES,
   POSITIONS,
+  equipmentNeed,
 } from "@/data/exercises";
+import type { Exercise } from "@/data/schema";
 import { useLang } from "@/lib/i18n";
 import LanguageToggle from "@/components/LanguageToggle";
 
@@ -28,13 +33,27 @@ type Axis = {
   key: string;
   label: string;
   options: readonly string[];
+  /** For axes that are worked out from the record rather than stored on it. */
+  read?: (ex: Exercise) => string[];
 };
 
+/* The order is the order a clinician narrows in: what part of the body, then
+   which joint, then what the exercise is for, then how the muscle works, how
+   the movement is produced, what it is loaded with — and only then the
+   practical questions of equipment, position and difficulty. */
 const AXES: Axis[] = [
   { key: "bodyRegion", label: "Body region", options: BODY_REGIONS },
-  { key: "mode", label: "Movement type", options: MOVEMENT_MODES },
-  { key: "contraction", label: "Contraction", options: CONTRACTION_TYPES },
+  { key: "joint", label: "Joint", options: JOINTS },
+  { key: "exerciseType", label: "Exercise type", options: EXERCISE_TYPES },
+  { key: "contraction", label: "Muscle work", options: CONTRACTION_TYPES },
+  { key: "mode", label: "Movement", options: MOVEMENT_MODES },
   { key: "load", label: "Load", options: LOAD_TYPES },
+  {
+    key: "equipmentNeed",
+    label: "Equipment",
+    options: EQUIPMENT_NEEDS,
+    read: (ex) => [equipmentNeed(ex)],
+  },
   { key: "position", label: "Position", options: POSITIONS },
   { key: "difficulty", label: "Difficulty", options: DIFFICULTIES },
 ];
@@ -84,7 +103,9 @@ export default function LibraryBrowser() {
         const selected = active[axis.key] ?? [];
         if (!selected.length) continue;
 
-        const field = ex[axis.key as keyof typeof ex];
+        const field = axis.read
+          ? axis.read(ex)
+          : ex[axis.key as keyof typeof ex];
         const values = Array.isArray(field) ? field : [field];
         if (!selected.some((s) => (values as string[]).includes(s))) {
           return false;

@@ -63,6 +63,7 @@ export default function ExerciseCard({ exercise }: { exercise: Exercise }) {
           </p>
 
           <div className={`mt-4 flex flex-wrap gap-1.5 ${rtl ? "justify-end" : ""}`}>
+            <Chip>{exercise.exerciseType}</Chip>
             <Chip>{exercise.difficulty}</Chip>
             <Chip>{exercise.mode}</Chip>
             <Chip>{exercise.position}</Chip>

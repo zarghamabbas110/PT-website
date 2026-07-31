@@ -1,0 +1,2275 @@
+import { pose } from "@/lib/figure";
+import type { Exercise } from "../schema";
+import { PRONE, QUADRUPED, SEATED, SIDE_LYING, STAND, SUPINE, SUPINE_LONG } from "./bases";
+
+/* ==========================================================================
+   RESISTED WORK — BAND AND LIGHT WEIGHT
+   --------------------------------------------------------------------------
+   The step after bodyweight: an elastic band or a light dumbbell through the
+   shoulder, forearm, hip, knee and ankle. Every one specifies a slow,
+   controlled return, which is where most of the strengthening happens and
+   what patients most often skip. Drafts pending clinical review.
+   ========================================================================== */
+
+export const RESISTED: Exercise[] = [
+  {
+    id: "EX-S-031",
+    slug: "band-shoulder-flexion",
+    name: { en: "Banded Shoulder Flexion", ur: "بینڈ کے ساتھ کندھا آگے اٹھانا" },
+    bodyRegion: "Shoulder",
+    joint: ["Glenohumeral", "Scapulothoracic"],
+    musclesTargeted: ["Anterior deltoid", "Serratus anterior", "Upper trapezius"],
+    conditions: ["Rotator cuff weakness", "Post-immobilisation weakness", "Reduced overhead reach", "Return to manual work"],
+    purpose: { en: "Adds resistance to lifting the arm forward, which is the movement used for every shelf, cupboard and washing line.", ur: "بازو آگے اٹھانے میں مزاحمت شامل کرتی ہے، اور یہی حرکت ہر شیلف، الماری اور کپڑے سکھانے کی تار کے لیے استعمال ہوتی ہے۔" },
+    exerciseType: "Strengthening",
+    difficulty: "Intermediate",
+    contraction: ["Concentric", "Eccentric"],
+    mode: "Resisted",
+    load: "Resistance band",
+    position: "Standing",
+    equipment: ["Resistance band"],
+    startingPosition: { en: "Stand on the middle of a band with both feet, holding one end in each hand at your sides.", ur: "بینڈ کے درمیان پر دونوں پاؤں رکھ کر کھڑے ہوں، ہر ہاتھ میں ایک سرا پہلوؤں پر۔" },
+    quickSteps: {
+      en: [
+        "Stand on the band, one end in each hand.",
+        "Raise both arms forward to shoulder height.",
+        "Lower slowly over three seconds.",
+      ],
+      ur: [
+        "بینڈ پر کھڑے ہوں، ہر ہاتھ میں ایک سرا۔",
+        "دونوں بازو آگے کندھے کی اونچائی تک اٹھائیں۔",
+        "تین سیکنڈ میں آہستہ نیچے لائیں۔",
+      ],
+    },
+    steps: {
+      en: [
+        "Stand on the middle of the band with feet hip-width apart.",
+        "Hold one end in each hand, thumbs pointing forward, arms at your sides.",
+        "Keeping the elbows straight, raise both arms forward and up to shoulder height.",
+        "Pause at the top without letting the shoulders shrug.",
+        "Lower slowly over three seconds against the band's pull.",
+      ],
+      ur: [
+        "بینڈ کے درمیان پر کھڑے ہوں، پاؤں کولہوں کے برابر فاصلے پر۔",
+        "ہر ہاتھ میں ایک سرا پکڑیں، انگوٹھے سامنے کی طرف، بازو پہلوؤں پر۔",
+        "کہنیاں سیدھی رکھتے ہوئے دونوں بازو آگے اور اوپر کندھے کی اونچائی تک اٹھائیں۔",
+        "اوپر رکیں، کندھے اُچھلنے نہ دیں۔",
+        "بینڈ کی کھنچائی کے خلاف تین سیکنڈ میں آہستہ نیچے لائیں۔",
+      ],
+    },
+    specialInstructions: {
+      en: [
+        "Three seconds out, three seconds back — the slow return is where most of the benefit is.",
+        "Change to a stronger band only when the last repetition still feels easy.",
+        "Check the band for nicks before every session; a band that snaps under tension can injure an eye.",
+      ],
+      ur: [
+        "تین سیکنڈ باہر، تین سیکنڈ واپس — زیادہ تر فائدہ آہستہ واپسی میں ہے۔",
+        "زیادہ سخت بینڈ تب لیں جب آخری بار بھی آسان لگے۔",
+        "ہر بار سے پہلے بینڈ میں کٹ دیکھ لیں؛ کھنچے ہوئے بینڈ کا ٹوٹنا آنکھ کو نقصان پہنچا سکتا ہے۔",
+      ],
+    },
+    commonMistakes: {
+      en: [
+        "Letting the band snap back quickly.",
+        "Using a band that is too strong to control.",
+        "Holding the breath during the effort.",
+        "Losing the starting posture as you tire.",
+      ],
+      ur: [
+        "بینڈ کو تیزی سے واپس جانے دینا۔",
+        "اتنا سخت بینڈ استعمال کرنا جو قابو میں نہ رہے۔",
+        "زور لگاتے وقت سانس روکنا۔",
+        "تھکنے پر شروع والی حالت بگاڑ لینا۔",
+      ],
+    },
+    safetyPrecautions: {
+      en: [
+        "Stop if you feel sharp or pinching pain in the shoulder.",
+        "Keep the movement below the point where the shoulder hitches up.",
+      ],
+      ur: [
+        "اگر کندھے میں تیز یا چبھنے والا درد ہو تو رک جائیں۔",
+        "حرکت اُس حد سے نیچے رکھیں جہاں کندھا اوپر اُچھلنے لگے۔",
+      ],
+    },
+    repetitions: "10–12",
+    sets: "3",
+    holdTime: "1 second at the top",
+    frequency: "Every other day",
+    restBetweenSets: "45 seconds",
+    progressions: [],
+    regressions: ["active-shoulder-flexion"],
+    contraindications: {
+      en: [
+        "Acute shoulder fracture or dislocation",
+        "Recent shoulder surgery unless specifically cleared",
+        "Active joint infection",
+      ],
+      ur: [
+        "کندھے کی حالیہ ٹوٹ پھوٹ یا جوڑ کا اُترنا",
+        "کندھے کا حالیہ آپریشن، جب تک خاص اجازت نہ ہو",
+        "جوڑ میں فعال انفیکشن",
+      ],
+    },
+    evidence: {
+      status: "unreviewed",
+      rationale: "Banded shoulder flexion is a standard progression from unloaded active range. Citations to be attached at clinical review.",
+    },
+    figure: {
+      view: "front",
+      frames: [
+        { pose: pose({ shoulderNear: 176, elbowNear: 6, shoulderFar: 176, elbowFar: 6 }, STAND), travel: 800, hold: 400, label: "Standing on the band, arms down" },
+        { pose: pose({ shoulderNear: 90, elbowNear: 6, shoulderFar: 90, elbowFar: 6 }, STAND), travel: 1000, hold: 900, label: "Raise both arms to shoulder height" },
+      ],
+      props: [{ kind: "band", anchor: "front" }],
+    },
+  },
+  {
+    id: "EX-S-032",
+    slug: "band-shoulder-abduction",
+    name: { en: "Banded Shoulder Abduction", ur: "بینڈ کے ساتھ کندھا پہلو میں اٹھانا" },
+    bodyRegion: "Shoulder",
+    joint: ["Glenohumeral", "Scapulothoracic"],
+    musclesTargeted: ["Middle deltoid", "Supraspinatus", "Upper trapezius"],
+    conditions: ["Rotator cuff weakness", "Post-immobilisation weakness", "Shoulder instability", "Return to overhead work"],
+    purpose: { en: "Resists lifting the arm out to the side, the movement most affected after any period in a sling.", ur: "بازو پہلو میں اٹھانے کے خلاف مزاحمت دیتی ہے، جو کندھا لٹکانے کی پٹی کے بعد سب سے زیادہ متاثر ہونے والی حرکت ہے۔" },
+    exerciseType: "Strengthening",
+    difficulty: "Intermediate",
+    contraction: ["Concentric", "Eccentric"],
+    mode: "Resisted",
+    load: "Resistance band",
+    position: "Standing",
+    equipment: ["Resistance band"],
+    startingPosition: { en: "Stand on the middle of a band with both feet, one end in each hand, arms at your sides.", ur: "بینڈ کے درمیان پر دونوں پاؤں رکھ کر کھڑے ہوں، ہر ہاتھ میں ایک سرا، بازو پہلوؤں پر۔" },
+    quickSteps: {
+      en: [
+        "Stand on the band, one end in each hand.",
+        "Raise both arms out to the sides to shoulder height.",
+        "Lower slowly over three seconds.",
+      ],
+      ur: [
+        "بینڈ پر کھڑے ہوں، ہر ہاتھ میں ایک سرا۔",
+        "دونوں بازو پہلوؤں میں کندھے کی اونچائی تک اٹھائیں۔",
+        "تین سیکنڈ میں آہستہ نیچے لائیں۔",
+      ],
+    },
+    steps: {
+      en: [
+        "Stand on the band with the feet hip-width apart.",
+        "Hold one end in each hand with the palms facing inwards.",
+        "Raise both arms straight out to the sides, thumbs leading upwards.",
+        "Stop at shoulder height — going higher shifts the work to the neck.",
+        "Lower slowly over three seconds.",
+      ],
+      ur: [
+        "بینڈ پر کھڑے ہوں، پاؤں کولہوں کے برابر فاصلے پر۔",
+        "ہر ہاتھ میں ایک سرا پکڑیں، ہتھیلیاں اندر کی طرف۔",
+        "دونوں بازو سیدھے پہلوؤں میں اٹھائیں، انگوٹھے اوپر کی طرف۔",
+        "کندھے کی اونچائی پر رک جائیں — اس سے اوپر جانے پر کام گردن پر آ جاتا ہے۔",
+        "تین سیکنڈ میں آہستہ نیچے لائیں۔",
+      ],
+    },
+    specialInstructions: {
+      en: [
+        "Three seconds out, three seconds back — the slow return is where most of the benefit is.",
+        "Change to a stronger band only when the last repetition still feels easy.",
+        "Check the band for nicks before every session; a band that snaps under tension can injure an eye.",
+      ],
+      ur: [
+        "تین سیکنڈ باہر، تین سیکنڈ واپس — زیادہ تر فائدہ آہستہ واپسی میں ہے۔",
+        "زیادہ سخت بینڈ تب لیں جب آخری بار بھی آسان لگے۔",
+        "ہر بار سے پہلے بینڈ میں کٹ دیکھ لیں؛ کھنچے ہوئے بینڈ کا ٹوٹنا آنکھ کو نقصان پہنچا سکتا ہے۔",
+      ],
+    },
+    commonMistakes: {
+      en: [
+        "Letting the band snap back quickly.",
+        "Using a band that is too strong to control.",
+        "Holding the breath during the effort.",
+        "Losing the starting posture as you tire.",
+      ],
+      ur: [
+        "بینڈ کو تیزی سے واپس جانے دینا۔",
+        "اتنا سخت بینڈ استعمال کرنا جو قابو میں نہ رہے۔",
+        "زور لگاتے وقت سانس روکنا۔",
+        "تھکنے پر شروع والی حالت بگاڑ لینا۔",
+      ],
+    },
+    safetyPrecautions: {
+      en: [
+        "Stop if you feel sharp or pinching pain in the shoulder.",
+        "Keep the movement below the point where the shoulder hitches up.",
+      ],
+      ur: [
+        "اگر کندھے میں تیز یا چبھنے والا درد ہو تو رک جائیں۔",
+        "حرکت اُس حد سے نیچے رکھیں جہاں کندھا اوپر اُچھلنے لگے۔",
+      ],
+    },
+    repetitions: "10–12",
+    sets: "3",
+    holdTime: "1 second at the top",
+    frequency: "Every other day",
+    restBetweenSets: "45 seconds",
+    progressions: [],
+    regressions: ["active-shoulder-abduction"],
+    contraindications: {
+      en: [
+        "Acute shoulder fracture or dislocation",
+        "Recent shoulder surgery unless specifically cleared",
+        "Active joint infection",
+      ],
+      ur: [
+        "کندھے کی حالیہ ٹوٹ پھوٹ یا جوڑ کا اُترنا",
+        "کندھے کا حالیہ آپریشن، جب تک خاص اجازت نہ ہو",
+        "جوڑ میں فعال انفیکشن",
+      ],
+    },
+    evidence: {
+      status: "unreviewed",
+      rationale: "Banded abduction is a standard strengthening progression for the deltoid and cuff. Citations to be attached at clinical review.",
+    },
+    figure: {
+      view: "front",
+      frames: [
+        { pose: pose({ shoulderNear: 176, elbowNear: 6, shoulderFar: 176, elbowFar: 6 }, STAND), travel: 800, hold: 400, label: "Standing on the band, arms down" },
+        { pose: pose({ shoulderNear: 92, shoulderAbductNear: 78, elbowNear: 6, shoulderFar: 92, shoulderAbductFar: 78, elbowFar: 6 }, STAND), travel: 1000, hold: 900, label: "Raise both arms out to the sides" },
+      ],
+      props: [{ kind: "band", anchor: "front" }],
+    },
+  },
+  {
+    id: "EX-S-033",
+    slug: "band-scaption",
+    name: { en: "Banded Scaption Raise", ur: "بینڈ کے ساتھ اسکیپشن — بازو ترچھا اٹھانا" },
+    bodyRegion: "Shoulder",
+    joint: ["Glenohumeral", "Scapulothoracic"],
+    musclesTargeted: ["Supraspinatus", "Anterior deltoid", "Serratus anterior"],
+    conditions: ["Rotator cuff tendinopathy", "Shoulder impingement", "Overhead sport", "Return to manual work"],
+    purpose: { en: "Raising the arm halfway between forward and sideways is the plane the shoulder blade sits in, which is why it is the least pinching way to load a shoulder.", ur: "بازو کو آگے اور پہلو کے بیچ اٹھانا شانے کی ہڈی کے اپنے رخ میں ہوتا ہے، اسی لیے کندھے پر بوجھ ڈالنے کا یہ سب سے کم چبھنے والا طریقہ ہے۔" },
+    exerciseType: "Strengthening",
+    difficulty: "Intermediate",
+    contraction: ["Concentric", "Eccentric"],
+    mode: "Resisted",
+    load: "Resistance band",
+    position: "Standing",
+    equipment: ["Resistance band"],
+    startingPosition: { en: "Stand on the middle of a band, one end in each hand, arms at your sides with the thumbs pointing up.", ur: "بینڈ کے درمیان پر کھڑے ہوں، ہر ہاتھ میں ایک سرا، بازو پہلوؤں پر اور انگوٹھے اوپر۔" },
+    quickSteps: {
+      en: [
+        "Stand on the band, thumbs pointing up.",
+        "Raise both arms at about forty-five degrees between front and side.",
+        "Stop at shoulder height and lower slowly.",
+      ],
+      ur: [
+        "بینڈ پر کھڑے ہوں، انگوٹھے اوپر کی طرف۔",
+        "دونوں بازو آگے اور پہلو کے بیچ تقریباً پینتالیس درجے پر اٹھائیں۔",
+        "کندھے کی اونچائی پر رکیں اور آہستہ نیچے لائیں۔",
+      ],
+    },
+    steps: {
+      en: [
+        "Stand on the band with the feet hip-width apart and the thumbs pointing up.",
+        "Imagine a wide V in front of you and raise the arms along it.",
+        "That is about halfway between straight forward and straight out to the side.",
+        "Raise to shoulder height, keeping the thumbs up throughout.",
+        "Lower slowly over three seconds.",
+      ],
+      ur: [
+        "بینڈ پر کھڑے ہوں، پاؤں کولہوں کے برابر فاصلے پر اور انگوٹھے اوپر۔",
+        "اپنے سامنے ایک کھلا V تصور کریں اور بازو اُسی لکیر پر اٹھائیں۔",
+        "یہ بالکل سامنے اور بالکل پہلو کے تقریباً بیچ میں ہے۔",
+        "کندھے کی اونچائی تک اٹھائیں، انگوٹھے پوری حرکت میں اوپر رکھیں۔",
+        "تین سیکنڈ میں آہستہ نیچے لائیں۔",
+      ],
+    },
+    specialInstructions: {
+      en: [
+        "Thumbs up throughout — thumbs down is what causes the pinch.",
+        "This plane is usually more comfortable than a straight side raise.",
+        "Stop at shoulder height unless you have been told otherwise.",
+      ],
+      ur: [
+        "پوری حرکت میں انگوٹھے اوپر — انگوٹھے نیچے ہونے سے ہی چبھن ہوتی ہے۔",
+        "یہ رخ عموماً سیدھے پہلو میں اٹھانے سے زیادہ آرام دہ ہوتا ہے۔",
+        "جب تک الگ سے نہ کہا جائے، کندھے کی اونچائی پر رک جائیں۔",
+      ],
+    },
+    commonMistakes: {
+      en: [
+        "Letting the band snap back quickly.",
+        "Using a band that is too strong to control.",
+        "Holding the breath during the effort.",
+        "Losing the starting posture as you tire.",
+      ],
+      ur: [
+        "بینڈ کو تیزی سے واپس جانے دینا۔",
+        "اتنا سخت بینڈ استعمال کرنا جو قابو میں نہ رہے۔",
+        "زور لگاتے وقت سانس روکنا۔",
+        "تھکنے پر شروع والی حالت بگاڑ لینا۔",
+      ],
+    },
+    safetyPrecautions: {
+      en: [
+        "Stop if you feel sharp or pinching pain in the shoulder.",
+        "Keep the movement below the point where the shoulder hitches up.",
+      ],
+      ur: [
+        "اگر کندھے میں تیز یا چبھنے والا درد ہو تو رک جائیں۔",
+        "حرکت اُس حد سے نیچے رکھیں جہاں کندھا اوپر اُچھلنے لگے۔",
+      ],
+    },
+    repetitions: "10–12",
+    sets: "3",
+    holdTime: "1 second at the top",
+    frequency: "Every other day",
+    restBetweenSets: "45 seconds",
+    progressions: [],
+    regressions: ["scaption-raise"],
+    contraindications: {
+      en: [
+        "Acute shoulder fracture or dislocation",
+        "Recent shoulder surgery unless specifically cleared",
+        "Active joint infection",
+      ],
+      ur: [
+        "کندھے کی حالیہ ٹوٹ پھوٹ یا جوڑ کا اُترنا",
+        "کندھے کا حالیہ آپریشن، جب تک خاص اجازت نہ ہو",
+        "جوڑ میں فعال انفیکشن",
+      ],
+    },
+    evidence: {
+      status: "unreviewed",
+      rationale: "Scaption loading is widely used as a lower-impingement plane for cuff strengthening. Citations to be attached at clinical review.",
+    },
+    figure: {
+      view: "front",
+      frames: [
+        { pose: pose({ shoulderNear: 176, elbowNear: 6, shoulderFar: 176, elbowFar: 6 }, STAND), travel: 800, hold: 400, label: "Standing on the band, thumbs up" },
+        { pose: pose({ shoulderNear: 92, shoulderAbductNear: 42, elbowNear: 6, shoulderFar: 92, shoulderAbductFar: 42, elbowFar: 6 }, STAND), travel: 1000, hold: 900, label: "Raise both arms in the V plane" },
+      ],
+      props: [{ kind: "band", anchor: "front" }],
+    },
+  },
+  {
+    id: "EX-S-034",
+    slug: "band-lat-pulldown-seated",
+    name: { en: "Seated Banded Pulldown", ur: "بیٹھ کر بینڈ نیچے کھینچنا" },
+    bodyRegion: "Shoulder",
+    joint: ["Glenohumeral", "Scapulothoracic"],
+    musclesTargeted: ["Latissimus dorsi", "Lower trapezius", "Teres major", "Rhomboids"],
+    conditions: ["Rounded posture", "Scapular weakness", "Neck and shoulder pain", "Return to lifting"],
+    purpose: { en: "Pulling down from overhead trains the muscles that set the shoulder blade down and back — the opposite of the rounded desk posture.", ur: "اوپر سے نیچے کھینچنا اُن پٹھوں کو مضبوط کرتا ہے جو شانے کی ہڈی کو نیچے اور پیچھے جماتے ہیں — میز پر جھکی ہوئی حالت کے بالکل الٹ۔" },
+    exerciseType: "Strengthening",
+    difficulty: "Intermediate",
+    contraction: ["Concentric", "Eccentric"],
+    mode: "Resisted",
+    load: "Resistance band",
+    position: "Sitting",
+    equipment: ["Resistance band", "Chair"],
+    startingPosition: { en: "Sit tall holding a band overhead in both hands, arms wide and elbows nearly straight.", ur: "سیدھے بیٹھیں، بینڈ دونوں ہاتھوں میں سر کے اوپر پکڑیں، بازو کھلے اور کہنیاں تقریباً سیدھی۔" },
+    quickSteps: {
+      en: [
+        "Hold a band overhead with both hands, arms wide.",
+        "Pull the hands down and apart to shoulder height.",
+        "Return slowly over three seconds.",
+      ],
+      ur: [
+        "بینڈ دونوں ہاتھوں میں سر کے اوپر پکڑیں، بازو کھلے۔",
+        "ہاتھ نیچے اور باہر کی طرف کندھے کی اونچائی تک کھینچیں۔",
+        "تین سیکنڈ میں آہستہ واپس لائیں۔",
+      ],
+    },
+    steps: {
+      en: [
+        "Sit tall with both feet flat and the low back supported.",
+        "Hold the band overhead with the hands wider than the shoulders.",
+        "Draw the shoulder blades down first, then pull the hands down and out.",
+        "Stop when the hands reach shoulder height and the band is across the upper chest.",
+        "Let the band draw the arms back up slowly over three seconds.",
+      ],
+      ur: [
+        "سیدھے بیٹھیں، دونوں پاؤں فرش پر اور کمر کو سہارا ہو۔",
+        "بینڈ سر کے اوپر پکڑیں، ہاتھ کندھوں سے زیادہ کھلے ہوں۔",
+        "پہلے شانے کی ہڈیاں نیچے کریں، پھر ہاتھ نیچے اور باہر کھینچیں۔",
+        "جب ہاتھ کندھے کی اونچائی پر آ جائیں اور بینڈ سینے کے اوپر ہو تو رک جائیں۔",
+        "بینڈ کو تین سیکنڈ میں آہستہ بازو واپس اوپر لے جانے دیں۔",
+      ],
+    },
+    specialInstructions: {
+      en: [
+        "Lead with the shoulder blades, not the hands.",
+        "Keep the ribs down — arching the back turns this into a back exercise.",
+        "Sit against a chair back if the low back gives way.",
+      ],
+      ur: [
+        "حرکت شانوں کی ہڈیوں سے شروع کریں، ہاتھوں سے نہیں۔",
+        "پسلیاں نیچے رکھیں — کمر کو محراب بنانے سے یہ کمر کی ورزش بن جاتی ہے۔",
+        "کمر جواب دے تو کرسی کی پشت سے ٹیک لگا کر بیٹھیں۔",
+      ],
+    },
+    commonMistakes: {
+      en: [
+        "Letting the band snap back quickly.",
+        "Using a band that is too strong to control.",
+        "Holding the breath during the effort.",
+        "Losing the starting posture as you tire.",
+      ],
+      ur: [
+        "بینڈ کو تیزی سے واپس جانے دینا۔",
+        "اتنا سخت بینڈ استعمال کرنا جو قابو میں نہ رہے۔",
+        "زور لگاتے وقت سانس روکنا۔",
+        "تھکنے پر شروع والی حالت بگاڑ لینا۔",
+      ],
+    },
+    safetyPrecautions: {
+      en: [
+        "Stop if you feel sharp or pinching pain in the shoulder.",
+        "Keep the movement below the point where the shoulder hitches up.",
+      ],
+      ur: [
+        "اگر کندھے میں تیز یا چبھنے والا درد ہو تو رک جائیں۔",
+        "حرکت اُس حد سے نیچے رکھیں جہاں کندھا اوپر اُچھلنے لگے۔",
+      ],
+    },
+    repetitions: "10–12",
+    sets: "3",
+    holdTime: "1 second",
+    frequency: "Every other day",
+    restBetweenSets: "45 seconds",
+    progressions: [],
+    regressions: [],
+    contraindications: {
+      en: [
+        "Acute shoulder fracture or dislocation",
+        "Recent shoulder surgery unless specifically cleared",
+        "Active joint infection",
+      ],
+      ur: [
+        "کندھے کی حالیہ ٹوٹ پھوٹ یا جوڑ کا اُترنا",
+        "کندھے کا حالیہ آپریشن، جب تک خاص اجازت نہ ہو",
+        "جوڑ میں فعال انفیکشن",
+      ],
+    },
+    evidence: {
+      status: "unreviewed",
+      rationale: "Banded pulldown patterns are widely used for scapular depression and lat strengthening. Citations to be attached at clinical review.",
+    },
+    figure: {
+      view: "front",
+      frames: [
+        { pose: pose({ shoulderNear: 20, elbowNear: 10, shoulderAbductNear: 24, shoulderFar: 20, elbowFar: 10, shoulderAbductFar: 24 }, SEATED), travel: 800, hold: 400, label: "Band held overhead" },
+        { pose: pose({ shoulderNear: 96, elbowNear: 76, shoulderAbductNear: 60, shoulderFar: 96, elbowFar: 76, shoulderAbductFar: 60 }, SEATED), travel: 1000, hold: 900, label: "Pull down to shoulder height" },
+      ],
+      props: [{ kind: "chair" }],
+    },
+  },
+  {
+    id: "EX-S-035",
+    slug: "band-chest-press",
+    name: { en: "Banded Chest Press", ur: "بینڈ کے ساتھ سینے کا دباؤ" },
+    bodyRegion: "Shoulder",
+    joint: ["Glenohumeral", "Scapulothoracic", "Humeroulnar"],
+    musclesTargeted: ["Pectoralis major", "Anterior deltoid", "Triceps brachii", "Serratus anterior"],
+    conditions: ["Upper limb weakness", "Return to pushing work", "Post-immobilisation weakness", "General conditioning"],
+    purpose: { en: "Trains the pushing pattern — opening a heavy door, pushing a cart, getting up off the floor.", ur: "دھکیلنے کی حرکت کو مضبوط کرتی ہے — بھاری دروازہ کھولنا، ٹھیلا دھکیلنا، فرش سے اٹھنا۔" },
+    exerciseType: "Strengthening",
+    difficulty: "Intermediate",
+    contraction: ["Concentric", "Eccentric"],
+    mode: "Resisted",
+    load: "Resistance band",
+    position: "Standing",
+    equipment: ["Resistance band"],
+    startingPosition: { en: "Stand with a band passed around your upper back and one end held in each hand at chest height.", ur: "بینڈ کو اوپری کمر کے گرد گزار کر کھڑے ہوں، ہر ہاتھ میں ایک سرا سینے کی اونچائی پر۔" },
+    quickSteps: {
+      en: [
+        "Pass a band around your upper back, one end in each hand.",
+        "Press both hands forward until the elbows are straight.",
+        "Return slowly over three seconds.",
+      ],
+      ur: [
+        "بینڈ اوپری کمر کے گرد گزاریں، ہر ہاتھ میں ایک سرا۔",
+        "دونوں ہاتھ آگے دبائیں یہاں تک کہ کہنیاں سیدھی ہوں۔",
+        "تین سیکنڈ میں آہستہ واپس آئیں۔",
+      ],
+    },
+    steps: {
+      en: [
+        "Pass the band across the upper back, under the armpits, and hold an end in each hand.",
+        "Stand with one foot slightly forward for balance.",
+        "Start with the hands at chest height and the elbows back.",
+        "Press both hands forward and slightly together until the elbows straighten.",
+        "Let the band draw the hands back slowly over three seconds.",
+      ],
+      ur: [
+        "بینڈ کو اوپری کمر پر بغلوں کے نیچے سے گزاریں اور ہر ہاتھ میں ایک سرا پکڑیں۔",
+        "توازن کے لیے ایک پاؤں تھوڑا آگے رکھ کر کھڑے ہوں۔",
+        "ہاتھ سینے کی اونچائی پر اور کہنیاں پیچھے رکھ کر شروع کریں۔",
+        "دونوں ہاتھ آگے اور ہلکا اندر کی طرف دبائیں یہاں تک کہ کہنیاں سیدھی ہوں۔",
+        "بینڈ کو تین سیکنڈ میں آہستہ ہاتھ واپس لانے دیں۔",
+      ],
+    },
+    specialInstructions: {
+      en: [
+        "Keep the shoulder blades from wrapping forward at the end.",
+        "The band should be taut before you start pressing, not slack.",
+        "Stagger the feet — otherwise the band pulls you backwards.",
+      ],
+      ur: [
+        "آخر میں شانے کی ہڈیوں کو آگے نہ لپٹنے دیں۔",
+        "دبانا شروع کرنے سے پہلے بینڈ کھنچا ہوا ہو، ڈھیلا نہیں۔",
+        "پاؤں آگے پیچھے رکھیں — ورنہ بینڈ آپ کو پیچھے کھینچے گا۔",
+      ],
+    },
+    commonMistakes: {
+      en: [
+        "Letting the band snap back quickly.",
+        "Using a band that is too strong to control.",
+        "Holding the breath during the effort.",
+        "Losing the starting posture as you tire.",
+      ],
+      ur: [
+        "بینڈ کو تیزی سے واپس جانے دینا۔",
+        "اتنا سخت بینڈ استعمال کرنا جو قابو میں نہ رہے۔",
+        "زور لگاتے وقت سانس روکنا۔",
+        "تھکنے پر شروع والی حالت بگاڑ لینا۔",
+      ],
+    },
+    safetyPrecautions: {
+      en: [
+        "Stop if you feel sharp or pinching pain in the shoulder.",
+        "Keep the movement below the point where the shoulder hitches up.",
+      ],
+      ur: [
+        "اگر کندھے میں تیز یا چبھنے والا درد ہو تو رک جائیں۔",
+        "حرکت اُس حد سے نیچے رکھیں جہاں کندھا اوپر اُچھلنے لگے۔",
+      ],
+    },
+    repetitions: "10–12",
+    sets: "3",
+    holdTime: "1 second",
+    frequency: "Every other day",
+    restBetweenSets: "45 seconds",
+    progressions: [],
+    regressions: ["wall-push-up"],
+    contraindications: {
+      en: [
+        "Acute shoulder fracture or dislocation",
+        "Recent shoulder surgery unless specifically cleared",
+        "Active joint infection",
+      ],
+      ur: [
+        "کندھے کی حالیہ ٹوٹ پھوٹ یا جوڑ کا اُترنا",
+        "کندھے کا حالیہ آپریشن، جب تک خاص اجازت نہ ہو",
+        "جوڑ میں فعال انفیکشن",
+      ],
+    },
+    evidence: {
+      status: "unreviewed",
+      rationale: "Banded pressing is a standard home substitute for machine or free weight chest work. Citations to be attached at clinical review.",
+    },
+    figure: {
+      view: "front",
+      frames: [
+        { pose: pose({ shoulderNear: 96, elbowNear: 100, shoulderFar: 96, elbowFar: 100 }, STAND), travel: 800, hold: 400, label: "Hands at chest height" },
+        { pose: pose({ shoulderNear: 92, elbowNear: 8, shoulderFar: 92, elbowFar: 8 }, STAND), travel: 1000, hold: 900, label: "Press forward to straight arms" },
+      ],
+      props: [{ kind: "band" }],
+    },
+  },
+  {
+    id: "EX-S-036",
+    slug: "band-reverse-fly",
+    name: { en: "Banded Reverse Fly", ur: "بینڈ کے ساتھ بازو پیچھے کھولنا" },
+    bodyRegion: "Shoulder",
+    joint: ["Scapulothoracic", "Glenohumeral"],
+    musclesTargeted: ["Rhomboids", "Middle trapezius", "Posterior deltoid", "Infraspinatus"],
+    conditions: ["Rounded posture", "Scapular weakness", "Neck and shoulder pain", "Desk work strain"],
+    purpose: { en: "The direct answer to a rounded upper back: it works the muscles between the shoulder blades against real resistance.", ur: "جھکی ہوئی اوپری کمر کا سیدھا جواب: یہ شانوں کے درمیان کے پٹھوں پر حقیقی مزاحمت کے ساتھ کام کرتی ہے۔" },
+    exerciseType: "Strengthening",
+    difficulty: "Intermediate",
+    contraction: ["Concentric", "Eccentric"],
+    mode: "Resisted",
+    load: "Resistance band",
+    position: "Standing",
+    equipment: ["Resistance band"],
+    startingPosition: { en: "Stand holding a band out in front at shoulder height with both hands, arms straight and hands close together.", ur: "بینڈ دونوں ہاتھوں میں کندھے کی اونچائی پر سامنے پکڑ کر کھڑے ہوں، بازو سیدھے اور ہاتھ قریب قریب۔" },
+    quickSteps: {
+      en: [
+        "Hold a band out in front at shoulder height.",
+        "Pull the hands apart until the arms are out to the sides.",
+        "Return slowly over three seconds.",
+      ],
+      ur: [
+        "بینڈ کندھے کی اونچائی پر سامنے پکڑیں۔",
+        "ہاتھ کھینچ کر الگ کریں یہاں تک کہ بازو پہلوؤں میں ہو جائیں۔",
+        "تین سیکنڈ میں آہستہ واپس لائیں۔",
+      ],
+    },
+    steps: {
+      en: [
+        "Stand tall with the feet hip-width apart.",
+        "Hold the band with both hands out in front at shoulder height, arms straight.",
+        "Draw the shoulder blades together and pull the hands apart.",
+        "Take the arms out to the sides until the band touches the chest.",
+        "Return slowly over three seconds without letting the shoulders round forward.",
+      ],
+      ur: [
+        "سیدھے کھڑے ہوں، پاؤں کولہوں کے برابر فاصلے پر۔",
+        "بینڈ دونوں ہاتھوں میں کندھے کی اونچائی پر سامنے پکڑیں، بازو سیدھے۔",
+        "شانے کی ہڈیاں ملائیں اور ہاتھ کھینچ کر الگ کریں۔",
+        "بازو پہلوؤں تک لے جائیں یہاں تک کہ بینڈ سینے کو چھوئے۔",
+        "تین سیکنڈ میں آہستہ واپس لائیں، کندھوں کو آگے نہ جھکنے دیں۔",
+      ],
+    },
+    specialInstructions: {
+      en: [
+        "The shoulder blades start the movement, the hands finish it.",
+        "Keep the elbows almost straight — bending them makes it a row instead.",
+        "Do not shrug; the shoulders stay down throughout.",
+      ],
+      ur: [
+        "حرکت شانوں کی ہڈیوں سے شروع اور ہاتھوں پر ختم ہوتی ہے۔",
+        "کہنیاں تقریباً سیدھی رکھیں — موڑنے سے یہ رو بن جاتی ہے۔",
+        "کندھے نہ اُچھالیں؛ وہ پوری ورزش میں نیچے رہیں۔",
+      ],
+    },
+    commonMistakes: {
+      en: [
+        "Letting the band snap back quickly.",
+        "Using a band that is too strong to control.",
+        "Holding the breath during the effort.",
+        "Losing the starting posture as you tire.",
+      ],
+      ur: [
+        "بینڈ کو تیزی سے واپس جانے دینا۔",
+        "اتنا سخت بینڈ استعمال کرنا جو قابو میں نہ رہے۔",
+        "زور لگاتے وقت سانس روکنا۔",
+        "تھکنے پر شروع والی حالت بگاڑ لینا۔",
+      ],
+    },
+    safetyPrecautions: {
+      en: [
+        "Stop if you feel sharp or pinching pain in the shoulder.",
+        "Keep the movement below the point where the shoulder hitches up.",
+      ],
+      ur: [
+        "اگر کندھے میں تیز یا چبھنے والا درد ہو تو رک جائیں۔",
+        "حرکت اُس حد سے نیچے رکھیں جہاں کندھا اوپر اُچھلنے لگے۔",
+      ],
+    },
+    repetitions: "10–12",
+    sets: "3",
+    holdTime: "1 second",
+    frequency: "Every other day",
+    restBetweenSets: "45 seconds",
+    progressions: [],
+    regressions: [],
+    contraindications: {
+      en: [
+        "Acute shoulder fracture or dislocation",
+        "Recent shoulder surgery unless specifically cleared",
+        "Active joint infection",
+      ],
+      ur: [
+        "کندھے کی حالیہ ٹوٹ پھوٹ یا جوڑ کا اُترنا",
+        "کندھے کا حالیہ آپریشن، جب تک خاص اجازت نہ ہو",
+        "جوڑ میں فعال انفیکشن",
+      ],
+    },
+    evidence: {
+      status: "unreviewed",
+      rationale: "Banded horizontal abduction is standard scapular retractor strengthening. Citations to be attached at clinical review.",
+    },
+    figure: {
+      view: "front",
+      frames: [
+        { pose: pose({ shoulderNear: 90, elbowNear: 6, shoulderAbductNear: 0, shoulderFar: 90, elbowFar: 6, shoulderAbductFar: 0 }, STAND), travel: 800, hold: 400, label: "Band held out in front" },
+        { pose: pose({ shoulderNear: 90, elbowNear: 6, shoulderAbductNear: 80, shoulderFar: 90, elbowFar: 6, shoulderAbductFar: 80 }, STAND), travel: 1000, hold: 900, label: "Pull the hands apart" },
+      ],
+      props: [{ kind: "band", anchor: "front" }],
+    },
+  },
+  {
+    id: "EX-S-037",
+    slug: "band-shoulder-w",
+    name: { en: "Banded W Pull", ur: "بینڈ کے ساتھ W کھینچنا" },
+    bodyRegion: "Shoulder",
+    joint: ["Scapulothoracic", "Glenohumeral"],
+    musclesTargeted: ["Lower trapezius", "Rhomboids", "Infraspinatus", "Teres minor"],
+    conditions: ["Rounded posture", "Rotator cuff weakness", "Scapular dyskinesis", "Overhead sport"],
+    purpose: { en: "Combines pulling the shoulder blades down with turning the arms out — the two things a rounded, internally rotated shoulder has stopped doing.", ur: "شانوں کی ہڈیاں نیچے کھینچنے اور بازو باہر گھمانے کو ملاتی ہے — یہی دو کام جھکا اور اندر گھوما ہوا کندھا کرنا چھوڑ دیتا ہے۔" },
+    exerciseType: "Strengthening",
+    difficulty: "Intermediate",
+    contraction: ["Concentric", "Eccentric", "Isometric"],
+    mode: "Resisted",
+    load: "Resistance band",
+    position: "Standing",
+    equipment: ["Resistance band"],
+    startingPosition: { en: "Stand holding a band in both hands with the elbows bent to ninety degrees and tucked in at your sides.", ur: "بینڈ دونوں ہاتھوں میں پکڑ کر کھڑے ہوں، کہنیاں نوے درجے مڑی اور پہلوؤں سے لگی ہوں۔" },
+    quickSteps: {
+      en: [
+        "Hold a band with the elbows bent and tucked in.",
+        "Pull the hands apart and the elbows down and back.",
+        "Hold 2 seconds, then return slowly.",
+      ],
+      ur: [
+        "بینڈ پکڑیں، کہنیاں مڑی اور پہلوؤں سے لگی ہوں۔",
+        "ہاتھ الگ کریں اور کہنیاں نیچے اور پیچھے لے جائیں۔",
+        "دو سیکنڈ رکیں، پھر آہستہ واپس آئیں۔",
+      ],
+    },
+    steps: {
+      en: [
+        "Hold the band in both hands in front of the stomach.",
+        "Bend both elbows to ninety degrees and tuck them firmly in at your sides.",
+        "Pull the hands outwards while drawing the elbows down and back, making a W shape.",
+        "Squeeze the shoulder blades together and hold for two seconds.",
+        "Return slowly over three seconds.",
+      ],
+      ur: [
+        "بینڈ دونوں ہاتھوں میں پیٹ کے سامنے پکڑیں۔",
+        "دونوں کہنیاں نوے درجے موڑیں اور مضبوطی سے پہلوؤں سے لگائیں۔",
+        "ہاتھ باہر کھینچیں اور کہنیاں نیچے اور پیچھے لے جائیں، W کی شکل بنائیں۔",
+        "شانے کی ہڈیاں ملا کر دو سیکنڈ روکیں۔",
+        "تین سیکنڈ میں آہستہ واپس آئیں۔",
+      ],
+    },
+    specialInstructions: {
+      en: [
+        "The elbows must stay tucked in — letting them drift out loses the cuff.",
+        "Squeeze at the end and hold; the hold is the point.",
+        "A light band is right here; this is control work, not heavy lifting.",
+      ],
+      ur: [
+        "کہنیاں پہلوؤں سے لگی رہیں — باہر ہو جائیں تو کف پر کام ختم ہو جاتا ہے۔",
+        "آخر میں دبا کر روکیں؛ یہی اصل بات ہے۔",
+        "یہاں ہلکا بینڈ درست ہے؛ یہ قابو کی مشق ہے، بھاری وزن اٹھانا نہیں۔",
+      ],
+    },
+    commonMistakes: {
+      en: [
+        "Letting the band snap back quickly.",
+        "Using a band that is too strong to control.",
+        "Holding the breath during the effort.",
+        "Losing the starting posture as you tire.",
+      ],
+      ur: [
+        "بینڈ کو تیزی سے واپس جانے دینا۔",
+        "اتنا سخت بینڈ استعمال کرنا جو قابو میں نہ رہے۔",
+        "زور لگاتے وقت سانس روکنا۔",
+        "تھکنے پر شروع والی حالت بگاڑ لینا۔",
+      ],
+    },
+    safetyPrecautions: {
+      en: [
+        "Stop if you feel sharp or pinching pain in the shoulder.",
+        "Keep the movement below the point where the shoulder hitches up.",
+      ],
+      ur: [
+        "اگر کندھے میں تیز یا چبھنے والا درد ہو تو رک جائیں۔",
+        "حرکت اُس حد سے نیچے رکھیں جہاں کندھا اوپر اُچھلنے لگے۔",
+      ],
+    },
+    repetitions: "10",
+    sets: "3",
+    holdTime: "2 seconds",
+    frequency: "Every other day",
+    restBetweenSets: "45 seconds",
+    progressions: [],
+    regressions: [],
+    contraindications: {
+      en: [
+        "Acute shoulder fracture or dislocation",
+        "Recent shoulder surgery unless specifically cleared",
+        "Active joint infection",
+      ],
+      ur: [
+        "کندھے کی حالیہ ٹوٹ پھوٹ یا جوڑ کا اُترنا",
+        "کندھے کا حالیہ آپریشن، جب تک خاص اجازت نہ ہو",
+        "جوڑ میں فعال انفیکشن",
+      ],
+    },
+    evidence: {
+      status: "unreviewed",
+      rationale: "W pulls combine scapular retraction with external rotation in cuff programmes. Citations to be attached at clinical review.",
+    },
+    figure: {
+      view: "front",
+      frames: [
+        { pose: pose({ shoulderNear: 168, elbowNear: 90, shoulderFar: 168, elbowFar: 90 }, STAND), travel: 800, hold: 400, label: "Elbows tucked in, band held" },
+        { pose: pose({ shoulderNear: 172, elbowNear: 88, shoulderRotNear: 46, shoulderFar: 172, elbowFar: 88, shoulderRotFar: 46 }, STAND), travel: 1000, hold: 900, label: "Pull out and squeeze the blades" },
+      ],
+      props: [{ kind: "band", anchor: "front" }],
+    },
+  },
+  {
+    id: "EX-S-038",
+    slug: "dumbbell-lateral-raise",
+    name: { en: "Light Dumbbell Lateral Raise", ur: "ہلکے ڈمبل سے بازو پہلو میں اٹھانا" },
+    bodyRegion: "Shoulder",
+    joint: ["Glenohumeral", "Scapulothoracic"],
+    musclesTargeted: ["Middle deltoid", "Supraspinatus", "Upper trapezius"],
+    conditions: ["Shoulder weakness", "Return to overhead work", "Post-immobilisation weakness", "General conditioning"],
+    purpose: { en: "A graded weight in the hand loads the shoulder more predictably than a band, because the load does not change through the range.", ur: "ہاتھ میں ماپا ہوا وزن بینڈ کی نسبت کندھے پر زیادہ یکساں بوجھ ڈالتا ہے، کیونکہ حرکت کے دوران بوجھ نہیں بدلتا۔" },
+    exerciseType: "Strengthening",
+    difficulty: "Intermediate",
+    contraction: ["Concentric", "Eccentric"],
+    mode: "Resisted",
+    load: "Free weight",
+    position: "Standing",
+    equipment: ["Light dumbbells (0.5–2 kg)"],
+    startingPosition: { en: "Stand tall with a light weight in each hand, arms at your sides and palms facing inwards.", ur: "سیدھے کھڑے ہوں، ہر ہاتھ میں ہلکا وزن، بازو پہلوؤں پر اور ہتھیلیاں اندر کی طرف۔" },
+    quickSteps: {
+      en: [
+        "Hold a light weight in each hand at your sides.",
+        "Raise both arms out to shoulder height.",
+        "Lower slowly over three seconds.",
+      ],
+      ur: [
+        "ہر ہاتھ میں ہلکا وزن پہلوؤں پر پکڑیں۔",
+        "دونوں بازو کندھے کی اونچائی تک پہلوؤں میں اٹھائیں۔",
+        "تین سیکنڈ میں آہستہ نیچے لائیں۔",
+      ],
+    },
+    steps: {
+      en: [
+        "Stand tall with the feet hip-width apart and a weight in each hand.",
+        "Keep a very slight bend at the elbows throughout.",
+        "Raise both arms out to the sides until they reach shoulder height.",
+        "Pause briefly without shrugging the shoulders up.",
+        "Lower slowly over three seconds — the lowering is what builds the muscle.",
+      ],
+      ur: [
+        "سیدھے کھڑے ہوں، پاؤں کولہوں کے برابر فاصلے پر اور ہر ہاتھ میں وزن۔",
+        "پوری ورزش میں کہنیاں بہت ہلکی مڑی رکھیں۔",
+        "دونوں بازو پہلوؤں میں کندھے کی اونچائی تک اٹھائیں۔",
+        "تھوڑا رکیں، کندھے اوپر نہ اُچھالیں۔",
+        "تین سیکنڈ میں آہستہ نیچے لائیں — پٹھا نیچے لانے سے ہی بنتا ہے۔",
+      ],
+    },
+    specialInstructions: {
+      en: [
+        "Start with half a kilogram — this exercise needs far less weight than people expect.",
+        "If the shoulders shrug, the weight is too heavy.",
+        "A water bottle works perfectly well as a weight.",
+      ],
+      ur: [
+        "آدھے کلو سے شروع کریں — اس ورزش میں لوگوں کے اندازے سے کہیں کم وزن چاہیے۔",
+        "کندھے اُچھلنے لگیں تو وزن زیادہ ہے۔",
+        "پانی کی بوتل بھی وزن کے طور پر بالکل ٹھیک کام دیتی ہے۔",
+      ],
+    },
+    commonMistakes: {
+      en: [
+        "Swinging the weights up with the body.",
+        "Shrugging the shoulders towards the ears.",
+        "Dropping the arms quickly.",
+        "Using too heavy a weight.",
+      ],
+      ur: [
+        "جسم کے جھٹکے سے وزن اوپر اُچھالنا۔",
+        "کندھے کانوں کی طرف اُچھالنا۔",
+        "بازو تیزی سے نیچے گرا دینا۔",
+        "بہت بھاری وزن استعمال کرنا۔",
+      ],
+    },
+    safetyPrecautions: {
+      en: [
+        "Stop if you feel sharp or pinching pain in the shoulder.",
+        "Keep the movement below the point where the shoulder hitches up.",
+      ],
+      ur: [
+        "اگر کندھے میں تیز یا چبھنے والا درد ہو تو رک جائیں۔",
+        "حرکت اُس حد سے نیچے رکھیں جہاں کندھا اوپر اُچھلنے لگے۔",
+      ],
+    },
+    repetitions: "10–12",
+    sets: "3",
+    holdTime: "1 second at the top",
+    frequency: "Every other day",
+    restBetweenSets: "45 seconds",
+    progressions: [],
+    regressions: ["band-shoulder-abduction"],
+    contraindications: {
+      en: [
+        "Acute shoulder fracture or dislocation",
+        "Recent shoulder surgery unless specifically cleared",
+        "Active joint infection",
+      ],
+      ur: [
+        "کندھے کی حالیہ ٹوٹ پھوٹ یا جوڑ کا اُترنا",
+        "کندھے کا حالیہ آپریشن، جب تک خاص اجازت نہ ہو",
+        "جوڑ میں فعال انفیکشن",
+      ],
+    },
+    evidence: {
+      status: "unreviewed",
+      rationale: "Light lateral raises are standard deltoid strengthening once range is pain-free. Citations to be attached at clinical review.",
+    },
+    figure: {
+      view: "front",
+      frames: [
+        { pose: pose({ shoulderNear: 176, elbowNear: 8, shoulderFar: 176, elbowFar: 8 }, STAND), travel: 800, hold: 400, label: "Weights held at the sides" },
+        { pose: pose({ shoulderNear: 92, shoulderAbductNear: 78, elbowNear: 8, shoulderFar: 92, shoulderAbductFar: 78, elbowFar: 8 }, STAND), travel: 1000, hold: 900, label: "Raise to shoulder height" },
+      ],
+      props: [{ kind: "dumbbells" }],
+    },
+  },
+  {
+    id: "EX-S-039",
+    slug: "dumbbell-front-raise",
+    name: { en: "Light Dumbbell Front Raise", ur: "ہلکے ڈمبل سے بازو سامنے اٹھانا" },
+    bodyRegion: "Shoulder",
+    joint: ["Glenohumeral", "Scapulothoracic"],
+    musclesTargeted: ["Anterior deltoid", "Pectoralis major", "Serratus anterior"],
+    conditions: ["Shoulder weakness", "Reduced overhead reach", "Return to lifting", "General conditioning"],
+    purpose: { en: "Loads the front of the shoulder through the exact range used to lift a child, a bucket or a box onto a shelf.", ur: "کندھے کے اگلے حصے پر اُسی حد میں بوجھ ڈالتی ہے جو بچہ، بالٹی یا ڈبہ شیلف پر رکھنے کے لیے استعمال ہوتی ہے۔" },
+    exerciseType: "Strengthening",
+    difficulty: "Intermediate",
+    contraction: ["Concentric", "Eccentric"],
+    mode: "Resisted",
+    load: "Free weight",
+    position: "Standing",
+    equipment: ["Light dumbbells (0.5–2 kg)"],
+    startingPosition: { en: "Stand tall with a light weight in each hand resting against the front of the thighs.", ur: "سیدھے کھڑے ہوں، ہر ہاتھ میں ہلکا وزن رانوں کے سامنے ٹکا ہوا۔" },
+    quickSteps: {
+      en: [
+        "Hold a light weight in each hand at the thighs.",
+        "Raise both arms forward to shoulder height.",
+        "Lower slowly over three seconds.",
+      ],
+      ur: [
+        "ہر ہاتھ میں ہلکا وزن رانوں پر پکڑیں۔",
+        "دونوں بازو سامنے کندھے کی اونچائی تک اٹھائیں۔",
+        "تین سیکنڈ میں آہستہ نیچے لائیں۔",
+      ],
+    },
+    steps: {
+      en: [
+        "Stand tall with the weights resting on the front of the thighs, palms facing back.",
+        "Tighten the stomach gently so the back does not arch.",
+        "Raise both arms straight forward and up to shoulder height.",
+        "Pause, keeping the elbows almost straight.",
+        "Lower slowly over three seconds.",
+      ],
+      ur: [
+        "سیدھے کھڑے ہوں، وزن رانوں کے سامنے ٹکے ہوں، ہتھیلیاں پیچھے کی طرف۔",
+        "پیٹ ہلکا سخت کریں تاکہ کمر محراب نہ بنے۔",
+        "دونوں بازو سیدھے سامنے اور اوپر کندھے کی اونچائی تک اٹھائیں۔",
+        "رکیں، کہنیاں تقریباً سیدھی رکھیں۔",
+        "تین سیکنڈ میں آہستہ نیچے لائیں۔",
+      ],
+    },
+    specialInstructions: {
+      en: [
+        "Leaning back to help the arms up defeats the exercise and strains the low back.",
+        "One arm at a time is easier to control at first.",
+        "Stop at shoulder height unless you have been cleared to go overhead.",
+      ],
+      ur: [
+        "بازو اٹھانے کے لیے پیچھے جھکنے سے ورزش بے کار ہو جاتی ہے اور کمر پر زور پڑتا ہے۔",
+        "شروع میں ایک وقت میں ایک بازو زیادہ قابو میں رہتا ہے۔",
+        "جب تک اجازت نہ ہو، کندھے کی اونچائی پر رک جائیں۔",
+      ],
+    },
+    commonMistakes: {
+      en: [
+        "Leaning the trunk backwards.",
+        "Swinging the weights.",
+        "Shrugging the shoulders.",
+        "Dropping the arms at the end.",
+      ],
+      ur: [
+        "دھڑ کو پیچھے جھکانا۔",
+        "وزن کو جھٹکے سے اٹھانا۔",
+        "کندھے اُچھالنا۔",
+        "آخر میں بازو گرا دینا۔",
+      ],
+    },
+    safetyPrecautions: {
+      en: [
+        "Stop if you feel sharp or pinching pain in the shoulder.",
+        "Keep the movement below the point where the shoulder hitches up.",
+      ],
+      ur: [
+        "اگر کندھے میں تیز یا چبھنے والا درد ہو تو رک جائیں۔",
+        "حرکت اُس حد سے نیچے رکھیں جہاں کندھا اوپر اُچھلنے لگے۔",
+      ],
+    },
+    repetitions: "10–12",
+    sets: "3",
+    holdTime: "1 second at the top",
+    frequency: "Every other day",
+    restBetweenSets: "45 seconds",
+    progressions: [],
+    regressions: ["band-shoulder-flexion"],
+    contraindications: {
+      en: [
+        "Acute shoulder fracture or dislocation",
+        "Recent shoulder surgery unless specifically cleared",
+        "Active joint infection",
+      ],
+      ur: [
+        "کندھے کی حالیہ ٹوٹ پھوٹ یا جوڑ کا اُترنا",
+        "کندھے کا حالیہ آپریشن، جب تک خاص اجازت نہ ہو",
+        "جوڑ میں فعال انفیکشن",
+      ],
+    },
+    evidence: {
+      status: "unreviewed",
+      rationale: "Front raises are standard anterior deltoid strengthening. Citations to be attached at clinical review.",
+    },
+    figure: {
+      view: "side",
+      frames: [
+        { pose: pose({ shoulderNear: 176, elbowNear: 8, shoulderFar: 176, elbowFar: 8 }, STAND), travel: 800, hold: 400, label: "Weights at the thighs" },
+        { pose: pose({ shoulderNear: 90, elbowNear: 8, shoulderFar: 90, elbowFar: 8 }, STAND), travel: 1000, hold: 900, label: "Raise forward to shoulder height" },
+      ],
+      props: [{ kind: "dumbbells" }],
+    },
+  },
+  {
+    id: "EX-S-040",
+    slug: "dumbbell-shrug",
+    name: { en: "Weighted Shoulder Shrug", ur: "وزن کے ساتھ کندھے اُچھالنا" },
+    bodyRegion: "Shoulder",
+    joint: ["Scapulothoracic", "Acromioclavicular"],
+    musclesTargeted: ["Upper trapezius", "Levator scapulae", "Rhomboids"],
+    conditions: ["Scapular weakness", "Neck and shoulder pain", "Return to carrying work", "Postural fatigue"],
+    purpose: { en: "Strengthens the muscles that carry the weight of the arm all day, which is what tires and aches in anyone who carries loads.", ur: "اُن پٹھوں کو مضبوط کرتی ہے جو سارا دن بازو کا وزن اٹھاتے ہیں، اور بوجھ اٹھانے والوں میں یہی تھکتے اور دُکھتے ہیں۔" },
+    exerciseType: "Strengthening",
+    difficulty: "Beginner",
+    contraction: ["Concentric", "Eccentric"],
+    mode: "Resisted",
+    load: "Free weight",
+    position: "Standing",
+    equipment: ["Light dumbbells (1–3 kg)"],
+    startingPosition: { en: "Stand tall with a weight in each hand hanging at your sides and the arms relaxed.", ur: "سیدھے کھڑے ہوں، ہر ہاتھ میں وزن پہلوؤں پر لٹکا ہو اور بازو ڈھیلے ہوں۔" },
+    quickSteps: {
+      en: [
+        "Hold a weight in each hand at your sides.",
+        "Lift both shoulders straight up towards the ears.",
+        "Lower slowly and fully.",
+      ],
+      ur: [
+        "ہر ہاتھ میں وزن پہلوؤں پر پکڑیں۔",
+        "دونوں کندھے سیدھے کانوں کی طرف اٹھائیں۔",
+        "آہستہ اور پوری طرح نیچے لائیں۔",
+      ],
+    },
+    steps: {
+      en: [
+        "Stand tall with the weights hanging at your sides and the elbows straight.",
+        "Lift both shoulders straight up towards the ears — no rolling.",
+        "Hold at the top for one second.",
+        "Lower all the way down and let the shoulders drop fully.",
+        "Keep the neck long and the chin level throughout.",
+      ],
+      ur: [
+        "سیدھے کھڑے ہوں، وزن پہلوؤں پر لٹکے ہوں اور کہنیاں سیدھی۔",
+        "دونوں کندھے سیدھے کانوں کی طرف اٹھائیں — گھمائیں نہیں۔",
+        "اوپر ایک سیکنڈ رکیں۔",
+        "پوری طرح نیچے لائیں اور کندھوں کو مکمل گرنے دیں۔",
+        "پوری ورزش میں گردن لمبی اور ٹھوڑی برابر رکھیں۔",
+      ],
+    },
+    specialInstructions: {
+      en: [
+        "Straight up and straight down — rolling the shoulders adds nothing and pinches.",
+        "Lowering fully at the end is as important as the lift.",
+        "Skip this one if you have an irritable neck.",
+      ],
+      ur: [
+        "سیدھا اوپر اور سیدھا نیچے — کندھے گھمانے سے کوئی فائدہ نہیں اور چبھن ہوتی ہے۔",
+        "آخر میں پوری طرح نیچے لانا اٹھانے جتنا ہی اہم ہے۔",
+        "گردن حساس ہو تو یہ ورزش چھوڑ دیں۔",
+      ],
+    },
+    commonMistakes: {
+      en: [
+        "Rolling the shoulders in a circle.",
+        "Bending the elbows to help.",
+        "Poking the chin forward.",
+        "Not lowering fully between repetitions.",
+      ],
+      ur: [
+        "کندھوں کو دائرے میں گھمانا۔",
+        "مدد کے لیے کہنیاں موڑ لینا۔",
+        "ٹھوڑی آگے نکالنا۔",
+        "دو بار کے درمیان پوری طرح نیچے نہ لانا۔",
+      ],
+    },
+    safetyPrecautions: {
+      en: [
+        "Stop if you feel sharp or pinching pain in the shoulder.",
+        "Keep the movement below the point where the shoulder hitches up.",
+      ],
+      ur: [
+        "اگر کندھے میں تیز یا چبھنے والا درد ہو تو رک جائیں۔",
+        "حرکت اُس حد سے نیچے رکھیں جہاں کندھا اوپر اُچھلنے لگے۔",
+      ],
+    },
+    repetitions: "12–15",
+    sets: "3",
+    holdTime: "1 second at the top",
+    frequency: "Every other day",
+    restBetweenSets: "45 seconds",
+    progressions: [],
+    regressions: ["shoulder-shrug"],
+    contraindications: {
+      en: [
+        "Acute shoulder fracture or dislocation",
+        "Recent shoulder surgery unless specifically cleared",
+        "Active joint infection",
+      ],
+      ur: [
+        "کندھے کی حالیہ ٹوٹ پھوٹ یا جوڑ کا اُترنا",
+        "کندھے کا حالیہ آپریشن، جب تک خاص اجازت نہ ہو",
+        "جوڑ میں فعال انفیکشن",
+      ],
+    },
+    evidence: {
+      status: "unreviewed",
+      rationale: "Weighted shrugs are standard upper trapezius strengthening. Citations to be attached at clinical review.",
+    },
+    figure: {
+      view: "front",
+      frames: [
+        { pose: STAND, travel: 800, hold: 400, label: "Weights hanging at the sides" },
+        { pose: pose({ thorax: -2 }, STAND), travel: 1000, hold: 900, label: "Lift both shoulders up" },
+      ],
+      props: [{ kind: "dumbbells" }],
+    },
+  },
+  {
+    id: "EX-W-010",
+    slug: "band-wrist-flexion",
+    name: { en: "Banded Wrist Flexion", ur: "بینڈ کے ساتھ کلائی موڑنا" },
+    bodyRegion: "Wrist & Hand",
+    joint: ["Radiocarpal", "Midcarpal"],
+    musclesTargeted: ["Flexor carpi radialis", "Flexor carpi ulnaris", "Palmaris longus"],
+    conditions: ["Golfer's elbow", "Wrist weakness", "Grip weakness", "Post-cast weakness"],
+    purpose: { en: "Loads the muscles on the palm side of the forearm, the ones behind a golfer's elbow and behind a weak grip.", ur: "بازو کی ہتھیلی والی طرف کے پٹھوں پر بوجھ ڈالتی ہے، جو گولفر ایلبو اور کمزور گرفت دونوں کے پیچھے ہوتے ہیں۔" },
+    exerciseType: "Strengthening",
+    difficulty: "Intermediate",
+    contraction: ["Concentric", "Eccentric"],
+    mode: "Resisted",
+    load: "Resistance band",
+    position: "Sitting",
+    equipment: ["Resistance band", "Chair"],
+    startingPosition: { en: "Sit with the forearm resting on your thigh, palm up, hand over the knee, holding a band under your foot.", ur: "بیٹھ جائیں، بازو ران پر رکھیں، ہتھیلی اوپر، ہاتھ گھٹنے سے باہر، اور بینڈ پاؤں کے نیچے سے پکڑیں۔" },
+    quickSteps: {
+      en: [
+        "Rest the forearm on your thigh, palm up, holding a band under your foot.",
+        "Curl the wrist upwards.",
+        "Lower slowly over three seconds.",
+      ],
+      ur: [
+        "بازو ران پر رکھیں، ہتھیلی اوپر، بینڈ پاؤں کے نیچے سے پکڑیں۔",
+        "کلائی اوپر کی طرف موڑیں۔",
+        "تین سیکنڈ میں آہستہ نیچے لائیں۔",
+      ],
+    },
+    steps: {
+      en: [
+        "Sit with the feet flat and one end of the band under the foot on that side.",
+        "Rest the forearm along the thigh with the palm facing up and the hand past the knee.",
+        "Hold the other end of the band in that hand.",
+        "Curl the wrist upwards as far as it will go, keeping the forearm still.",
+        "Lower slowly over three seconds against the band.",
+      ],
+      ur: [
+        "پاؤں فرش پر رکھ کر بیٹھیں، بینڈ کا ایک سرا اُسی طرف کے پاؤں کے نیچے۔",
+        "بازو ران پر رکھیں، ہتھیلی اوپر اور ہاتھ گھٹنے سے آگے۔",
+        "بینڈ کا دوسرا سرا اُسی ہاتھ میں پکڑیں۔",
+        "بازو ساکن رکھتے ہوئے کلائی جتنی جائے اوپر موڑیں۔",
+        "بینڈ کے خلاف تین سیکنڈ میں آہستہ نیچے لائیں۔",
+      ],
+    },
+    specialInstructions: {
+      en: [
+        "Three seconds out, three seconds back — the slow return is where most of the benefit is.",
+        "Change to a stronger band only when the last repetition still feels easy.",
+        "Check the band for nicks before every session; a band that snaps under tension can injure an eye.",
+      ],
+      ur: [
+        "تین سیکنڈ باہر، تین سیکنڈ واپس — زیادہ تر فائدہ آہستہ واپسی میں ہے۔",
+        "زیادہ سخت بینڈ تب لیں جب آخری بار بھی آسان لگے۔",
+        "ہر بار سے پہلے بینڈ میں کٹ دیکھ لیں؛ کھنچے ہوئے بینڈ کا ٹوٹنا آنکھ کو نقصان پہنچا سکتا ہے۔",
+      ],
+    },
+    commonMistakes: {
+      en: [
+        "Letting the band snap back quickly.",
+        "Using a band that is too strong to control.",
+        "Holding the breath during the effort.",
+        "Losing the starting posture as you tire.",
+      ],
+      ur: [
+        "بینڈ کو تیزی سے واپس جانے دینا۔",
+        "اتنا سخت بینڈ استعمال کرنا جو قابو میں نہ رہے۔",
+        "زور لگاتے وقت سانس روکنا۔",
+        "تھکنے پر شروع والی حالت بگاڑ لینا۔",
+      ],
+    },
+    safetyPrecautions: {
+      en: [
+        "Stop if you get pins and needles or numbness in the hand.",
+        "Keep the effort gentle; the wrist responds badly to forcing.",
+      ],
+      ur: [
+        "ہاتھ میں سنسناہٹ یا سُن پن ہو تو رک جائیں۔",
+        "زور ہلکا رکھیں؛ کلائی پر زبردستی کرنے سے نقصان ہوتا ہے۔",
+      ],
+    },
+    repetitions: "12–15",
+    sets: "3",
+    holdTime: "1 second",
+    frequency: "Every other day",
+    restBetweenSets: "45 seconds",
+    progressions: [],
+    regressions: [],
+    contraindications: {
+      en: [
+        "Acute wrist or hand fracture",
+        "Recent wrist surgery unless cleared",
+        "Suspected scaphoid injury",
+      ],
+      ur: [
+        "کلائی یا ہاتھ کی حالیہ ٹوٹ پھوٹ",
+        "کلائی کا حالیہ آپریشن، جب تک اجازت نہ ہو",
+        "اسکیفائیڈ ہڈی کی مشتبہ چوٹ",
+      ],
+    },
+    evidence: {
+      status: "unreviewed",
+      rationale: "Resisted wrist flexion is used for medial elbow tendinopathy and grip weakness. Citations to be attached at clinical review.",
+    },
+    figure: {
+      view: "side",
+      frames: [
+        { pose: pose({ elbowNear: 88 }, SEATED), travel: 800, hold: 400, label: "Forearm on the thigh, palm up" },
+        { pose: pose({ elbowNear: 88, shoulderNear: 160 }, SEATED), travel: 1000, hold: 900, label: "Curl the wrist upwards" },
+      ],
+      props: [{ kind: "chair" }],
+    },
+  },
+  {
+    id: "EX-EL-013",
+    slug: "band-forearm-pronation",
+    name: { en: "Banded Forearm Rotation", ur: "بینڈ کے ساتھ بازو گھمانا" },
+    bodyRegion: "Elbow",
+    joint: ["Radioulnar", "Humeroradial"],
+    musclesTargeted: ["Pronator teres", "Supinator", "Biceps brachii"],
+    conditions: ["Post-fracture stiffness", "Forearm weakness", "Difficulty turning a key or tap", "Tennis elbow"],
+    purpose: { en: "Strengthens turning the palm up and down, the movement needed for a key, a door handle, a tap and a steering wheel.", ur: "ہتھیلی اوپر نیچے گھمانے کو مضبوط کرتی ہے، جو چابی، دروازے کے ہینڈل، نلکے اور اسٹیئرنگ کے لیے ضروری ہے۔" },
+    exerciseType: "Strengthening",
+    difficulty: "Intermediate",
+    contraction: ["Concentric", "Eccentric"],
+    mode: "Resisted",
+    load: "Resistance band",
+    position: "Sitting",
+    equipment: ["Resistance band", "Chair"],
+    startingPosition: { en: "Sit with the elbow tucked in and bent to ninety degrees, holding one end of a band with the thumb up.", ur: "بیٹھ جائیں، کہنی پہلو سے لگی اور نوے درجے مڑی، بینڈ کا ایک سرا انگوٹھا اوپر رکھ کر پکڑیں۔" },
+    quickSteps: {
+      en: [
+        "Tuck the elbow in and hold a band with the thumb up.",
+        "Turn the palm down, then slowly back up.",
+        "Repeat, then turn the palm up against the band instead.",
+      ],
+      ur: [
+        "کہنی پہلو سے لگائیں اور بینڈ انگوٹھا اوپر رکھ کر پکڑیں۔",
+        "ہتھیلی نیچے گھمائیں، پھر آہستہ واپس اوپر۔",
+        "دہرائیں، پھر بینڈ کے خلاف ہتھیلی اوپر گھمائیں۔",
+      ],
+    },
+    steps: {
+      en: [
+        "Sit with the elbow held firmly against your side, bent to ninety degrees.",
+        "Anchor one end of the band under the foot on that side.",
+        "Hold the other end with the thumb pointing up.",
+        "Turn the palm down towards the floor against the band, keeping the elbow still.",
+        "Return slowly, then repeat the set turning the palm up instead.",
+      ],
+      ur: [
+        "بیٹھ جائیں، کہنی مضبوطی سے پہلو سے لگی اور نوے درجے مڑی ہو۔",
+        "بینڈ کا ایک سرا اُسی طرف کے پاؤں کے نیچے دبائیں۔",
+        "دوسرا سرا انگوٹھا اوپر رکھ کر پکڑیں۔",
+        "کہنی ساکن رکھتے ہوئے بینڈ کے خلاف ہتھیلی فرش کی طرف نیچے گھمائیں۔",
+        "آہستہ واپس آئیں، پھر ہتھیلی اوپر گھما کر سیٹ دہرائیں۔",
+      ],
+    },
+    specialInstructions: {
+      en: [
+        "The elbow must not lift away from the side — that is the shoulder taking over.",
+        "Work both directions; they use different muscles.",
+        "Small range, slow tempo — this is a fine movement, not a big one.",
+      ],
+      ur: [
+        "کہنی پہلو سے ہٹنی نہیں چاہیے — یہ کندھے کا کام سنبھالنا ہے۔",
+        "دونوں سمتوں میں کریں؛ ان میں مختلف پٹھے کام کرتے ہیں۔",
+        "حرکت چھوٹی اور رفتار آہستہ — یہ باریک حرکت ہے، بڑی نہیں۔",
+      ],
+    },
+    commonMistakes: {
+      en: [
+        "Letting the band snap back quickly.",
+        "Using a band that is too strong to control.",
+        "Holding the breath during the effort.",
+        "Losing the starting posture as you tire.",
+      ],
+      ur: [
+        "بینڈ کو تیزی سے واپس جانے دینا۔",
+        "اتنا سخت بینڈ استعمال کرنا جو قابو میں نہ رہے۔",
+        "زور لگاتے وقت سانس روکنا۔",
+        "تھکنے پر شروع والی حالت بگاڑ لینا۔",
+      ],
+    },
+    safetyPrecautions: {
+      en: [
+        "Stop if you feel sharp pain at the elbow or into the forearm.",
+        "Build the load slowly — tendons respond to gradual increases.",
+      ],
+      ur: [
+        "کہنی یا بازو میں تیز درد ہو تو رک جائیں۔",
+        "وزن آہستہ آہستہ بڑھائیں — پٹھوں کے ٹینڈن بتدریج بہتر ہوتے ہیں۔",
+      ],
+    },
+    repetitions: "12 each direction",
+    sets: "3",
+    holdTime: "1 second",
+    frequency: "Every other day",
+    restBetweenSets: "45 seconds",
+    progressions: [],
+    regressions: ["forearm-pronation-supination"],
+    contraindications: {
+      en: [
+        "Acute elbow fracture or dislocation",
+        "Recent elbow surgery unless cleared",
+        "Active joint infection",
+      ],
+      ur: [
+        "کہنی کی حالیہ ٹوٹ پھوٹ یا جوڑ کا اُترنا",
+        "کہنی کا حالیہ آپریشن، جب تک اجازت نہ ہو",
+        "جوڑ میں فعال انفیکشن",
+      ],
+    },
+    evidence: {
+      status: "unreviewed",
+      rationale: "Resisted forearm rotation is standard after distal radius and forearm fractures. Citations to be attached at clinical review.",
+    },
+    figure: {
+      view: "front",
+      frames: [
+        { pose: pose({ elbowNear: 88 }, SEATED), travel: 800, hold: 400, label: "Elbow tucked in, thumb up" },
+        { pose: pose({ elbowNear: 88, shoulderNear: 168 }, SEATED), travel: 1000, hold: 900, label: "Turn the palm against the band" },
+      ],
+      props: [{ kind: "chair" }],
+    },
+  },
+  {
+    id: "EX-H-021",
+    slug: "band-hip-flexion-standing",
+    name: { en: "Standing Banded Hip Flexion", ur: "کھڑے ہو کر بینڈ سے ٹانگ آگے اٹھانا" },
+    bodyRegion: "Pelvis & Hip",
+    joint: ["Hip"],
+    musclesTargeted: ["Iliopsoas", "Rectus femoris", "Tensor fasciae latae"],
+    conditions: ["Hip flexor weakness", "Difficulty climbing stairs", "Foot clearance in gait", "Post-hip-surgery rehabilitation"],
+    purpose: { en: "Strengthens lifting the thigh, which is what clears the foot over a step, a threshold or a kerb.", ur: "ران اٹھانے کو مضبوط کرتی ہے، جو پاؤں کو سیڑھی، دہلیز یا فٹ پاتھ کے اوپر سے گزارنے کے لیے ضروری ہے۔" },
+    exerciseType: "Strengthening",
+    difficulty: "Intermediate",
+    contraction: ["Concentric", "Eccentric"],
+    mode: "Resisted",
+    load: "Resistance band",
+    position: "Standing",
+    equipment: ["Resistance band", "Support to hold"],
+    startingPosition: { en: "Stand holding a support, with a band looped around one ankle and anchored behind you.", ur: "سہارا پکڑ کر کھڑے ہوں، بینڈ ایک ٹخنے کے گرد اور پیچھے کہیں باندھا ہوا ہو۔" },
+    quickSteps: {
+      en: [
+        "Loop a band round one ankle, anchored behind you.",
+        "Lift that knee forward and up to hip height.",
+        "Lower slowly over three seconds.",
+      ],
+      ur: [
+        "بینڈ ایک ٹخنے کے گرد ڈالیں، پیچھے باندھا ہوا ہو۔",
+        "وہ گھٹنا آگے اور اوپر کولہے کی اونچائی تک اٹھائیں۔",
+        "تین سیکنڈ میں آہستہ نیچے لائیں۔",
+      ],
+    },
+    steps: {
+      en: [
+        "Anchor the band low behind you — a table leg or a closed door works.",
+        "Loop the other end around one ankle and stand tall, holding a support.",
+        "Keeping the trunk upright, lift that knee forward and up towards hip height.",
+        "Do not let the trunk lean back to help.",
+        "Lower slowly over three seconds against the band.",
+      ],
+      ur: [
+        "بینڈ اپنے پیچھے نیچے کہیں باندھیں — میز کی ٹانگ یا بند دروازہ ٹھیک رہتا ہے۔",
+        "دوسرا سرا ایک ٹخنے کے گرد ڈالیں اور سہارا پکڑ کر سیدھے کھڑے ہوں۔",
+        "دھڑ سیدھا رکھتے ہوئے وہ گھٹنا آگے اور اوپر کولہے کی اونچائی تک اٹھائیں۔",
+        "مدد کے لیے دھڑ کو پیچھے نہ جھکائیں۔",
+        "بینڈ کے خلاف تین سیکنڈ میں آہستہ نیچے لائیں۔",
+      ],
+    },
+    specialInstructions: {
+      en: [
+        "The trunk stays upright — leaning back is the commonest cheat.",
+        "Hip height is enough; higher just rounds the low back.",
+        "Hold a support until the balance is reliable.",
+      ],
+      ur: [
+        "دھڑ سیدھا رہے — پیچھے جھکنا سب سے عام چوری ہے۔",
+        "کولہے کی اونچائی کافی ہے؛ اس سے اوپر صرف کمر گول ہوتی ہے۔",
+        "توازن پکا ہونے تک سہارا پکڑے رکھیں۔",
+      ],
+    },
+    commonMistakes: {
+      en: [
+        "Letting the band snap back quickly.",
+        "Using a band that is too strong to control.",
+        "Holding the breath during the effort.",
+        "Losing the starting posture as you tire.",
+      ],
+      ur: [
+        "بینڈ کو تیزی سے واپس جانے دینا۔",
+        "اتنا سخت بینڈ استعمال کرنا جو قابو میں نہ رہے۔",
+        "زور لگاتے وقت سانس روکنا۔",
+        "تھکنے پر شروع والی حالت بگاڑ لینا۔",
+      ],
+    },
+    safetyPrecautions: {
+      en: [
+        "Stop if you feel a pinch at the front of the hip.",
+        "Keep the pelvis level; do not let it roll back.",
+      ],
+      ur: [
+        "کولہے کے اگلے حصے میں چبھن محسوس ہو تو رک جائیں۔",
+        "کولہا سیدھا رکھیں؛ اسے پیچھے نہ لڑھکنے دیں۔",
+      ],
+    },
+    repetitions: "10–12 each side",
+    sets: "3",
+    holdTime: "1 second",
+    frequency: "Every other day",
+    restBetweenSets: "45 seconds",
+    progressions: [],
+    regressions: [],
+    contraindications: {
+      en: [
+        "Acute hip fracture",
+        "Hip precautions after joint replacement",
+        "Recent hip surgery unless cleared",
+      ],
+      ur: [
+        "کولہے کی حالیہ ٹوٹ پھوٹ",
+        "کولہے کی تبدیلی کے بعد کی پابندیاں",
+        "کولہے کا حالیہ آپریشن، جب تک اجازت نہ ہو",
+      ],
+    },
+    evidence: {
+      status: "unreviewed",
+      rationale: "Resisted hip flexion is used for gait clearance and hip flexor weakness. Citations to be attached at clinical review.",
+    },
+    figure: {
+      view: "side",
+      frames: [
+        { pose: pose({ hipNear: 0, kneeNear: 2 }, STAND), travel: 800, hold: 400, label: "Standing with the band on the ankle" },
+        { pose: pose({ hipNear: 88, kneeNear: 86, shoulderNear: 150, elbowNear: 40 }, STAND), travel: 1000, hold: 900, label: "Lift the knee to hip height" },
+      ],
+      props: [{ kind: "band" }],
+    },
+  },
+  {
+    id: "EX-H-022",
+    slug: "band-hip-extension-standing",
+    name: { en: "Standing Banded Hip Extension", ur: "کھڑے ہو کر بینڈ سے ٹانگ پیچھے لے جانا" },
+    bodyRegion: "Pelvis & Hip",
+    joint: ["Hip"],
+    musclesTargeted: ["Gluteus maximus", "Hamstrings", "Erector spinae"],
+    conditions: ["Gluteal weakness", "Low back pain", "Difficulty climbing stairs", "Post-hip-surgery rehabilitation"],
+    purpose: { en: "Strengthens driving the leg backwards, which is the power stroke of walking and the reason a weak buttock makes a hill hard.", ur: "ٹانگ پیچھے دھکیلنے کو مضبوط کرتی ہے، جو چلنے کا اصل زور ہے اور جس کی کمزوری سے چڑھائی مشکل لگتی ہے۔" },
+    exerciseType: "Strengthening",
+    difficulty: "Intermediate",
+    contraction: ["Concentric", "Eccentric"],
+    mode: "Resisted",
+    load: "Resistance band",
+    position: "Standing",
+    equipment: ["Resistance band", "Support to hold"],
+    startingPosition: { en: "Stand facing a support with a band looped around one ankle and anchored in front of you.", ur: "سہارے کی طرف منہ کر کے کھڑے ہوں، بینڈ ایک ٹخنے کے گرد اور سامنے باندھا ہوا ہو۔" },
+    quickSteps: {
+      en: [
+        "Loop a band round one ankle, anchored in front.",
+        "Push that leg straight back, keeping the knee straight.",
+        "Return slowly over three seconds.",
+      ],
+      ur: [
+        "بینڈ ایک ٹخنے کے گرد ڈالیں، سامنے باندھا ہوا ہو۔",
+        "گھٹنا سیدھا رکھتے ہوئے وہ ٹانگ سیدھی پیچھے دھکیلیں۔",
+        "تین سیکنڈ میں آہستہ واپس لائیں۔",
+      ],
+    },
+    steps: {
+      en: [
+        "Anchor the band low in front of you and loop it around one ankle.",
+        "Stand tall holding a chair or the wall, weight on the other leg.",
+        "Keeping that knee straight, push the leg backwards from the hip.",
+        "Go only as far as you can without arching the low back.",
+        "Return slowly over three seconds.",
+      ],
+      ur: [
+        "بینڈ اپنے سامنے نیچے باندھیں اور ایک ٹخنے کے گرد ڈالیں۔",
+        "کرسی یا دیوار پکڑ کر سیدھے کھڑے ہوں، وزن دوسری ٹانگ پر۔",
+        "گھٹنا سیدھا رکھتے ہوئے ٹانگ کولہے سے پیچھے دھکیلیں۔",
+        "صرف اتنا جائیں جتنا کمر کو محراب بنائے بغیر ممکن ہو۔",
+        "تین سیکنڈ میں آہستہ واپس لائیں۔",
+      ],
+    },
+    specialInstructions: {
+      en: [
+        "The low back must not arch — that is the back doing the buttock's job.",
+        "Small range done properly beats a big swing.",
+        "Squeeze the buttock at the end of each repetition.",
+      ],
+      ur: [
+        "کمر محراب نہ بنے — یہ کمر کا کولہے کا کام کرنا ہے۔",
+        "بڑے جھٹکے سے بہتر ہے چھوٹی حرکت درست طریقے سے۔",
+        "ہر بار کے آخر میں کولہے کا پٹھا دبائیں۔",
+      ],
+    },
+    commonMistakes: {
+      en: [
+        "Letting the band snap back quickly.",
+        "Using a band that is too strong to control.",
+        "Holding the breath during the effort.",
+        "Losing the starting posture as you tire.",
+      ],
+      ur: [
+        "بینڈ کو تیزی سے واپس جانے دینا۔",
+        "اتنا سخت بینڈ استعمال کرنا جو قابو میں نہ رہے۔",
+        "زور لگاتے وقت سانس روکنا۔",
+        "تھکنے پر شروع والی حالت بگاڑ لینا۔",
+      ],
+    },
+    safetyPrecautions: {
+      en: [
+        "Stop if you feel a pinch at the front of the hip.",
+        "Keep the pelvis level; do not let it roll back.",
+      ],
+      ur: [
+        "کولہے کے اگلے حصے میں چبھن محسوس ہو تو رک جائیں۔",
+        "کولہا سیدھا رکھیں؛ اسے پیچھے نہ لڑھکنے دیں۔",
+      ],
+    },
+    repetitions: "10–12 each side",
+    sets: "3",
+    holdTime: "1 second",
+    frequency: "Every other day",
+    restBetweenSets: "45 seconds",
+    progressions: [],
+    regressions: ["prone-hip-extension"],
+    contraindications: {
+      en: [
+        "Acute hip fracture",
+        "Hip precautions after joint replacement",
+        "Recent hip surgery unless cleared",
+      ],
+      ur: [
+        "کولہے کی حالیہ ٹوٹ پھوٹ",
+        "کولہے کی تبدیلی کے بعد کی پابندیاں",
+        "کولہے کا حالیہ آپریشن، جب تک اجازت نہ ہو",
+      ],
+    },
+    evidence: {
+      status: "unreviewed",
+      rationale: "Resisted hip extension is standard gluteal strengthening. Citations to be attached at clinical review.",
+    },
+    figure: {
+      view: "side",
+      frames: [
+        { pose: pose({ hipNear: 0, kneeNear: 2 }, STAND), travel: 800, hold: 400, label: "Standing with the band on the ankle" },
+        { pose: pose({ hipNear: -28, kneeNear: 4, shoulderNear: 110, elbowNear: 30, shoulderFar: 110, elbowFar: 30 }, STAND), travel: 1000, hold: 900, label: "Push the leg straight back" },
+      ],
+      props: [{ kind: "band" }],
+    },
+  },
+  {
+    id: "EX-H-023",
+    slug: "band-hip-abduction-standing",
+    name: { en: "Standing Banded Hip Abduction", ur: "کھڑے ہو کر بینڈ سے ٹانگ پہلو میں لے جانا" },
+    bodyRegion: "Pelvis & Hip",
+    joint: ["Hip"],
+    musclesTargeted: ["Gluteus medius", "Gluteus minimus", "Tensor fasciae latae"],
+    conditions: ["Gluteal weakness", "Trendelenburg gait", "Hip instability", "Knee valgus in squatting"],
+    purpose: { en: "Loads the side of the hip in standing, which is where it actually has to work — holding the pelvis level on one leg.", ur: "کھڑی حالت میں کولہے کے پہلو پر بوجھ ڈالتی ہے، جہاں اسے واقعی کام کرنا ہوتا ہے — ایک ٹانگ پر پیڑو کو برابر رکھنا۔" },
+    exerciseType: "Strengthening",
+    difficulty: "Intermediate",
+    contraction: ["Concentric", "Eccentric"],
+    mode: "Resisted",
+    load: "Resistance band",
+    position: "Standing",
+    equipment: ["Resistance band", "Support to hold"],
+    startingPosition: { en: "Stand side-on to an anchor with a band looped around one ankle, holding a support with one hand.", ur: "لنگر کی طرف پہلو کر کے کھڑے ہوں، بینڈ ایک ٹخنے کے گرد ہو اور ایک ہاتھ سے سہارا پکڑا ہو۔" },
+    quickSteps: {
+      en: [
+        "Loop a band round the outer ankle, anchored to the side.",
+        "Take that leg out to the side, knee straight.",
+        "Return slowly over three seconds.",
+      ],
+      ur: [
+        "بینڈ باہر والے ٹخنے کے گرد ڈالیں، پہلو میں باندھا ہوا ہو۔",
+        "وہ ٹانگ پہلو میں لے جائیں، گھٹنا سیدھا۔",
+        "تین سیکنڈ میں آہستہ واپس لائیں۔",
+      ],
+    },
+    steps: {
+      en: [
+        "Anchor the band at ankle height and loop it around the leg furthest from the anchor.",
+        "Stand tall with the weight on the near leg, holding a support.",
+        "Take the banded leg straight out to the side, keeping the knee straight and the toes forward.",
+        "Keep the pelvis level — do not let the trunk lean away.",
+        "Return slowly over three seconds.",
+      ],
+      ur: [
+        "بینڈ ٹخنے کی اونچائی پر باندھیں اور لنگر سے دور والی ٹانگ کے گرد ڈالیں۔",
+        "سہارا پکڑ کر سیدھے کھڑے ہوں، وزن قریبی ٹانگ پر۔",
+        "بینڈ والی ٹانگ سیدھی پہلو میں لے جائیں، گھٹنا سیدھا اور پنجہ سامنے۔",
+        "پیڑو برابر رکھیں — دھڑ کو مخالف طرف نہ جھکائیں۔",
+        "تین سیکنڈ میں آہستہ واپس لائیں۔",
+      ],
+    },
+    specialInstructions: {
+      en: [
+        "The toes stay pointing forward; turning them out brings in the wrong muscle.",
+        "Leaning the trunk away is the standard cheat — keep it upright.",
+        "The buttock of the standing leg should also be working.",
+      ],
+      ur: [
+        "پنجہ سامنے ہی رہے؛ باہر گھمانے سے غلط پٹھا کام کرنے لگتا ہے۔",
+        "دھڑ کو مخالف طرف جھکانا عام چوری ہے — اسے سیدھا رکھیں۔",
+        "کھڑی ٹانگ کے کولہے پر بھی زور آنا چاہیے۔",
+      ],
+    },
+    commonMistakes: {
+      en: [
+        "Letting the band snap back quickly.",
+        "Using a band that is too strong to control.",
+        "Holding the breath during the effort.",
+        "Losing the starting posture as you tire.",
+      ],
+      ur: [
+        "بینڈ کو تیزی سے واپس جانے دینا۔",
+        "اتنا سخت بینڈ استعمال کرنا جو قابو میں نہ رہے۔",
+        "زور لگاتے وقت سانس روکنا۔",
+        "تھکنے پر شروع والی حالت بگاڑ لینا۔",
+      ],
+    },
+    safetyPrecautions: {
+      en: [
+        "Stop if you feel a pinch at the front of the hip.",
+        "Keep the pelvis level; do not let it roll back.",
+      ],
+      ur: [
+        "کولہے کے اگلے حصے میں چبھن محسوس ہو تو رک جائیں۔",
+        "کولہا سیدھا رکھیں؛ اسے پیچھے نہ لڑھکنے دیں۔",
+      ],
+    },
+    repetitions: "10–12 each side",
+    sets: "3",
+    holdTime: "1 second",
+    frequency: "Every other day",
+    restBetweenSets: "45 seconds",
+    progressions: [],
+    regressions: ["standing-hip-abduction"],
+    contraindications: {
+      en: [
+        "Acute hip fracture",
+        "Hip precautions after joint replacement",
+        "Recent hip surgery unless cleared",
+      ],
+      ur: [
+        "کولہے کی حالیہ ٹوٹ پھوٹ",
+        "کولہے کی تبدیلی کے بعد کی پابندیاں",
+        "کولہے کا حالیہ آپریشن، جب تک اجازت نہ ہو",
+      ],
+    },
+    evidence: {
+      status: "unreviewed",
+      rationale: "Standing resisted abduction is a functional progression for gluteus medius. Citations to be attached at clinical review.",
+    },
+    figure: {
+      view: "front",
+      frames: [
+        { pose: STAND, travel: 800, hold: 400, label: "Standing with the band on the ankle" },
+        { pose: pose({ hipRotNear: -34, hipNear: 4, kneeNear: 2, shoulderFar: 140, elbowFar: 40 }, STAND), travel: 1000, hold: 900, label: "Take the leg out to the side" },
+      ],
+      props: [{ kind: "band" }],
+    },
+  },
+  {
+    id: "EX-K-014",
+    slug: "band-knee-extension-seated",
+    name: { en: "Seated Banded Knee Extension", ur: "بیٹھ کر بینڈ سے گھٹنا سیدھا کرنا" },
+    bodyRegion: "Knee",
+    joint: ["Tibiofemoral", "Patellofemoral"],
+    musclesTargeted: ["Quadriceps femoris", "Vastus medialis obliquus"],
+    conditions: ["Quadriceps weakness", "Osteoarthritis of the knee", "Post-knee-surgery rehabilitation", "Extension lag"],
+    purpose: { en: "Adds resistance to straightening the knee — the last few degrees are the hardest and the most often lost after surgery.", ur: "گھٹنا سیدھا کرنے میں مزاحمت شامل کرتی ہے — آخری چند درجے سب سے مشکل اور آپریشن کے بعد سب سے زیادہ ضائع ہونے والے ہیں۔" },
+    exerciseType: "Strengthening",
+    difficulty: "Intermediate",
+    contraction: ["Concentric", "Eccentric"],
+    mode: "Resisted",
+    load: "Resistance band",
+    position: "Sitting",
+    equipment: ["Resistance band", "Chair"],
+    startingPosition: { en: "Sit tall on a firm chair with a band looped around one ankle and anchored behind the chair.", ur: "مضبوط کرسی پر سیدھے بیٹھیں، بینڈ ایک ٹخنے کے گرد اور کرسی کے پیچھے باندھا ہوا ہو۔" },
+    quickSteps: {
+      en: [
+        "Sit with a band around one ankle, anchored behind you.",
+        "Straighten the knee fully against the band.",
+        "Lower slowly over three seconds.",
+      ],
+      ur: [
+        "بینڈ ایک ٹخنے کے گرد رکھ کر بیٹھیں، پیچھے باندھا ہوا ہو۔",
+        "بینڈ کے خلاف گھٹنا پوری طرح سیدھا کریں۔",
+        "تین سیکنڈ میں آہستہ نیچے لائیں۔",
+      ],
+    },
+    steps: {
+      en: [
+        "Sit well back so the thigh is fully supported by the chair.",
+        "Loop the band around one ankle and anchor the other end behind the chair.",
+        "Straighten that knee until it is completely straight — the last few degrees matter most.",
+        "Hold straight for two seconds, tightening the front of the thigh.",
+        "Lower slowly over three seconds against the band.",
+      ],
+      ur: [
+        "اچھی طرح پیچھے بیٹھیں تاکہ ران کو کرسی کا پورا سہارا ملے۔",
+        "بینڈ ایک ٹخنے کے گرد ڈالیں اور دوسرا سرا کرسی کے پیچھے باندھیں۔",
+        "وہ گھٹنا بالکل سیدھا ہونے تک اٹھائیں — آخری چند درجے سب سے اہم ہیں۔",
+        "دو سیکنڈ سیدھا رکھیں، ران کا اگلا حصہ سخت کریں۔",
+        "بینڈ کے خلاف تین سیکنڈ میں آہستہ نیچے لائیں۔",
+      ],
+    },
+    specialInstructions: {
+      en: [
+        "Full straightening is the point — stopping short trains the lag in.",
+        "Sit upright; leaning back changes which part of the muscle works.",
+        "Stop if the kneecap grinds or catches.",
+      ],
+      ur: [
+        "پوری طرح سیدھا کرنا ہی مقصد ہے — کم رہ جانے سے کمی پکی ہو جاتی ہے۔",
+        "سیدھے بیٹھیں؛ پیچھے جھکنے سے پٹھے کا کام کرنے والا حصہ بدل جاتا ہے۔",
+        "گھٹنے کی ٹوپی میں رگڑ یا اٹکاؤ ہو تو رک جائیں۔",
+      ],
+    },
+    commonMistakes: {
+      en: [
+        "Letting the band snap back quickly.",
+        "Using a band that is too strong to control.",
+        "Holding the breath during the effort.",
+        "Losing the starting posture as you tire.",
+      ],
+      ur: [
+        "بینڈ کو تیزی سے واپس جانے دینا۔",
+        "اتنا سخت بینڈ استعمال کرنا جو قابو میں نہ رہے۔",
+        "زور لگاتے وقت سانس روکنا۔",
+        "تھکنے پر شروع والی حالت بگاڑ لینا۔",
+      ],
+    },
+    safetyPrecautions: {
+      en: [
+        "Stop if the knee swells or gives way.",
+        "Keep the kneecap tracking over the middle of the foot.",
+      ],
+      ur: [
+        "گھٹنا سوج جائے یا جواب دے تو رک جائیں۔",
+        "گھٹنے کی ٹوپی پاؤں کے درمیان کی سیدھ میں رکھیں۔",
+      ],
+    },
+    repetitions: "10–12 each side",
+    sets: "3",
+    holdTime: "2 seconds straight",
+    frequency: "Every other day",
+    restBetweenSets: "45 seconds",
+    progressions: [],
+    regressions: ["quad-setting"],
+    contraindications: {
+      en: [
+        "Acute knee fracture or locked knee",
+        "Recent knee surgery unless cleared",
+        "Large tense joint effusion",
+      ],
+      ur: [
+        "گھٹنے کی حالیہ ٹوٹ پھوٹ یا گھٹنے کا جام ہو جانا",
+        "گھٹنے کا حالیہ آپریشن، جب تک اجازت نہ ہو",
+        "جوڑ میں زیادہ پانی بھر جانا",
+      ],
+    },
+    evidence: {
+      status: "unreviewed",
+      rationale: "Resisted knee extension is standard quadriceps strengthening in knee rehabilitation. Citations to be attached at clinical review.",
+    },
+    figure: {
+      view: "side",
+      frames: [
+        { pose: pose({ kneeNear: 84 }, SEATED), travel: 800, hold: 400, label: "Sitting, band on the ankle" },
+        { pose: pose({ kneeNear: 4, ankleNear: 0 }, SEATED), travel: 1000, hold: 900, label: "Straighten the knee fully" },
+      ],
+      props: [{ kind: "chair" }],
+    },
+  },
+  {
+    id: "EX-K-015",
+    slug: "band-hamstring-curl",
+    name: { en: "Banded Hamstring Curl", ur: "بینڈ کے ساتھ ایڑی کولہے کی طرف لانا" },
+    bodyRegion: "Knee",
+    joint: ["Tibiofemoral"],
+    musclesTargeted: ["Hamstrings", "Gastrocnemius", "Gluteus maximus"],
+    conditions: ["Hamstring weakness", "Post-ACL rehabilitation", "Return to sport", "Knee instability"],
+    purpose: { en: "Resists bending the knee, which balances the quadriceps work most knee programmes are heavy on.", ur: "گھٹنا موڑنے کے خلاف مزاحمت دیتی ہے، جو ران کے اگلے پٹھوں کی اُس مشق کا توازن بناتی ہے جس پر زیادہ تر پروگرام زور دیتے ہیں۔" },
+    exerciseType: "Strengthening",
+    difficulty: "Intermediate",
+    contraction: ["Concentric", "Eccentric"],
+    mode: "Resisted",
+    load: "Resistance band",
+    position: "Standing",
+    equipment: ["Resistance band", "Support to hold"],
+    startingPosition: { en: "Stand holding a support with a band looped around one ankle and anchored in front of you.", ur: "سہارا پکڑ کر کھڑے ہوں، بینڈ ایک ٹخنے کے گرد اور سامنے باندھا ہوا ہو۔" },
+    quickSteps: {
+      en: [
+        "Loop a band round one ankle, anchored in front.",
+        "Bend that knee, bringing the heel towards the buttock.",
+        "Lower slowly over three seconds.",
+      ],
+      ur: [
+        "بینڈ ایک ٹخنے کے گرد ڈالیں، سامنے باندھا ہوا ہو۔",
+        "وہ گھٹنا موڑیں، ایڑی کولہے کی طرف لائیں۔",
+        "تین سیکنڈ میں آہستہ نیچے لائیں۔",
+      ],
+    },
+    steps: {
+      en: [
+        "Anchor the band low in front and loop it around one ankle.",
+        "Stand tall holding a support, weight on the other leg.",
+        "Keeping the thighs side by side, bend the knee and draw the heel up towards the buttock.",
+        "Do not let the thigh swing back as you curl.",
+        "Lower slowly over three seconds.",
+      ],
+      ur: [
+        "بینڈ سامنے نیچے باندھیں اور ایک ٹخنے کے گرد ڈالیں۔",
+        "سہارا پکڑ کر سیدھے کھڑے ہوں، وزن دوسری ٹانگ پر۔",
+        "دونوں رانیں ساتھ ساتھ رکھتے ہوئے گھٹنا موڑیں اور ایڑی کولہے کی طرف لائیں۔",
+        "موڑتے وقت ران کو پیچھے نہ جانے دیں۔",
+        "تین سیکنڈ میں آہستہ نیچے لائیں۔",
+      ],
+    },
+    specialInstructions: {
+      en: [
+        "Keep the knees level with each other — letting the thigh drift back uses the hip instead.",
+        "Slow lowering is where the hamstring actually gets stronger.",
+        "Stop if you feel a pull at the back of the thigh rather than effort.",
+      ],
+      ur: [
+        "دونوں گھٹنے برابر رکھیں — ران پیچھے چلی جائے تو کام کولہا کرنے لگتا ہے۔",
+        "ران کا پچھلا پٹھا آہستہ نیچے لانے سے ہی مضبوط ہوتا ہے۔",
+        "زور کے بجائے ران کے پیچھے کھنچاؤ محسوس ہو تو رک جائیں۔",
+      ],
+    },
+    commonMistakes: {
+      en: [
+        "Letting the band snap back quickly.",
+        "Using a band that is too strong to control.",
+        "Holding the breath during the effort.",
+        "Losing the starting posture as you tire.",
+      ],
+      ur: [
+        "بینڈ کو تیزی سے واپس جانے دینا۔",
+        "اتنا سخت بینڈ استعمال کرنا جو قابو میں نہ رہے۔",
+        "زور لگاتے وقت سانس روکنا۔",
+        "تھکنے پر شروع والی حالت بگاڑ لینا۔",
+      ],
+    },
+    safetyPrecautions: {
+      en: [
+        "Stop if the knee swells or gives way.",
+        "Keep the kneecap tracking over the middle of the foot.",
+      ],
+      ur: [
+        "گھٹنا سوج جائے یا جواب دے تو رک جائیں۔",
+        "گھٹنے کی ٹوپی پاؤں کے درمیان کی سیدھ میں رکھیں۔",
+      ],
+    },
+    repetitions: "10–12 each side",
+    sets: "3",
+    holdTime: "1 second",
+    frequency: "Every other day",
+    restBetweenSets: "45 seconds",
+    progressions: [],
+    regressions: ["hamstring-curl-standing"],
+    contraindications: {
+      en: [
+        "Acute knee fracture or locked knee",
+        "Recent knee surgery unless cleared",
+        "Large tense joint effusion",
+      ],
+      ur: [
+        "گھٹنے کی حالیہ ٹوٹ پھوٹ یا گھٹنے کا جام ہو جانا",
+        "گھٹنے کا حالیہ آپریشن، جب تک اجازت نہ ہو",
+        "جوڑ میں زیادہ پانی بھر جانا",
+      ],
+    },
+    evidence: {
+      status: "unreviewed",
+      rationale: "Resisted knee flexion is standard hamstring strengthening in knee programmes. Citations to be attached at clinical review.",
+    },
+    figure: {
+      view: "side",
+      frames: [
+        { pose: pose({ kneeNear: 2 }, STAND), travel: 800, hold: 400, label: "Standing with the band on the ankle" },
+        { pose: pose({ kneeNear: 96, hipNear: -6, shoulderNear: 120, elbowNear: 30, shoulderFar: 120, elbowFar: 30 }, STAND), travel: 1000, hold: 900, label: "Bend the knee against the band" },
+      ],
+      props: [{ kind: "band" }],
+    },
+  },
+  {
+    id: "EX-A-013",
+    slug: "band-ankle-dorsiflexion",
+    name: { en: "Banded Ankle Dorsiflexion", ur: "بینڈ کے ساتھ پاؤں اوپر کھینچنا" },
+    bodyRegion: "Ankle & Foot",
+    joint: ["Talocrural"],
+    musclesTargeted: ["Tibialis anterior", "Extensor digitorum longus", "Extensor hallucis longus"],
+    conditions: ["Foot drop", "Shin splints", "Ankle weakness", "Tripping in gait"],
+    purpose: { en: "Strengthens pulling the foot up, which is what stops the toes catching on a step or a rough floor.", ur: "پاؤں اوپر کھینچنے کو مضبوط کرتی ہے، جو پنجوں کو سیڑھی یا ناہموار فرش سے ٹکرانے سے روکتا ہے۔" },
+    exerciseType: "Strengthening",
+    difficulty: "Beginner",
+    contraction: ["Concentric", "Eccentric"],
+    mode: "Resisted",
+    load: "Resistance band",
+    position: "Sitting",
+    equipment: ["Resistance band"],
+    startingPosition: { en: "Sit on the floor with one leg out straight and a band looped around the foot, anchored in front of you.", ur: "فرش پر بیٹھیں، ایک ٹانگ سیدھی اور بینڈ پاؤں کے گرد، سامنے باندھا ہوا ہو۔" },
+    quickSteps: {
+      en: [
+        "Loop a band around the foot, anchored in front.",
+        "Pull the foot up towards you against the band.",
+        "Return slowly over three seconds.",
+      ],
+      ur: [
+        "بینڈ پاؤں کے گرد ڈالیں، سامنے باندھا ہوا ہو۔",
+        "بینڈ کے خلاف پاؤں اپنی طرف اوپر کھینچیں۔",
+        "تین سیکنڈ میں آہستہ واپس لائیں۔",
+      ],
+    },
+    steps: {
+      en: [
+        "Sit on the floor with the leg straight out in front.",
+        "Loop the band around the ball of the foot and anchor the other end ahead of you.",
+        "Keeping the knee straight, pull the whole foot up towards your shin.",
+        "Hold at the top for a second, feeling the front of the shin work.",
+        "Let it back down slowly over three seconds.",
+      ],
+      ur: [
+        "فرش پر بیٹھیں، ٹانگ سامنے سیدھی ہو۔",
+        "بینڈ پاؤں کے اگلے حصے کے گرد ڈالیں اور دوسرا سرا سامنے باندھیں۔",
+        "گھٹنا سیدھا رکھتے ہوئے پورا پاؤں پنڈلی کی طرف اوپر کھینچیں۔",
+        "اوپر ایک سیکنڈ رکیں، پنڈلی کے اگلے حصے میں زور محسوس کریں۔",
+        "تین سیکنڈ میں آہستہ واپس نیچے جانے دیں۔",
+      ],
+    },
+    specialInstructions: {
+      en: [
+        "Lift the whole foot, not just the toes.",
+        "The knee must stay straight or the calf takes over.",
+        "This is the key muscle in a foot drop.",
+      ],
+      ur: [
+        "پورا پاؤں اٹھائیں، صرف انگلیاں نہیں۔",
+        "گھٹنا سیدھا رہے ورنہ پنڈلی کام سنبھال لیتی ہے۔",
+        "فٹ ڈراپ میں یہی سب سے اہم پٹھا ہے۔",
+      ],
+    },
+    commonMistakes: {
+      en: [
+        "Letting the band snap back quickly.",
+        "Using a band that is too strong to control.",
+        "Holding the breath during the effort.",
+        "Losing the starting posture as you tire.",
+      ],
+      ur: [
+        "بینڈ کو تیزی سے واپس جانے دینا۔",
+        "اتنا سخت بینڈ استعمال کرنا جو قابو میں نہ رہے۔",
+        "زور لگاتے وقت سانس روکنا۔",
+        "تھکنے پر شروع والی حالت بگاڑ لینا۔",
+      ],
+    },
+    safetyPrecautions: {
+      en: [
+        "Stop if the ankle feels unstable or gives way.",
+        "Progress slowly if you have had a recent sprain.",
+      ],
+      ur: [
+        "ٹخنہ ڈھیلا لگے یا جواب دے تو رک جائیں۔",
+        "حالیہ موچ آئی ہو تو آہستہ آگے بڑھیں۔",
+      ],
+    },
+    repetitions: "12–15 each side",
+    sets: "3",
+    holdTime: "1 second",
+    frequency: "Daily",
+    restBetweenSets: "45 seconds",
+    progressions: [],
+    regressions: ["ankle-pumps"],
+    contraindications: {
+      en: [
+        "Acute ankle or foot fracture",
+        "Suspected Achilles rupture",
+        "Recent ankle surgery unless cleared",
+      ],
+      ur: [
+        "ٹخنے یا پاؤں کی حالیہ ٹوٹ پھوٹ",
+        "ایڑی کے پٹھے کے پھٹنے کا شبہ",
+        "ٹخنے کا حالیہ آپریشن، جب تک اجازت نہ ہو",
+      ],
+    },
+    evidence: {
+      status: "unreviewed",
+      rationale: "Resisted dorsiflexion is standard for tibialis anterior weakness and foot drop. Citations to be attached at clinical review.",
+    },
+    figure: {
+      view: "side",
+      frames: [
+        { pose: pose({ ankleNear: 10 }, SUPINE_LONG), travel: 800, hold: 400, label: "Sitting with the band on the foot" },
+        { pose: pose({ ankleNear: -26, shoulderNear: 120, elbowNear: 40, lumbar: 16, rootRot: -62 }, SUPINE_LONG), travel: 1000, hold: 900, label: "Pull the foot up towards you" },
+      ],
+      props: [{ kind: "mat" }],
+    },
+  },
+  {
+    id: "EX-A-014",
+    slug: "band-ankle-plantarflexion",
+    name: { en: "Banded Ankle Push", ur: "بینڈ کے خلاف پاؤں نیچے دبانا" },
+    bodyRegion: "Ankle & Foot",
+    joint: ["Talocrural", "Subtalar"],
+    musclesTargeted: ["Gastrocnemius", "Soleus", "Flexor hallucis longus"],
+    conditions: ["Calf weakness", "Achilles tendinopathy", "Push-off weakness in gait", "Post-immobilisation weakness"],
+    purpose: { en: "Loads the calf while sitting, which is how it starts after an Achilles injury before standing heel raises are safe.", ur: "بیٹھ کر پنڈلی پر بوجھ ڈالتی ہے، اور ایڑی کے پٹھے کی چوٹ کے بعد کھڑے ہو کر ایڑی اٹھانے سے پہلے یہی طریقہ استعمال ہوتا ہے۔" },
+    exerciseType: "Strengthening",
+    difficulty: "Beginner",
+    contraction: ["Concentric", "Eccentric"],
+    mode: "Resisted",
+    load: "Resistance band",
+    position: "Sitting",
+    equipment: ["Resistance band"],
+    startingPosition: { en: "Sit on the floor with one leg out straight and a band looped around the ball of the foot, both ends held in your hands.", ur: "فرش پر بیٹھیں، ایک ٹانگ سیدھی اور بینڈ پاؤں کے اگلے حصے کے گرد، دونوں سرے ہاتھوں میں۔" },
+    quickSteps: {
+      en: [
+        "Loop a band around the ball of the foot, holding both ends.",
+        "Push the foot away against the band.",
+        "Return slowly over three seconds.",
+      ],
+      ur: [
+        "بینڈ پاؤں کے اگلے حصے کے گرد ڈالیں، دونوں سرے پکڑیں۔",
+        "بینڈ کے خلاف پاؤں دور کی طرف دبائیں۔",
+        "تین سیکنڈ میں آہستہ واپس لائیں۔",
+      ],
+    },
+    steps: {
+      en: [
+        "Sit with the leg straight out in front and the band around the ball of the foot.",
+        "Hold both ends of the band and take up the slack.",
+        "Push the foot away from you, pointing the toes against the band.",
+        "Go through the full range until the ankle is fully pointed.",
+        "Let it return slowly over three seconds.",
+      ],
+      ur: [
+        "ٹانگ سامنے سیدھی رکھ کر بیٹھیں اور بینڈ پاؤں کے اگلے حصے کے گرد ڈالیں۔",
+        "بینڈ کے دونوں سرے پکڑیں اور ڈھیل ختم کریں۔",
+        "بینڈ کے خلاف پاؤں دور کی طرف دبائیں، پنجہ نیچے کریں۔",
+        "پوری حد تک جائیں یہاں تک کہ ٹخنہ مکمل جھک جائے۔",
+        "تین سیکنڈ میں آہستہ واپس آنے دیں۔",
+      ],
+    },
+    specialInstructions: {
+      en: [
+        "Full range each time — a small push does very little.",
+        "Stop if the calf cramps; shake it out and use a lighter band.",
+        "Progress to standing heel raises when this is easy.",
+      ],
+      ur: [
+        "ہر بار پوری حد تک — چھوٹا دباؤ بہت کم فائدہ دیتا ہے۔",
+        "پنڈلی میں کھچاؤ ہو تو رک جائیں؛ جھٹک کر ہلکا بینڈ لیں۔",
+        "آسان ہو جائے تو کھڑے ہو کر ایڑی اٹھانے پر جائیں۔",
+      ],
+    },
+    commonMistakes: {
+      en: [
+        "Letting the band snap back quickly.",
+        "Using a band that is too strong to control.",
+        "Holding the breath during the effort.",
+        "Losing the starting posture as you tire.",
+      ],
+      ur: [
+        "بینڈ کو تیزی سے واپس جانے دینا۔",
+        "اتنا سخت بینڈ استعمال کرنا جو قابو میں نہ رہے۔",
+        "زور لگاتے وقت سانس روکنا۔",
+        "تھکنے پر شروع والی حالت بگاڑ لینا۔",
+      ],
+    },
+    safetyPrecautions: {
+      en: [
+        "Stop if the ankle feels unstable or gives way.",
+        "Progress slowly if you have had a recent sprain.",
+      ],
+      ur: [
+        "ٹخنہ ڈھیلا لگے یا جواب دے تو رک جائیں۔",
+        "حالیہ موچ آئی ہو تو آہستہ آگے بڑھیں۔",
+      ],
+    },
+    repetitions: "12–15 each side",
+    sets: "3",
+    holdTime: "1 second",
+    frequency: "Daily",
+    restBetweenSets: "45 seconds",
+    progressions: ["heel-raises"],
+    regressions: [],
+    contraindications: {
+      en: [
+        "Acute ankle or foot fracture",
+        "Suspected Achilles rupture",
+        "Recent ankle surgery unless cleared",
+      ],
+      ur: [
+        "ٹخنے یا پاؤں کی حالیہ ٹوٹ پھوٹ",
+        "ایڑی کے پٹھے کے پھٹنے کا شبہ",
+        "ٹخنے کا حالیہ آپریشن، جب تک اجازت نہ ہو",
+      ],
+    },
+    evidence: {
+      status: "unreviewed",
+      rationale: "Seated resisted plantarflexion precedes weight-bearing calf loading. Citations to be attached at clinical review.",
+    },
+    figure: {
+      view: "side",
+      frames: [
+        { pose: pose({ ankleNear: 10 }, SUPINE_LONG), travel: 800, hold: 400, label: "Sitting with the band on the foot" },
+        { pose: pose({ ankleNear: 40, shoulderNear: 120, elbowNear: 40, lumbar: 16, rootRot: -62 }, SUPINE_LONG), travel: 1000, hold: 900, label: "Push the foot away" },
+      ],
+      props: [{ kind: "mat" }],
+    },
+  },
+  {
+    id: "EX-A-015",
+    slug: "band-ankle-eversion",
+    name: { en: "Banded Ankle Eversion", ur: "بینڈ کے ساتھ پاؤں باہر لے جانا" },
+    bodyRegion: "Ankle & Foot",
+    joint: ["Talocrural", "Subtalar"],
+    musclesTargeted: ["Peroneus longus", "Peroneus brevis"],
+    conditions: ["Ankle sprain recovery", "Ankle instability", "Recurrent rolling of the ankle", "Return to sport"],
+    purpose: { en: "The key strengthening exercise after a rolled ankle: it trains the muscles that would have stopped it rolling.", ur: "ٹخنہ لڑھکنے کے بعد سب سے اہم مضبوطی کی ورزش: یہ اُن پٹھوں کو مضبوط کرتی ہے جو اسے لڑھکنے سے روکتے۔" },
+    exerciseType: "Strengthening",
+    difficulty: "Beginner",
+    contraction: ["Concentric", "Eccentric"],
+    mode: "Resisted",
+    load: "Resistance band",
+    position: "Sitting",
+    equipment: ["Resistance band"],
+    startingPosition: { en: "Sit with one leg out straight and a band looped around the foot, anchored to the inner side.", ur: "بیٹھ جائیں، ایک ٹانگ سیدھی اور بینڈ پاؤں کے گرد، اندر کی طرف باندھا ہوا ہو۔" },
+    quickSteps: {
+      en: [
+        "Loop a band around the foot, anchored to the inner side.",
+        "Turn the foot outwards against the band.",
+        "Return slowly over three seconds.",
+      ],
+      ur: [
+        "بینڈ پاؤں کے گرد ڈالیں، اندر کی طرف باندھا ہوا ہو۔",
+        "بینڈ کے خلاف پاؤں باہر گھمائیں۔",
+        "تین سیکنڈ میں آہستہ واپس لائیں۔",
+      ],
+    },
+    steps: {
+      en: [
+        "Sit with the leg straight and the band looped around the middle of the foot.",
+        "Anchor the other end to something on the inner side of that foot.",
+        "Keeping the knee and shin still, turn the sole of the foot outwards.",
+        "The movement comes from the ankle only, not from the hip.",
+        "Return slowly over three seconds.",
+      ],
+      ur: [
+        "ٹانگ سیدھی رکھ کر بیٹھیں اور بینڈ پاؤں کے درمیان کے گرد ڈالیں۔",
+        "دوسرا سرا اُس پاؤں کی اندرونی طرف کسی چیز سے باندھیں۔",
+        "گھٹنا اور پنڈلی ساکن رکھتے ہوئے پاؤں کا تلوا باہر کی طرف گھمائیں۔",
+        "حرکت صرف ٹخنے سے ہو، کولہے سے نہیں۔",
+        "تین سیکنڈ میں آہستہ واپس لائیں۔",
+      ],
+    },
+    specialInstructions: {
+      en: [
+        "Watch the knee — if it rolls out, the hip is doing the work.",
+        "This is the single most important exercise after a lateral ankle sprain.",
+        "Build to three sets before adding balance work on that ankle.",
+      ],
+      ur: [
+        "گھٹنے پر نظر رکھیں — وہ باہر گھومے تو کام کولہا کر رہا ہے۔",
+        "باہر کی طرف موچ کے بعد یہ سب سے اہم ورزش ہے۔",
+        "اُس ٹخنے پر توازن کی مشق شروع کرنے سے پہلے تین سیٹ تک پہنچیں۔",
+      ],
+    },
+    commonMistakes: {
+      en: [
+        "Letting the band snap back quickly.",
+        "Using a band that is too strong to control.",
+        "Holding the breath during the effort.",
+        "Losing the starting posture as you tire.",
+      ],
+      ur: [
+        "بینڈ کو تیزی سے واپس جانے دینا۔",
+        "اتنا سخت بینڈ استعمال کرنا جو قابو میں نہ رہے۔",
+        "زور لگاتے وقت سانس روکنا۔",
+        "تھکنے پر شروع والی حالت بگاڑ لینا۔",
+      ],
+    },
+    safetyPrecautions: {
+      en: [
+        "Stop if the ankle feels unstable or gives way.",
+        "Progress slowly if you have had a recent sprain.",
+      ],
+      ur: [
+        "ٹخنہ ڈھیلا لگے یا جواب دے تو رک جائیں۔",
+        "حالیہ موچ آئی ہو تو آہستہ آگے بڑھیں۔",
+      ],
+    },
+    repetitions: "12–15 each side",
+    sets: "3",
+    holdTime: "1 second",
+    frequency: "Daily",
+    restBetweenSets: "45 seconds",
+    progressions: [],
+    regressions: ["isometric-ankle-eversion"],
+    contraindications: {
+      en: [
+        "Acute ankle or foot fracture",
+        "Suspected Achilles rupture",
+        "Recent ankle surgery unless cleared",
+      ],
+      ur: [
+        "ٹخنے یا پاؤں کی حالیہ ٹوٹ پھوٹ",
+        "ایڑی کے پٹھے کے پھٹنے کا شبہ",
+        "ٹخنے کا حالیہ آپریشن، جب تک اجازت نہ ہو",
+      ],
+    },
+    evidence: {
+      status: "unreviewed",
+      rationale: "Resisted eversion is the standard peroneal strengthening exercise after ankle sprain. Citations to be attached at clinical review.",
+    },
+    figure: {
+      view: "front",
+      frames: [
+        { pose: pose({ ankleNear: 10 }, SUPINE_LONG), travel: 800, hold: 400, label: "Sitting with the band on the foot" },
+        { pose: pose({ ankleNear: 6, hipRotNear: -18, shoulderNear: 120, elbowNear: 40, lumbar: 16, rootRot: -62 }, SUPINE_LONG), travel: 1000, hold: 900, label: "Turn the foot outwards" },
+      ],
+      props: [{ kind: "mat" }],
+    },
+  },
+];

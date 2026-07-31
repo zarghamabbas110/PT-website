@@ -25,6 +25,43 @@ export type BodyRegion =
   | "Ankle & Foot"
   | "Core";
 
+/**
+ * The joints an exercise moves or loads, one level finer than the body region.
+ * A controlled list rather than free text: it is a filter axis, so "Knee" and
+ * "Tibiofemoral" cannot be allowed to mean the same thing in two records.
+ */
+export const JOINTS = [
+  "Atlanto-occipital",
+  "Atlantoaxial",
+  "Cervical spine C1–C7",
+  "Thoracic spine T1–T12",
+  "Costovertebral",
+  "Lumbar spine L1–L5",
+  "Sacroiliac",
+  "Sternoclavicular",
+  "Acromioclavicular",
+  "Scapulothoracic",
+  "Glenohumeral",
+  "Humeroulnar",
+  "Humeroradial",
+  "Radioulnar",
+  "Radiocarpal",
+  "Midcarpal",
+  "Carpometacarpal",
+  "Metacarpophalangeal",
+  "Interphalangeal",
+  "Hip",
+  "Tibiofemoral",
+  "Patellofemoral",
+  "Tibiofibular",
+  "Talocrural",
+  "Subtalar",
+  "Midtarsal",
+  "Metatarsophalangeal",
+] as const;
+
+export type Joint = (typeof JOINTS)[number];
+
 export type Difficulty = "Beginner" | "Intermediate" | "Advanced";
 
 export type ContractionType =
@@ -53,6 +90,21 @@ export type Position =
 /** How the movement is produced — the classic AROM / AAROM / PROM ladder. */
 export type MovementMode = "Passive" | "Active-assisted" | "Active" | "Resisted";
 
+/**
+ * What the exercise is *for*. This is the axis a clinician reaches for first
+ * after the region — "show me the hamstring stretches", "show me the isometric
+ * work for this knee" — and it is orthogonal to how the movement is produced.
+ */
+export type ExerciseType =
+  | "Range of motion"
+  | "Stretching"
+  | "Strengthening"
+  | "Stabilisation & motor control"
+  | "Balance & proprioception"
+  | "Functional & gait"
+  | "Neural mobilisation"
+  | "Breathing & relaxation";
+
 export type Evidence = {
   status: "unreviewed" | "in-review" | "approved";
   /** Plain rationale. No citation is invented here. */
@@ -66,10 +118,12 @@ export type Exercise = {
   slug: string;
   name: Bi;
   bodyRegion: BodyRegion;
-  joint: string[];
+  /** Anatomical joints, from the controlled list in `data/exercises`. */
+  joint: Joint[];
   musclesTargeted: string[];
   conditions: string[];
   purpose: Bi;
+  exerciseType: ExerciseType;
   difficulty: Difficulty;
   contraction: ContractionType[];
   mode: MovementMode;

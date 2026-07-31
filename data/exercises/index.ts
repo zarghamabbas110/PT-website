@@ -1,4 +1,5 @@
 import type { Exercise } from "../schema";
+export { JOINTS } from "../schema";
 import { SHOULDER } from "./shoulder";
 import { SHOULDER_B } from "./shoulder-b";
 import { SHOULDER_C } from "./shoulder-c";
@@ -12,6 +13,12 @@ import { PROGRESSIONS } from "./progressions";
 import { CORE_SET } from "./core-set";
 import { TRUNK_SET } from "./trunk-set";
 import { SPINE_LOWER_LIMB } from "./spine-lower-limb";
+import { STRETCHES } from "./stretches";
+import { ISOMETRICS } from "./isometrics";
+import { RESISTED } from "./resisted";
+import { RANGE_OF_MOTION } from "./range-of-motion";
+import { CONTROL_BALANCE } from "./control-balance";
+import { ADVANCED_SET } from "./advanced-set";
 
 /* The library is assembled from per-region files so batches can be written,
    reviewed and merged independently as it grows. */
@@ -29,6 +36,12 @@ export const EXERCISES: Exercise[] = [
   ...CORE_SET,
   ...TRUNK_SET,
   ...SPINE_LOWER_LIMB,
+  ...STRETCHES,
+  ...ISOMETRICS,
+  ...RESISTED,
+  ...RANGE_OF_MOTION,
+  ...CONTROL_BALANCE,
+  ...ADVANCED_SET,
 ];
 
 export const BODY_REGIONS = [
@@ -76,6 +89,24 @@ export const POSITIONS = [
   "Standing",
   "Quadruped",
 ] as const;
+
+export const EXERCISE_TYPES = [
+  "Range of motion",
+  "Stretching",
+  "Strengthening",
+  "Stabilisation & motor control",
+  "Balance & proprioception",
+  "Functional & gait",
+  "Neural mobilisation",
+  "Breathing & relaxation",
+] as const;
+
+/** Derived, not stored: "can I do this with nothing to hand?" */
+export const EQUIPMENT_NEEDS = ["No equipment", "Equipment needed"] as const;
+
+export function equipmentNeed(ex: Exercise): string {
+  return ex.equipment.length ? "Equipment needed" : "No equipment";
+}
 
 export const DIFFICULTIES = ["Beginner", "Intermediate", "Advanced"] as const;
 
