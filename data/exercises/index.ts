@@ -19,6 +19,12 @@ import { RESISTED } from "./resisted";
 import { RANGE_OF_MOTION } from "./range-of-motion";
 import { CONTROL_BALANCE } from "./control-balance";
 import { ADVANCED_SET } from "./advanced-set";
+import { GAIT_BALANCE } from "./gait-balance";
+import { POST_OPERATIVE } from "./post-operative";
+import { POPULATIONS } from "./populations";
+import { EQUIPMENT } from "./equipment";
+import { REGION_DEPTH } from "./region-depth";
+import { FINAL_SET } from "./final-set";
 
 /* The library is assembled from per-region files so batches can be written,
    reviewed and merged independently as it grows. */
@@ -42,6 +48,12 @@ export const EXERCISES: Exercise[] = [
   ...RANGE_OF_MOTION,
   ...CONTROL_BALANCE,
   ...ADVANCED_SET,
+  ...GAIT_BALANCE,
+  ...POST_OPERATIVE,
+  ...POPULATIONS,
+  ...EQUIPMENT,
+  ...REGION_DEPTH,
+  ...FINAL_SET,
 ];
 
 export const BODY_REGIONS = [
